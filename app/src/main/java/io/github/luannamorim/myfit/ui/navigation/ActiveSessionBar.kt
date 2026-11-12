@@ -35,7 +35,7 @@ fun ActiveSessionBar(session: ActiveSession, onResume: () -> Unit, modifier: Mod
     }
     Surface(
         onClick = onResume,
-        modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.s),
+        modifier = modifier.fillMaxWidth(),
         shape = MyFitShapes.medium,
         color = c.textPrimary,
         contentColor = c.background,

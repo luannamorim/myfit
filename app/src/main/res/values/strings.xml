@@ -190,4 +190,26 @@
     <string name="detail_set_skipped">pulada</string>
     <string name="detail_set_not_done">não feita</string>
     <string name="detail_started_at">Início às %1$s</string>
+    <!-- Início -->
+    <string name="home_morning">Bom dia</string>
+    <string name="home_afternoon">Boa tarde</string>
+    <string name="home_evening">Boa noite</string>
+    <string name="home_in_progress">Treino em andamento</string>
+    <string name="home_today_done">Treino de hoje concluído</string>
+    <string name="home_next">Próximo treino</string>
+    <string name="home_start">Iniciar treino</string>
+    <string name="home_your_routines">Seus treinos</string>
+    <string name="home_see_all">Ver todos</string>
+    <string name="home_last_activity">Última atividade</string>
+    <string name="home_body">Corpo</string>
+    <string name="home_body_empty">Registre peso e medidas para acompanhar sua evolução.</string>
+    <string name="home_body_cta">Nova avaliação</string>
+    <string name="home_week">Esta semana</string>
+    <string name="home_week_summary">%1$s · %2$s</string>
+    <plurals name="home_sessions_count">
+        <item quantity="one">%d treino</item>
+        <item quantity="other">%d treinos</item>
+    </plurals>
+    <string name="home_empty_title">Comece pelo seu primeiro treino</string>
+    <string name="home_empty_message">Monte uma sequência de exercícios e inicie quando chegar na academia.</string>
 </resources>

@@ -37,9 +37,12 @@ class NavigationTest {
 
     private fun heading(text: String) = compose.onNode(hasText(text) and isHeading())
 
+    /** Home's title is a time-of-day greeting. */
+    private fun homeHeading() = compose.onNode(isHeading() and (hasText("Bom dia") or hasText("Boa tarde") or hasText("Boa noite")))
+
     @Test
     fun eachTab_showsItsScreen_andBackReturnsHome() {
-        heading("Início").assertIsDisplayed()
+        homeHeading().assertIsDisplayed()
 
         listOf("Treinos", "Histórico", "Evolução", "Ajustes").forEach { tab ->
             compose.onAllNodesWithText(tab).onFirst().performClick()
@@ -48,7 +51,7 @@ class NavigationTest {
 
         compose.onAllNodesWithText("Treinos").onFirst().performClick()
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-        heading("Início").assertIsDisplayed()
+        homeHeading().assertIsDisplayed()
     }
 
     @Test

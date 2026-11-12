@@ -32,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import io.github.luannamorim.myfit.ui.feature.evolution.EvolutionScreen
 import io.github.luannamorim.myfit.ui.feature.history.HistoryScreen
 import io.github.luannamorim.myfit.ui.feature.history.SessionDetailScreen
+import io.github.luannamorim.myfit.ui.feature.home.HomeActions
 import io.github.luannamorim.myfit.ui.feature.home.HomeScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutinesScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorScreen
@@ -42,6 +43,8 @@ import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.ui.feature.settings.SettingsScreen
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
+import io.github.luannamorim.myfit.ui.theme.Spacing
+import androidx.compose.foundation.layout.padding
 
 @Composable
 fun MyFitNavHost(
@@ -122,7 +125,20 @@ fun MyFitNavHost(
     ) {
         Column(Modifier.fillMaxSize()) {
             NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.weight(1f)) {
-                composable<HomeRoute> { HomeScreen() }
+                composable<HomeRoute> {
+                    HomeScreen(
+                        actions = HomeActions(
+                            onStart = appViewModel::startRoutine,
+                            onResume = { navController.navigate(WorkoutRoute) { launchSingleTop = true } },
+                            onOpenRoutine = { navController.navigate(RoutineEditorRoute(it)) },
+                            onCreateRoutine = { navController.navigate(RoutineEditorRoute()) },
+                            onSeeRoutines = { navController.navigateToTopLevel(TopLevelDestination.ROUTINES) },
+                            onOpenSession = { navController.navigate(SessionDetailRoute(it)) },
+                            onOpenHistory = { navController.navigateToTopLevel(TopLevelDestination.HISTORY) },
+                            onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
+                        ),
+                    )
+                }
                 composable<RoutinesRoute> {
                     RoutinesScreen(
                         onCreate = { navController.navigate(RoutineEditorRoute()) },
@@ -188,8 +204,13 @@ fun MyFitNavHost(
                 }
             }
             val session = activeSession
-            if (session != null && currentTop != null) {
-                ActiveSessionBar(session, onResume = { navController.navigate(WorkoutRoute) { launchSingleTop = true } })
+            // Home shows its own resume card.
+            if (session != null && currentTop != null && currentTop != TopLevelDestination.HOME) {
+                ActiveSessionBar(
+                    session,
+                    onResume = { navController.navigate(WorkoutRoute) { launchSingleTop = true } },
+                    modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s),
+                )
             }
         }
     }
