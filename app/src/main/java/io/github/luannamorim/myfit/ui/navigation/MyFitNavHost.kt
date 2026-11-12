@@ -26,6 +26,12 @@ import io.github.luannamorim.myfit.ui.feature.evolution.EvolutionScreen
 import io.github.luannamorim.myfit.ui.feature.history.HistoryScreen
 import io.github.luannamorim.myfit.ui.feature.home.HomeScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutinesScreen
+import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorScreen
+import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorViewModel
+import io.github.luannamorim.myfit.ui.feature.library.ExerciseEditorScreen
+import io.github.luannamorim.myfit.ui.feature.library.ExerciseLibraryScreen
+import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.ui.feature.settings.SettingsScreen
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 
@@ -33,6 +39,7 @@ import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 fun MyFitNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    onStartRoutine: (Long) -> Unit = {},
 ) {
     val entry by navController.currentBackStackEntryAsState()
     val destination = entry?.destination
@@ -86,10 +93,49 @@ fun MyFitNavHost(
     ) {
         NavHost(navController = navController, startDestination = HomeRoute) {
             composable<HomeRoute> { HomeScreen() }
-            composable<RoutinesRoute> { RoutinesScreen() }
+            composable<RoutinesRoute> {
+                RoutinesScreen(
+                    onCreate = { navController.navigate(RoutineEditorRoute()) },
+                    onEdit = { navController.navigate(RoutineEditorRoute(it)) },
+                    onStart = onStartRoutine,
+                    onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
+                )
+            }
             composable<HistoryRoute> { HistoryScreen() }
             composable<EvolutionRoute> { EvolutionScreen() }
             composable<SettingsRoute> { SettingsScreen() }
+
+            composable<RoutineEditorRoute> { entry ->
+                val picked by entry.savedStateHandle
+                    .getStateFlow<LongArray?>(RoutineEditorViewModel.PICKED_IDS_KEY, null)
+                    .collectAsStateWithLifecycle()
+                RoutineEditorScreen(
+                    pickedExerciseIds = picked,
+                    onPickedConsumed = { entry.savedStateHandle[RoutineEditorViewModel.PICKED_IDS_KEY] = null },
+                    onAddExercises = { navController.navigate(ExercisePickerRoute) },
+                    onClose = { navController.popBackStack() },
+                )
+            }
+            composable<ExercisePickerRoute> {
+                ExercisePickerScreen(
+                    onBack = { navController.popBackStack() },
+                    onConfirm = { ids ->
+                        navController.previousBackStackEntry?.savedStateHandle?.set(RoutineEditorViewModel.PICKED_IDS_KEY, ids)
+                        navController.popBackStack()
+                    },
+                    onCreate = { navController.navigate(ExerciseEditorRoute()) },
+                )
+            }
+            composable<ExerciseLibraryRoute> {
+                ExerciseLibraryScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpen = { navController.navigate(ExerciseEditorRoute(it)) },
+                    onCreate = { navController.navigate(ExerciseEditorRoute()) },
+                )
+            }
+            composable<ExerciseEditorRoute> {
+                ExerciseEditorScreen(onClose = { navController.popBackStack() })
+            }
         }
     }
 }
