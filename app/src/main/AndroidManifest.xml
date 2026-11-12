@@ -16,6 +16,8 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- Workout reminders: re-arm their alarms after a reboot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".MyFitApp"
@@ -52,6 +54,22 @@
         <receiver
             android:name=".platform.session.SessionActionReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".platform.reminder.ReminderReceiver"
+            android:exported="false" />
+
+        <!-- System broadcasts reach non-exported receivers. -->
+        <receiver
+            android:name=".platform.reminder.ReminderRescheduleReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- WorkManager is initialized on demand through Configuration.Provider (Hilt workers). -->
         <provider

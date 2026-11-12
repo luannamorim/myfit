@@ -45,6 +45,8 @@ import io.github.luannamorim.myfit.ui.feature.home.HomeScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseEditorScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseLibraryScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
+import io.github.luannamorim.myfit.ui.feature.reminders.ReminderEditorScreen
+import io.github.luannamorim.myfit.ui.feature.reminders.RemindersScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorViewModel
 import io.github.luannamorim.myfit.ui.feature.routines.RoutinesScreen
@@ -196,10 +198,19 @@ fun MyFitNavHost(
                         onOpenBackup = { navController.navigate(BackupRoute) },
                         onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
                         onOpenCredits = { navController.navigate(CreditsRoute) },
+                        onOpenReminders = { navController.navigate(RemindersRoute) },
                     )
                 }
                 composable<BackupRoute> { BackupScreen(onBack = { navController.popBackStack() }) }
                 composable<CreditsRoute> { CreditsScreen(onBack = { navController.popBackStack() }) }
+                composable<RemindersRoute> {
+                    RemindersScreen(
+                        onBack = { navController.popBackStack() },
+                        onCreate = { navController.navigate(ReminderEditorRoute()) },
+                        onEdit = { navController.navigate(ReminderEditorRoute(it)) },
+                    )
+                }
+                composable<ReminderEditorRoute> { ReminderEditorScreen(onClose = { navController.popBackStack() }) }
 
                 composable<RoutineEditorRoute> { entry ->
                     val picked by entry.savedStateHandle

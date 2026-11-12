@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.core.net.toUri
@@ -56,6 +58,7 @@ fun SettingsScreen(
     onOpenLibrary: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenCredits: () -> Unit = {},
+    onOpenReminders: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -82,6 +85,7 @@ fun SettingsScreen(
         },
         modifier = modifier,
         onOpenCredits = onOpenCredits,
+        onOpenReminders = onOpenReminders,
     )
 }
 
@@ -95,6 +99,7 @@ fun SettingsContent(
     onAllowBattery: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenCredits: () -> Unit = {},
+    onOpenReminders: () -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     val s = state.settings
@@ -130,6 +135,13 @@ fun SettingsContent(
                 onUpdate { it.copy(updateRoutineLoadsOnFinish = v) }
             }
         }
+        val activeReminders = s.reminders.count { it.enabled }
+        NavRow(
+            Icons.Rounded.NotificationsActive,
+            stringResource(R.string.reminders_title),
+            if (activeReminders > 0) pluralStringResource(R.plurals.reminders_active_count, activeReminders, activeReminders) else stringResource(R.string.reminders_hint),
+            onOpenReminders,
+        )
 
         SectionHeader(stringResource(R.string.settings_data), Modifier.padding(top = Spacing.s))
         NavRow(Icons.Rounded.Backup, stringResource(R.string.backup_title), stringResource(R.string.settings_backup_hint), onOpenBackup, error = state.backup.lastError != null)

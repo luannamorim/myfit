@@ -412,4 +412,36 @@
     <string name="calendar_has_workout">%1$s, with workout</string>
     <string name="detail_set_done" tools:ignore="PluralsCandidate">%1$d reps%2$s</string>
     <string name="routine_copy_suffix">(copy)</string>
+    <!-- Reminders -->
+    <string name="reminders_title">Reminders</string>
+    <string name="reminders_hint">Get notified when it\'s time to work out</string>
+    <plurals name="reminders_active_count">
+        <item quantity="one">%1$d reminder on</item>
+        <item quantity="other">%1$d reminders on</item>
+    </plurals>
+    <string name="reminders_new">New reminder</string>
+    <string name="reminders_edit">Edit reminder</string>
+    <string name="reminders_empty_title">No reminders</string>
+    <string name="reminders_empty_message">Choose a workout and when you want to be notified.</string>
+    <string name="reminders_every_day">Every day</string>
+    <string name="reminders_today">Today</string>
+    <string name="reminders_tomorrow">Tomorrow</string>
+    <string name="reminders_notifications_off">Off: reminders won\'t show up.</string>
+    <string name="reminders_switch_a11y">%1$s at %2$s</string>
+    <string name="reminder_what">What</string>
+    <string name="reminder_other">Other activity</string>
+    <string name="reminder_activity">Activity</string>
+    <string name="reminder_activity_hint">E.g. Run, Yoga</string>
+    <string name="reminder_activity_required">Enter the activity</string>
+    <string name="reminder_time">Time</string>
+    <string name="reminder_repeat">Repeat</string>
+    <string name="reminder_once">No day selected: reminds you once, on the date below.</string>
+    <string name="reminder_weekly">Every week on the selected days.</string>
+    <string name="reminder_date">Date: %1$s</string>
+    <string name="reminder_past_error">That moment has already passed. Choose a later date or time.</string>
+    <string name="reminder_delete_title">Delete reminder?</string>
+    <string name="reminder_delete_message">You won\'t be notified about it anymore.</string>
+    <string name="channel_reminders">Reminders</string>
+    <string name="channel_reminders_desc">Workout reminders you scheduled</string>
+    <string name="reminder_notif_title">Time to work out</string>
 </resources>

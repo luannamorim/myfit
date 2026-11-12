@@ -18,6 +18,7 @@ data class AppSettings(
     val keepScreenOn: Boolean = true,
     val updateRoutineLoadsOnFinish: Boolean = true,
     val autoBackup: Boolean = true,
+    val reminders: List<Reminder> = emptyList(),
 ) {
     companion object {
         const val MIN_REST_SECONDS = 15
