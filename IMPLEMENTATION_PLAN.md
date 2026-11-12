@@ -19,7 +19,8 @@
 - Tempo de sessão vem sempre de `Mark` persistido (Tarefa 2.1); nenhum contador de UI é fonte de verdade.
 - Tema escuro é o padrão (`ThemeMode.DARK`). Verde é a única cor de destaque.
 - Backup: senha obrigatória antes do primeiro backup; mantém 7 arquivos; formato versionado (`formatVersion = 1`).
-- Ambiente: `JAVA_HOME=~/.local/share/jdks/jdk-21.0.13+9`, `ANDROID_HOME=~/Android/Sdk` exportados antes de cada `./gradlew`.
+- Ambiente: `JAVA_HOME=~/.local/share/jdks/jdk-21.0.13+9`, `ANDROID_HOME=~/Android/Sdk` exportados antes de cada `./gradlew`. Testes rodam com `--add-exports/--add-opens` de `java.base` (exigência do Robolectric no SDK 36 + JDK 21, já no `app/build.gradle.kts`).
+- Testes Compose usam `androidx.compose.ui.test.junit4.v2.*` (as regras v1 estão obsoletas).
 - Verificação padrão de toda tarefa: `./gradlew testDebugUnitTest` verde. No fim de cada etapa: `./gradlew lintDebug testDebugUnitTest recordRoborazziDebug` + revisão visual dos PNGs em `app/build/outputs/roborazzi/`.
 - Commits Conventional Commits, em inglês, **sem** trailer `Co-Authored-By`; push para `origin main` no fim de cada etapa.
 - A partir do APK `v0.1.0`, toda mudança de schema Room exige `Migration` + `MigrationTestHelper`.
@@ -98,16 +99,16 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 
 ### Tarefa 1.2: Tema (cores, tipografia, formas)
 
-**Arquivos:** `…/ui/theme/{Color,Type,Shape,Spacing,Theme}.kt`, `res/font/geist_*.ttf`, `res/font/geist_mono_*.ttf`, `res/font/OFL.txt`, Teste: `…/ui/theme/ColorContrastTest.kt`, `…/ui/theme/ThemeScreenshotTest.kt`
+**Arquivos:** `…/ui/theme/{Color,Type,Shape,Spacing,Theme}.kt`, `res/font/geist_*.ttf`, `docs/licenses/GEIST_OFL.txt`, Teste: `…/ui/theme/ColorContrastTest.kt`, `…/ui/theme/ThemeScreenshotTest.kt`
 
 **Produz:**
 - `enum class ThemeMode { DARK, LIGHT, SYSTEM }`
 - `@Immutable data class MyFitColors(background, surface, surfaceRaised, outline, textPrimary, textSecondary, textTertiary, accent, onAccent, accentMuted, danger, warning: Color)`; `val DarkColors`, `val LightColors`; `val LocalMyFitColors`.
 - `object MyFitTheme { val colors: MyFitColors @Composable get; val type: MyFitType @Composable get }`; `@Composable fun MyFitTheme(mode: ThemeMode = ThemeMode.DARK, content: @Composable () -> Unit)` que também monta o `MaterialTheme` (colorScheme derivado).
-- `MyFitType` com `display`, `title`, `body`, `label`, `caption` (Geist) e `numericLarge`, `numeric` (Geist Mono, `fontFeatureSettings = "tnum"`).
+- `MyFitType` com `display`, `headline`, `title`, `body`, `bodyStrong`, `label`, `caption`, `overline`, `numericHero`, `numericLarge`, `numeric` — tudo em Geist; os numéricos com `fontFeatureSettings = "tnum"` (Geist Mono descartada na revisão visual: vírgula larga e zero cortado).
 - Formas: `small = 10.dp`, `medium = 16.dp`, `large = 24.dp`, botões em pílula.
 
-- [ ] Baixar Geist e Geist Mono (releases oficiais vercel/geist-font, OFL) → pesos Regular/Medium/SemiBold/Bold e Mono Regular/Medium/SemiBold; incluir `OFL.txt`.
+- [ ] Baixar Geist (release oficial vercel/geist-font, OFL) → pesos Regular/Medium/SemiBold/Bold; licença em `docs/licenses/GEIST_OFL.txt`.
 - [ ] Escrever `ColorContrastTest` com função `contrast(a: Color, b: Color): Double` (WCAG) e asserts, para Dark e Light: `textPrimary/background ≥ 7.0`, `textSecondary/background ≥ 4.5`, `onAccent/accent ≥ 4.5`, `accent/background ≥ 3.0`.
 - [ ] Rodar → falha (tipos não existem). Implementar o tema calibrando os hex até passar.
 - [ ] `ThemeScreenshotTest` (Roborazzi, `@GraphicsMode(NATIVE)`, `@Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")`): catálogo de cores e tipografia nos dois temas.
