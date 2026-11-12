@@ -1,10 +1,14 @@
 package io.github.luannamorim.myfit.ui.feature.workout
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
+import io.github.luannamorim.myfit.data.images.ImageKind
+import io.github.luannamorim.myfit.data.images.ImageStore
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 import io.github.luannamorim.myfit.platform.session.SessionController
@@ -13,6 +17,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,8 +33,14 @@ data class SessionSummaryUiState(
     val volumeKg: Double = 0.0,
     val exercises: List<SummaryExercise> = emptyList(),
     val updateLoads: Boolean = true,
+    val intensity: Intensity? = null,
+    val imagePath: String? = null,
+    val photoError: Boolean = false,
     val finishedSessionId: Long? = null,
 )
+
+/** What the user picked on the summary screen before saving. */
+private data class Choices(val updateLoads: Boolean? = null, val intensity: Intensity? = null, val imagePath: String? = null, val photoError: Boolean = false)
 
 /** Review screen shown before the active session is saved to history. */
 @HiltViewModel
@@ -37,12 +48,13 @@ class SessionSummaryViewModel @Inject constructor(
     private val controller: SessionController,
     private val time: TimeSource,
     private val settings: SettingsRepository,
+    private val images: ImageStore,
 ) : ViewModel() {
-    private val updateLoads = MutableStateFlow<Boolean?>(null)
+    private val choices = MutableStateFlow(Choices())
     private val finished = MutableStateFlow<Long?>(null)
     private val finishing = MutableStateFlow(false)
 
-    val state: StateFlow<SessionSummaryUiState> = combine(controller.active, updateLoads, finished, finishing, settings.settings) { s, update, done, busy, prefs ->
+    val state: StateFlow<SessionSummaryUiState> = combine(controller.active, choices, finished, finishing, settings.settings) { s, picked, done, busy, prefs ->
         // While finishing, the active session disappears before the id comes back: keep "loading".
         if (s == null) return@combine SessionSummaryUiState(loading = busy && done == null, hasSession = false, finishedSessionId = done)
         val sets = s.exercises.flatMap { it.sets }
@@ -64,20 +76,40 @@ class SessionSummaryViewModel @Inject constructor(
                     bestLoadKg = ex.sets.filter { it.status == ItemStatus.DONE }.mapNotNull { it.actualLoadKg }.maxOrNull(),
                 )
             },
-            updateLoads = update ?: prefs.updateRoutineLoadsOnFinish,
+            updateLoads = picked.updateLoads ?: prefs.updateRoutineLoadsOnFinish,
+            intensity = picked.intensity,
+            imagePath = picked.imagePath,
+            photoError = picked.photoError,
             finishedSessionId = done,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionSummaryUiState())
 
-    fun setUpdateLoads(value: Boolean) {
-        updateLoads.value = value
+    fun setUpdateLoads(value: Boolean) = choices.update { it.copy(updateLoads = value) }
+
+    fun setIntensity(value: Intensity?) = choices.update { it.copy(intensity = value) }
+
+    /** Imports (and shrinks) the picked photo right away; the previous pick is deleted. */
+    fun setPhoto(uri: Uri) {
+        viewModelScope.launch {
+            val path = runCatching { images.import(uri, ImageKind.SESSION) }.getOrNull()
+            val previous = choices.value.imagePath
+            choices.update { if (path == null) it.copy(photoError = true) else it.copy(imagePath = path, photoError = false) }
+            if (path != null) images.delete(previous)
+        }
+    }
+
+    fun removePhoto() {
+        val previous = choices.value.imagePath
+        choices.update { it.copy(imagePath = null, photoError = false) }
+        viewModelScope.launch { images.delete(previous) }
     }
 
     fun confirm() {
         if (finishing.value) return
         finishing.value = true
+        val picked = state.value
         viewModelScope.launch {
-            finished.value = controller.finish(state.value.updateLoads)
+            finished.value = controller.finish(picked.updateLoads, picked.intensity, picked.imagePath)
         }
     }
 }

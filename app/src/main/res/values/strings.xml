@@ -154,6 +154,47 @@
     <string name="summary_confirm">Finish and save</string>
     <string name="summary_exercise_sets" tools:ignore="PluralsCandidate">%1$d/%2$d sets</string>
     <string name="summary_skipped">skipped</string>
+    <string name="intensity_title">Intensity</string>
+    <string name="intensity_low">Low</string>
+    <string name="intensity_medium">Medium</string>
+    <string name="intensity_high">High</string>
+    <string name="workout_photo_add">Add a photo</string>
+    <string name="workout_photo_change">Change photo</string>
+    <string name="workout_photo_remove">Remove</string>
+    <string name="workout_photo_a11y">Workout photo</string>
+    <string name="sport_swimming">Swimming</string>
+    <string name="sport_cycling">Cycling</string>
+    <string name="sport_indoor_cycling">Indoor cycling</string>
+    <string name="sport_running">Running</string>
+    <string name="sport_treadmill">Treadmill</string>
+    <string name="sport_walking">Walking</string>
+    <string name="sport_soccer">Soccer</string>
+    <string name="sport_volleyball">Volleyball</string>
+    <string name="sport_basketball">Basketball</string>
+    <string name="sport_beach_tennis">Beach tennis</string>
+    <string name="sport_muay_thai">Muay thai</string>
+    <string name="sport_jiu_jitsu">Jiu-jitsu</string>
+    <string name="sport_boxing">Boxing</string>
+    <string name="sport_yoga">Yoga</string>
+    <string name="sport_pilates">Pilates</string>
+    <string name="sport_stretching">Stretching</string>
+    <string name="sport_other">Other</string>
+    <string name="activity_log">Log activity</string>
+    <string name="activity_title_new">New activity</string>
+    <string name="activity_title_edit">Activity</string>
+    <string name="activity_sport">Sport</string>
+    <string name="activity_name">Activity name</string>
+    <string name="activity_name_error">Give the activity a name.</string>
+    <string name="activity_date">Date</string>
+    <string name="activity_duration">Duration</string>
+    <string name="activity_duration_error">Enter the duration in minutes.</string>
+    <string name="activity_distance">Distance</string>
+    <string name="activity_notes">Notes</string>
+    <string name="activity_delete_title">Delete activity?</string>
+    <string name="activity_delete_message">It will be removed from your history. This cannot be undone.</string>
+    <string name="unit_min">min</string>
+    <string name="unit_km">km</string>
+    <string name="unit_m">m</string>
     <string name="active_bar_title">Workout in progress</string>
     <string name="active_bar_resume">Resume</string>
     <string name="history_prev_month">Previous month</string>
@@ -165,8 +206,12 @@
     <string name="history_frequency">Frequency</string>
     <string name="history_frequency_value">%1$s×/wk</string>
     <string name="history_exercises">Exercises done</string>
-    <string name="history_no_sessions_day">No workouts on this day.</string>
+    <string name="history_no_sessions_day">Nothing logged on this day.</string>
     <string name="history_month_sessions">Workouts this month</string>
+    <string name="history_add_activity">Activity</string>
+    <string name="history_activities">Activities</string>
+    <string name="history_month_activities">Activities this month</string>
+    <string name="history_sports">Sports</string>
     <string name="history_session_meta" tools:ignore="PluralsCandidate">%1$s · %2$s · %3$d sets</string>
     <string name="history_exercise_times">%d×</string>
     <string name="detail_title">Session</string>
@@ -192,6 +237,10 @@
     <plurals name="home_sessions_count">
         <item quantity="one">%d workout</item>
         <item quantity="other">%d workouts</item>
+    </plurals>
+    <plurals name="home_activities_count">
+        <item quantity="one">%d activity</item>
+        <item quantity="other">%d activities</item>
     </plurals>
     <string name="home_empty_title">Start with your first workout</string>
     <string name="home_empty_message">Build an exercise sequence and start it when you get to the gym.</string>
@@ -249,6 +298,10 @@
     <string name="charts_period_6m">6 months</string>
     <string name="charts_not_enough">Needs at least two assessments with this measurement.</string>
     <string name="charts_change">%1$s in period</string>
+    <string name="charts_all_measures">All</string>
+    <string name="charts_pick_measure">Pick one or more measurements above.</string>
+    <string name="charts_no_data">No data for these measurements in this period.</string>
+    <string name="photos_date">Date</string>
     <string name="photos_add">Add photo</string>
     <string name="photos_empty">Dated photos show progress a tape measure misses.</string>
     <string name="photos_pose">Pose</string>

@@ -23,15 +23,24 @@ class SnapshotMapperTest {
 
     @Test
     fun exportReplaceAll_roundTripsEveryTable() = runBlocking {
-        env.populateEverything(listOf("images/body/p.jpg"))
+        env.populateEverything(listOf("images/body/p.jpg"), sessionImage = "images/sessions/s.jpg", activityImage = "images/sessions/a.jpg")
         val exported = SnapshotMapper.export(env.db)
         assertTrue(exported.counts().values.all { it > 0 })
+        assertEquals(1, exported.counts()["activities"])
+        assertEquals("HIGH", exported.sessions.first { it.status == "FINISHED" }.intensity)
 
         val other = inMemoryDb(seed = true) // different content that must be fully replaced
         SnapshotMapper.replaceAll(other, exported)
         assertEquals(exported, SnapshotMapper.export(other))
-        assertEquals(setOf("images/body/p.jpg"), exported.referencedImages())
+        assertEquals(setOf("images/body/p.jpg", "images/sessions/s.jpg", "images/sessions/a.jpg"), exported.referencedImages())
         other.close()
+    }
+
+    @Test
+    fun counts_ofBackupsWithoutActivities_matchManifestsWrittenBeforeVersion4() {
+        // Older manifests have no "activities" key; the check compares maps exactly.
+        val before = setOf("exercises", "routines", "routineExercises", "sessions", "sessionExercises", "sessionSets", "assessments", "photos")
+        assertEquals(before, BackupDataV1().counts().keys)
     }
 
     @Test

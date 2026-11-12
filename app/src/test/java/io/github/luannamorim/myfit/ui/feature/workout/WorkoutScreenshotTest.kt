@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.domain.model.ThemeMode
@@ -90,6 +91,7 @@ class WorkoutScreenshotTest {
                     SummaryExercise("Lat pulldown", 2, 3, false, 50.0),
                 ),
                 updateLoads = true,
+                intensity = Intensity.HIGH,
             ),
             {}, {}, {},
         )

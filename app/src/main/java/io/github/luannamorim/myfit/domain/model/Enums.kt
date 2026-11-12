@@ -12,3 +12,6 @@ enum class SessionStatus { ACTIVE, FINISHED }
 enum class ItemStatus { PENDING, DONE, SKIPPED }
 
 enum class PhotoPose { FRONT, SIDE, BACK, OTHER }
+
+/** How hard a finished workout felt, chosen by the user (optional). */
+enum class Intensity { LOW, MEDIUM, HIGH }

@@ -72,4 +72,11 @@ interface SessionDao {
 
     @Query("DELETE FROM workout_session WHERE id = :id")
     suspend fun deleteSession(id: Long)
+
+    /** [intensity] is an [io.github.luannamorim.myfit.domain.model.Intensity] name, or null to clear it. */
+    @Query("UPDATE workout_session SET intensity = :intensity WHERE id = :id AND status = 'FINISHED'")
+    suspend fun setIntensity(id: Long, intensity: String?)
+
+    @Query("UPDATE workout_session SET imagePath = :imagePath WHERE id = :id AND status = 'FINISHED'")
+    suspend fun setImagePath(id: Long, imagePath: String?)
 }

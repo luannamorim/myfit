@@ -13,12 +13,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,12 +39,11 @@ import io.github.luannamorim.myfit.ui.components.MyFitTextField
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.SecondaryButton
 import io.github.luannamorim.myfit.ui.components.SectionHeader
+import io.github.luannamorim.myfit.ui.components.MyFitDatePickerDialog
 import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 private val Groups: List<Pair<Int, List<Measure>>> = listOf(
     R.string.assessment_group_general to listOf(Measure.WEIGHT, Measure.BODY_FAT),
@@ -141,19 +137,7 @@ fun AssessmentEditorContent(
         }
     }
     if (pickDate) {
-        val pickerState = rememberDatePickerState(
-            initialSelectedDateMillis = state.date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-        )
-        DatePickerDialog(
-            onDismissRequest = { pickDate = false },
-            confirmButton = {
-                TextAction(stringResource(R.string.action_save), onClick = {
-                    pickerState.selectedDateMillis?.let { onDate(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
-                    pickDate = false
-                })
-            },
-            dismissButton = { TextAction(stringResource(R.string.action_cancel), onClick = { pickDate = false }, color = c.textSecondary) },
-        ) { DatePicker(state = pickerState) }
+        MyFitDatePickerDialog(state.date, onDate = { onDate(it); pickDate = false }, onDismiss = { pickDate = false })
     }
     if (confirmDelete) {
         ConfirmDialog(

@@ -58,6 +58,7 @@ import io.github.luannamorim.myfit.domain.model.PhotoPose
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.common.localImageModel
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
+import io.github.luannamorim.myfit.ui.components.DateField
 import io.github.luannamorim.myfit.ui.components.EmptyState
 import io.github.luannamorim.myfit.ui.components.FilterChipRow
 import io.github.luannamorim.myfit.ui.components.MyFitCard
@@ -70,6 +71,7 @@ import io.github.luannamorim.myfit.ui.components.TabScreen
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
+import java.time.LocalDate
 
 data class EvolutionActions(
     val onNewAssessment: () -> Unit = {},
@@ -83,7 +85,7 @@ fun EvolutionScreen(actions: EvolutionActions, modifier: Modifier = Modifier, vi
     val state by viewModel.state.collectAsStateWithLifecycle()
     var pendingPose by remember { mutableStateOf(PhotoPose.FRONT) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        if (uri != null) viewModel.addPhoto(uri, state.today, pendingPose)
+        if (uri != null) viewModel.addPhoto(uri, state.photoDate, pendingPose)
     }
     EvolutionContent(
         state = state,
@@ -98,6 +100,8 @@ fun EvolutionScreen(actions: EvolutionActions, modifier: Modifier = Modifier, vi
         },
         onDeletePhotos = viewModel::deleteSelectedPhotos,
         modifier = modifier,
+        onToggleAllMeasures = viewModel::toggleAllMeasures,
+        onPhotoDate = viewModel::setPhotoDate,
     )
 }
 
@@ -112,6 +116,8 @@ fun EvolutionContent(
     onAddPhoto: (PhotoPose) -> Unit,
     onDeletePhotos: () -> Unit,
     modifier: Modifier = Modifier,
+    onToggleAllMeasures: () -> Unit = {},
+    onPhotoDate: (LocalDate) -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     TabScreen(
@@ -136,8 +142,8 @@ fun EvolutionContent(
         if (state.loading) return@TabScreen
         when (state.section) {
             EvolutionSection.MEASURES -> MeasuresSection(state, actions)
-            EvolutionSection.CHARTS -> ChartsSection(state, onToggleMeasure, onPeriod)
-            EvolutionSection.PHOTOS -> PhotosSection(state, onTogglePhoto, onAddPhoto, onDeletePhotos, actions.onComparePhotos)
+            EvolutionSection.CHARTS -> ChartsSection(state, onToggleMeasure, onToggleAllMeasures, onPeriod)
+            EvolutionSection.PHOTOS -> PhotosSection(state, onTogglePhoto, onAddPhoto, onPhotoDate, onDeletePhotos, actions.onComparePhotos)
         }
     }
 }
@@ -174,7 +180,7 @@ private fun MeasuresSection(state: EvolutionUiState, actions: EvolutionActions) 
     state.assessments.forEach { AssessmentRow(it, onClick = { actions.onOpenAssessment(it.id) }) }
 }
 
-/** Latest weight/fat/waist with change vs the previous assessment (neutral color: no judgment). */
+/** Latest weight and body fat with change vs the previous assessment (neutral color: no judgment). */
 @Composable
 fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
     val c = MyFitTheme.colors
@@ -223,7 +229,12 @@ private fun AssessmentRow(assessment: BodyAssessment, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ChartsSection(state: EvolutionUiState, onToggleMeasure: (Measure) -> Unit, onPeriod: (ChartPeriod) -> Unit) {
+private fun ChartsSection(
+    state: EvolutionUiState,
+    onToggleMeasure: (Measure) -> Unit,
+    onToggleAll: () -> Unit,
+    onPeriod: (ChartPeriod) -> Unit,
+) {
     val c = MyFitTheme.colors
     if (state.assessments.isEmpty()) {
         Text(stringResource(R.string.charts_not_enough), style = MyFitTheme.type.body, color = c.textSecondary)
@@ -234,10 +245,16 @@ private fun ChartsSection(state: EvolutionUiState, onToggleMeasure: (Measure) ->
         selected = state.selectedMeasures,
         label = { stringResource(it.labelRes) },
         onToggle = onToggleMeasure,
+        allLabel = stringResource(R.string.charts_all_measures),
+        onToggleAll = onToggleAll,
     )
     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
         listOf(ChartPeriod.ALL to R.string.charts_period_all, ChartPeriod.YEAR to R.string.charts_period_year, ChartPeriod.SIX_MONTHS to R.string.charts_period_6m)
             .forEach { (p, label) -> MyFitChip(stringResource(label), selected = state.period == p, onClick = { onPeriod(p) }) }
+    }
+    if (state.charts.isEmpty()) {
+        val hint = if (state.selectedMeasures.isEmpty()) R.string.charts_pick_measure else R.string.charts_no_data
+        Text(stringResource(hint), style = MyFitTheme.type.body, color = c.textSecondary)
     }
     state.charts.forEach { chart ->
         MyFitCard(Modifier.fillMaxWidth()) {
@@ -270,6 +287,7 @@ private fun PhotosSection(
     state: EvolutionUiState,
     onTogglePhoto: (Long) -> Unit,
     onAddPhoto: (PhotoPose) -> Unit,
+    onPhotoDate: (LocalDate) -> Unit,
     onDelete: () -> Unit,
     onCompare: (Long, Long) -> Unit,
 ) {
@@ -284,6 +302,8 @@ private fun PhotosSection(
             PhotoPose.entries.forEach { p -> MyFitChip(stringResource(p.labelRes), selected = pose == p, onClick = { pose = p }) }
         }
         Spacer(Modifier.height(Spacing.m))
+        DateField(stringResource(R.string.photos_date), state.photoDate, onPhotoDate, Modifier.fillMaxWidth(), maxDate = state.today)
+        Spacer(Modifier.height(Spacing.s))
         PrimaryButton(stringResource(R.string.photos_add), onClick = { onAddPhoto(pose) }, icon = Icons.Rounded.Add, modifier = Modifier.fillMaxWidth())
         if (state.photoError) Text(stringResource(R.string.exercise_image_error), style = MyFitTheme.type.caption, color = c.danger)
     }

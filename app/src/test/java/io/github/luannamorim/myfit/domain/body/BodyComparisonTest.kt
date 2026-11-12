@@ -44,7 +44,7 @@ class BodyComparisonTest {
         val snap = BodyComparison.snapshot(listOf(first, current))!!
         assertEquals(2L, snap.latest.id)
         assertEquals(1L, snap.previous!!.id)
-        assertEquals(listOf(Measure.WEIGHT, Measure.BODY_FAT, Measure.WAIST), snap.highlights.map { it.measure })
+        assertEquals(listOf(Measure.WEIGHT, Measure.BODY_FAT), snap.highlights.map { it.measure }) // waist left out on purpose
         assertEquals(2.0, snap.highlights[0].diff!!, 0.0)
         assertNull(snap.highlights[1].diff)
         assertNull(BodyComparison.snapshot(emptyList()))

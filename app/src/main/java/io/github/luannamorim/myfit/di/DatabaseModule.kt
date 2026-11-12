@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.luannamorim.myfit.data.db.Migrations
 import io.github.luannamorim.myfit.data.db.MyFitDatabase
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import javax.inject.Singleton
@@ -19,7 +20,7 @@ object DatabaseModule {
     fun provideDatabase(@ApplicationContext context: Context): MyFitDatabase =
         Room.databaseBuilder(context, MyFitDatabase::class.java, MyFitDatabase.NAME)
             .addCallback(ExerciseSeed.Callback())
-            .addMigrations(*ExerciseSeed.MIGRATIONS)
+            .addMigrations(*Migrations.ALL)
             .build()
 
     @Provides fun provideExerciseDao(db: MyFitDatabase) = db.exerciseDao()

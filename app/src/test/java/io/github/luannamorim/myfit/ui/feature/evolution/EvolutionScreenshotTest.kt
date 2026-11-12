@@ -55,6 +55,20 @@ class EvolutionScreenshotTest {
     }
 
     @Test
+    fun evolution_charts_all() = compose.snapBothThemes("evolution_charts_all") {
+        val all = Measure.entries.toSet()
+        EvolutionContent(
+            state(EvolutionSection.CHARTS).copy(selectedMeasures = all, charts = buildCharts(assessments, all, ChartPeriod.ALL, today)),
+            EvolutionActions(), {}, {}, {}, {}, {}, {},
+        )
+    }
+
+    @Test
+    fun evolution_photos() = compose.snapBothThemes("evolution_photos") {
+        EvolutionContent(state(EvolutionSection.PHOTOS).copy(photoDate = today.minusMonths(2)), EvolutionActions(), {}, {}, {}, {}, {}, {})
+    }
+
+    @Test
     fun assessment_compare() = compose.snapBothThemes("assessment_compare") {
         val from = assessments.last()
         val to = assessments.first()

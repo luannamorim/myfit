@@ -1,10 +1,14 @@
 package io.github.luannamorim.myfit.ui.feature.home
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
+import io.github.luannamorim.myfit.domain.activity.Activity
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 import io.github.luannamorim.myfit.testutil.MainDispatcherRule
@@ -14,6 +18,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,10 +56,13 @@ class HomeViewModelTest {
         val s = SessionEngine.completeSet(env.repo.getActive()!!, 12, 40.0, env.time.now())
         env.repo.finish(s, env.time.now(), updateRoutineLoads = false)
         env.startWorkout(1) // a second, still active session: not in "today"
+        val activities = ActivityRepository(env.db, env.time, BackupTrigger { })
+        activities.save(Activity(sport = Sport.SOCCER, date = env.time.today(), durationMinutes = 60))
 
         val vm = HomeViewModel(
             RoutineRepository(env.db, env.time, BackupTrigger { }),
             HistoryRepository(env.db, env.time, BackupTrigger { }),
+            activities,
             env.controller,
             BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { }),
             env.time,
@@ -62,6 +70,8 @@ class HomeViewModelTest {
         val state = vm.state.awaitUntil { !it.loading && it.todaySessions.isNotEmpty() && it.active != null }
         assertEquals(1, state.todaySessions.size)
         assertEquals(1, state.week.sessions)
+        assertEquals(1, state.week.activities)
+        assertTrue(state.week.totalDurationMs >= 60 * 60_000L) // the activity's hour counts in the week
         assertEquals(1, state.week.days.count { it.trained })
         assertEquals(1, state.week.days.count { it.isToday })
     }

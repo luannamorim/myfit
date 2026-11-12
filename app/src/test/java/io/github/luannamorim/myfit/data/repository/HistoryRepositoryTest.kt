@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 import io.github.luannamorim.myfit.testutil.SessionEnv
@@ -48,6 +49,22 @@ class HistoryRepositoryTest {
         assertEquals(1, summary.setsDone)
         assertEquals(listOf("Exercício 1"), summary.exercises)
         assertEquals(1_800_000L, summary.durationMs)
+    }
+
+    @Test
+    fun intensityAndPhoto_setWhenFinishing_andEditableLater() = runBlocking {
+        env.startWorkout(1)
+        val s = SessionEngine.completeSet(env.repo.getActive()!!, 12, 40.0, env.time.now())
+        val id = env.repo.finish(s, env.time.now(), updateRoutineLoads = false, intensity = Intensity.MEDIUM, imagePath = "images/sessions/a.jpg")
+        var summary = history.observeDetail(id).first()!!.summary
+        assertEquals(Intensity.MEDIUM, summary.intensity)
+        assertEquals("images/sessions/a.jpg", summary.imagePath)
+
+        history.setIntensity(id, null)
+        assertEquals("images/sessions/a.jpg", history.setImage(id, "images/sessions/b.jpg")) // returns the replaced one
+        summary = history.observeDetail(id).first()!!.summary
+        assertEquals(null, summary.intensity)
+        assertEquals("images/sessions/b.jpg", summary.imagePath)
     }
 
     @Test

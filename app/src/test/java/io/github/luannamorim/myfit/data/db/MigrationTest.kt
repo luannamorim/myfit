@@ -6,7 +6,10 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
+import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.model.Intensity
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
@@ -19,7 +22,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import java.io.File
 
-/** Opens databases created by older releases (schema versions 1 and 2) with the current app. */
+/** Opens databases created by older releases (schema versions 1, 2 and 3) with the current app. */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
 class MigrationTest {
@@ -47,7 +50,7 @@ class MigrationTest {
 
     private fun open(name: String) = Room.databaseBuilder(context, MyFitDatabase::class.java, name)
         .addCallback(ExerciseSeed.Callback())
-        .addMigrations(*ExerciseSeed.MIGRATIONS)
+        .addMigrations(*Migrations.ALL)
         .allowMainThreadQueries()
         .build()
 
@@ -80,7 +83,7 @@ class MigrationTest {
         assertTrue(goblet.isCustom)
         assertEquals("goblet-squat", goblet.seedKey)
         all.filter { !it.isCustom }.forEach { e -> assertEquals(e.name, ExerciseSeed.forKey(e.seedKey)?.namePt) }
-        assertEquals(3, room.openHelper.readableDatabase.version)
+        assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
         room.close()
     }
 
@@ -129,6 +132,38 @@ class MigrationTest {
             assertTrue(c.moveToFirst())
             assertEquals("barbell-bench-press", c.getString(0))
         }
+        room.close()
+    }
+
+    @Test
+    fun migrate3To4_keepsSessions_andAddsIntensityPhotoAndActivities() = runBlocking {
+        createVersion(3, "migration-v3-test.db") { db ->
+            ExerciseSeed.items.forEach { db.insertExercise(it.namePt, custom = false) }
+            db.insert(
+                "workout_session",
+                null,
+                ContentValues().apply {
+                    put("routineName", "Costas"); put("status", "FINISHED"); put("totalPausedMs", 0); put("durationMs", 3_600_000)
+                    put("cursorExercise", 0); put("cursorSet", 0); put("startDateEpochDay", 20_400)
+                    put("started_wallMs", 0); put("started_elapsedMs", 0); put("started_bootCount", 0)
+                },
+            )
+        }
+
+        val room = open("migration-v3-test.db")
+        val session = room.sessionDao().getAllSessions().single()
+        assertEquals("Costas", session.routineName)
+        assertEquals(3_600_000L, session.durationMs)
+        assertEquals(null, session.intensity)
+        assertEquals(null, session.imagePath)
+        room.sessionDao().setIntensity(session.id, Intensity.HIGH.name)
+        assertEquals(Intensity.HIGH, room.sessionDao().getAllSessions().single().intensity)
+
+        val id = room.activityDao().insert(
+            ActivityEntity(sport = Sport.SWIMMING, dateEpochDay = 20_401, durationMinutes = 45, distanceKm = 1.5, createdAtMs = 1),
+        )
+        assertEquals(Sport.SWIMMING, room.activityDao().get(id)!!.sport)
+        assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
         room.close()
     }
 

@@ -1,5 +1,9 @@
 package io.github.luannamorim.myfit.ui.feature.workout
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +34,9 @@ import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.formatThousands
 import io.github.luannamorim.myfit.core.format.Durations
 import io.github.luannamorim.myfit.core.format.formatKg
+import io.github.luannamorim.myfit.domain.model.Intensity
+import io.github.luannamorim.myfit.ui.common.IntensityPicker
+import io.github.luannamorim.myfit.ui.common.PhotoField
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.PrimaryButton
@@ -49,7 +56,18 @@ fun SessionSummaryScreen(
         val finished = state.finishedSessionId
         if (finished != null) onDone(finished) else if (!state.loading && !state.hasSession) onBack()
     }
-    SessionSummaryContent(state, onBack, viewModel::setUpdateLoads, viewModel::confirm)
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        if (uri != null) viewModel.setPhoto(uri)
+    }
+    SessionSummaryContent(
+        state,
+        onBack,
+        viewModel::setUpdateLoads,
+        viewModel::confirm,
+        onIntensity = viewModel::setIntensity,
+        onPickPhoto = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+        onRemovePhoto = viewModel::removePhoto,
+    )
 }
 
 @Composable
@@ -58,6 +76,9 @@ fun SessionSummaryContent(
     onBack: () -> Unit,
     onUpdateLoads: (Boolean) -> Unit,
     onConfirm: () -> Unit,
+    onIntensity: (Intensity?) -> Unit = {},
+    onPickPhoto: () -> Unit = {},
+    onRemovePhoto: () -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     Scaffold(
@@ -85,6 +106,9 @@ fun SessionSummaryContent(
                     StatTile(stringResource(R.string.summary_sets), "${state.setsDone}/${state.setsTotal}", Modifier.weight(1f))
                 }
                 StatTile(stringResource(R.string.summary_volume), formatThousands(state.volumeKg), Modifier.fillMaxWidth(), unit = stringResource(R.string.unit_kg))
+                // Asked before saving: how hard it was, and an optional photo (both editable later in history).
+                IntensityPicker(state.intensity, onIntensity, Modifier.padding(top = Spacing.s))
+                PhotoField(state.imagePath, onPick = onPickPhoto, onRemove = onRemovePhoto, error = state.photoError)
                 SectionHeader(stringResource(R.string.workout_exercises))
                 state.exercises.forEach { ex ->
                     Row(Modifier.fillMaxWidth().padding(vertical = Spacing.xs), verticalAlignment = Alignment.CenterVertically) {

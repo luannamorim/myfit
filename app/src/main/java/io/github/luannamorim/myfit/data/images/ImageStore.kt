@@ -18,7 +18,14 @@ import javax.inject.Singleton
 import kotlin.math.max
 import kotlin.math.min
 
-enum class ImageKind(val dir: String) { EXERCISE("exercises"), BODY("body") }
+/** Where each kind of image goes and how much it is reduced (longest side in px, JPEG quality). */
+enum class ImageKind(val dir: String, val maxSide: Int = ImageStore.MAX_SIDE, val quality: Int = 85) {
+    EXERCISE("exercises"),
+    BODY("body"),
+
+    /** Workout and activity photos are mementos: smaller and lighter (~150–300 KB). */
+    SESSION("sessions", maxSide = 1280, quality = 80),
+}
 
 /**
  * Stores user images inside app-private storage. Images are decoded downscaled (longest side
@@ -34,14 +41,14 @@ class ImageStore @Inject constructor(
 
     /** Copies the picked image right away (picker grants are temporary). Returns e.g. "images/body/<uuid>.jpg". */
     suspend fun import(uri: Uri, kind: ImageKind): String = withContext(io) {
-        val bitmap = decode(uri)
+        val bitmap = decode(uri, kind.maxSide)
         val relative = "$IMAGES_DIR/${kind.dir}/${UUID.randomUUID()}.jpg"
         val target = File(root, relative)
         target.parentFile?.mkdirs()
         val tmp = File(target.parentFile, "${target.name}.tmp")
         try {
             tmp.outputStream().use { out ->
-                check(bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)) { "JPEG encode failed" }
+                check(bitmap.compress(Bitmap.CompressFormat.JPEG, kind.quality, out)) { "JPEG encode failed" }
             }
             if (!tmp.renameTo(target)) throw IOException("rename failed: $tmp")
         } finally {
@@ -82,7 +89,7 @@ class ImageStore @Inject constructor(
         }
     }
 
-    private fun decode(uri: Uri): Bitmap {
+    private fun decode(uri: Uri, maxSide: Int): Bitmap {
         val resolver = context.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         val input = resolver.openInputStream(uri) ?: throw IOException("cannot open $uri")
@@ -90,7 +97,7 @@ class ImageStore @Inject constructor(
         require(bounds.outWidth > 0 && bounds.outHeight > 0) { "not an image: $uri" }
 
         var sample = 1
-        while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= MAX_SIDE) sample *= 2
+        while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= maxSide) sample *= 2
         val options = BitmapFactory.Options().apply { inSampleSize = sample }
         val decoded = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
             ?: throw IOException("decode failed: $uri")
@@ -101,7 +108,7 @@ class ImageStore @Inject constructor(
             if (it.isFlipped) matrix.postScale(-1f, 1f)
             matrix.postRotate(it.rotationDegrees.toFloat())
         }
-        val scale = min(1f, MAX_SIDE.toFloat() / max(decoded.width, decoded.height))
+        val scale = min(1f, maxSide.toFloat() / max(decoded.width, decoded.height))
         if (scale < 1f) matrix.postScale(scale, scale)
         if (matrix.isIdentity) return decoded
         val transformed = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
@@ -113,6 +120,5 @@ class ImageStore @Inject constructor(
         const val IMAGES_DIR = "images"
         const val MAX_SIDE = 1600
         private const val INVALID = ".invalid"
-        private const val JPEG_QUALITY = 85
     }
 }

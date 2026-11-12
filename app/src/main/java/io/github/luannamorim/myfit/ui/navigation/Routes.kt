@@ -20,3 +20,6 @@ import kotlinx.serialization.Serializable
 @Serializable data class PhotoCompareRoute(val firstId: Long, val secondId: Long)
 @Serializable data object BackupRoute
 @Serializable data object CreditsRoute
+
+/** [activityId] 0 creates a new one; [dateEpochDay] pre-fills its date (History's selected day). */
+@Serializable data class ActivityEditorRoute(val activityId: Long = 0, val dateEpochDay: Long? = null)

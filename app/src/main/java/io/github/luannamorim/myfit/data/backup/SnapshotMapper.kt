@@ -3,6 +3,7 @@ package io.github.luannamorim.myfit.data.backup
 import androidx.room.withTransaction
 import io.github.luannamorim.myfit.core.time.Mark
 import io.github.luannamorim.myfit.data.db.MyFitDatabase
+import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyAssessmentEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyPhotoEntity
 import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
@@ -12,6 +13,7 @@ import io.github.luannamorim.myfit.data.db.entity.SessionExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionSetEntity
 import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
+import io.github.luannamorim.myfit.domain.backup.ActivityDto
 import io.github.luannamorim.myfit.domain.backup.AssessmentDto
 import io.github.luannamorim.myfit.domain.backup.BackupDataV1
 import io.github.luannamorim.myfit.domain.backup.ExerciseDto
@@ -22,6 +24,7 @@ import io.github.luannamorim.myfit.domain.backup.RoutineExerciseDto
 import io.github.luannamorim.myfit.domain.backup.SessionDto
 import io.github.luannamorim.myfit.domain.backup.SessionExerciseDto
 import io.github.luannamorim.myfit.domain.backup.SessionSetDto
+import io.github.luannamorim.myfit.domain.model.Intensity
 
 /** Converts the whole database to/from the versioned backup DTOs. */
 object SnapshotMapper {
@@ -36,6 +39,7 @@ object SnapshotMapper {
             sessionSets = db.sessionDao().getAllSets().map { it.toDto() },
             assessments = db.bodyDao().getAllAssessments().map { it.toDto() },
             photos = db.bodyDao().getAllPhotos().map { it.toDto() },
+            activities = db.activityDao().getAll().map { it.toDto() },
         )
     }
 
@@ -54,6 +58,7 @@ object SnapshotMapper {
             dao.clearExercises()
             dao.clearPhotos()
             dao.clearAssessments()
+            dao.clearActivities()
 
             dao.insertExercises(data.exercises.map { it.toEntity() })
             dao.insertRoutines(data.routines.map { it.toEntity() })
@@ -63,6 +68,7 @@ object SnapshotMapper {
             dao.insertSessionSets(data.sessionSets.map { it.toEntity() })
             dao.insertAssessments(data.assessments.map { it.toEntity() })
             dao.insertPhotos(data.photos.map { it.toEntity() })
+            dao.insertActivities(data.activities.map { it.toEntity() })
             ExerciseSeed.linkKeys(db.openHelper.writableDatabase)
         }
     }
@@ -81,11 +87,14 @@ object SnapshotMapper {
 
     private fun WorkoutSessionEntity.toDto() = SessionDto(
         id, routineId, routineName, status.name, started.toDto(), paused?.toDto(), totalPausedMs, ended?.toDto(), durationMs,
-        cursorExercise, cursorSet, restStarted?.toDto(), restDurationMs, startDateEpochDay,
+        cursorExercise, cursorSet, restStarted?.toDto(), restDurationMs, startDateEpochDay, intensity?.name, imagePath,
     )
     private fun SessionDto.toEntity() = WorkoutSessionEntity(
         id, routineId, routineName, enumOf(status), started.toMark(), paused?.toMark(), totalPausedMs, ended?.toMark(), durationMs,
         cursorExercise, cursorSet, restStarted?.toMark(), restDurationMs, startDateEpochDay,
+        // Unknown values (a newer app) are dropped rather than failing the whole restore.
+        intensity?.let { name -> Intensity.entries.firstOrNull { it.name == name } },
+        imagePath,
     )
 
     private fun SessionExerciseEntity.toDto() = SessionExerciseDto(
@@ -109,6 +118,14 @@ object SnapshotMapper {
 
     private fun BodyPhotoEntity.toDto() = PhotoDto(id, dateEpochDay, imagePath, pose.name, createdAtMs)
     private fun PhotoDto.toEntity() = BodyPhotoEntity(id, dateEpochDay, imagePath, enumOf(pose), createdAtMs)
+
+    private fun ActivityEntity.toDto() = ActivityDto(
+        id, sport.name, name, dateEpochDay, durationMinutes, distanceKm, intensity?.name, notes, imagePath, createdAtMs,
+    )
+    private fun ActivityDto.toEntity() = ActivityEntity(
+        id, enumOf(sport), name, dateEpochDay, durationMinutes, distanceKm,
+        intensity?.let { name -> Intensity.entries.firstOrNull { it.name == name } }, notes, imagePath, createdAtMs,
+    )
 
     private inline fun <reified E : Enum<E>> enumOf(name: String): E =
         enumValues<E>().firstOrNull { it.name == name } ?: throw IllegalArgumentException("unknown ${E::class.simpleName}: $name")

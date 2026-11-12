@@ -54,8 +54,8 @@ object BodyComparison {
     fun series(items: List<BodyAssessment>, measure: Measure): List<Pair<LocalDate, Double>> =
         items.sortedWith(compareBy({ it.date }, { it.id })).mapNotNull { a -> a.values[measure]?.let { a.date to it } }
 
-    /** Snapshot of the two most recent assessments; highlights are weight, body fat and waist when present. */
-    fun snapshot(items: List<BodyAssessment>, highlight: List<Measure> = listOf(Measure.WEIGHT, Measure.BODY_FAT, Measure.WAIST)): BodySnapshot? {
+    /** Snapshot of the two most recent assessments; highlights are weight and body fat when present (Home and Progress). */
+    fun snapshot(items: List<BodyAssessment>, highlight: List<Measure> = listOf(Measure.WEIGHT, Measure.BODY_FAT)): BodySnapshot? {
         val sorted = items.sortedWith(compareByDescending<BodyAssessment> { it.date }.thenByDescending { it.id })
         val latest = sorted.firstOrNull() ?: return null
         val previous = sorted.getOrNull(1)

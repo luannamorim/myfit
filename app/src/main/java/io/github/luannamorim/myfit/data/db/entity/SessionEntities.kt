@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import io.github.luannamorim.myfit.core.time.Mark
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
@@ -35,6 +36,10 @@ data class WorkoutSessionEntity(
     val restDurationMs: Long? = null,
     /** Local date the session started on (calendar/history key). */
     val startDateEpochDay: Long,
+    /** Perceived intensity, set when finishing or later in history (since v4). */
+    val intensity: Intensity? = null,
+    /** Optional photo of the workout, relative to the images dir (since v4). */
+    val imagePath: String? = null,
 )
 
 @Entity(

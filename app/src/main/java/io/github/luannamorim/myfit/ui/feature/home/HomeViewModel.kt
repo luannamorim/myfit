@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
@@ -35,7 +36,8 @@ enum class Greeting { MORNING, AFTERNOON, EVENING;
 
 data class DayMark(val date: LocalDate, val trained: Boolean, val isToday: Boolean)
 
-data class WeekStrip(val days: List<DayMark>, val sessions: Int, val totalDurationMs: Long)
+/** [totalDurationMs] counts workouts and logged activities. */
+data class WeekStrip(val days: List<DayMark>, val sessions: Int, val totalDurationMs: Long, val activities: Int = 0)
 
 data class HomeUiState(
     val loading: Boolean = true,
@@ -61,6 +63,7 @@ fun suggestRoutine(routines: List<RoutineOverview>): RoutineOverview? =
 class HomeViewModel @Inject constructor(
     routines: RoutineRepository,
     history: HistoryRepository,
+    activities: ActivityRepository,
     controller: SessionController,
     body: BodyRepository,
     time: TimeSource,
@@ -70,13 +73,13 @@ class HomeViewModel @Inject constructor(
 
     val state: StateFlow<HomeUiState> = combine(
         routines.observeOverviews(),
-        history.observeSummaries(week),
+        combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
         history.observeLast(),
         controller.active,
         body.observeAssessments(),
-    ) { list, weekSessions, last, active, assessments ->
+    ) { list, (weekSessions, weekActivities), last, active, assessments ->
         val hour = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone()).hour
-        val trainedDays = HistoryCalculator.daysWithSessions(weekSessions)
+        val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
         HomeUiState(
             loading = false,
             greeting = Greeting.forHour(hour),
@@ -90,7 +93,8 @@ class HomeViewModel @Inject constructor(
             week = WeekStrip(
                 days = (0L..6L).map { week.start.plusDays(it) }.map { DayMark(it, it in trainedDays, it == today) },
                 sessions = weekSessions.size,
-                totalDurationMs = weekSessions.sumOf { it.durationMs },
+                totalDurationMs = weekSessions.sumOf { it.durationMs } + weekActivities.sumOf { it.durationMs },
+                activities = weekActivities.size,
             ),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())

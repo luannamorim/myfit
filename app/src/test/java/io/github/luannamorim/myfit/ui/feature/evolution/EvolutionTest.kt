@@ -147,7 +147,20 @@ class EvolutionTest {
         vm.toggleMeasure(Measure.WAIST)
         vm.toggleMeasure(Measure.CHEST)
         val state = vm.state.awaitUntil { Measure.CHEST in it.selectedMeasures }
-        assertEquals(listOf(Measure.WEIGHT, Measure.CHEST, Measure.ARM_RIGHT), state.charts.map { it.measure })
+        // Right arm is selected by default but was never measured: no empty card for it.
+        assertEquals(listOf(Measure.WEIGHT, Measure.CHEST), state.charts.map { it.measure })
+
+        // "All" selects every measure (charts only for measured ones), and again clears the selection.
+        vm.toggleAllMeasures()
+        val all = vm.state.awaitUntil { it.selectedMeasures.size == Measure.entries.size }
+        assertEquals(listOf(Measure.WEIGHT, Measure.CHEST, Measure.WAIST), all.charts.map { it.measure }.sortedBy { listOf(Measure.WEIGHT, Measure.CHEST, Measure.WAIST).indexOf(it) })
+        vm.toggleAllMeasures()
+        assertTrue(vm.state.awaitUntil { it.selectedMeasures.isEmpty() }.charts.isEmpty())
+
+        // Photos default to today and can be back-dated.
+        assertEquals(time.today(), vm.state.value.photoDate)
+        vm.setPhotoDate(jan)
+        assertEquals(jan, vm.state.awaitUntil { it.photoDate == jan }.photoDate)
 
         // Photos: grouped newest first, compare keeps exactly two, delete removes file.
         vm.addPhoto(image("p1"), jan, PhotoPose.FRONT)

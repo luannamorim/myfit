@@ -32,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import io.github.luannamorim.myfit.ui.feature.activity.ActivityEditorScreen
 import io.github.luannamorim.myfit.ui.feature.evolution.AssessmentCompareScreen
 import io.github.luannamorim.myfit.ui.feature.evolution.AssessmentEditorScreen
 import io.github.luannamorim.myfit.ui.feature.evolution.EvolutionActions
@@ -157,6 +158,7 @@ fun MyFitNavHost(
                             onOpenSession = { navController.navigate(SessionDetailRoute(it)) },
                             onOpenHistory = { navController.navigateToTopLevel(TopLevelDestination.HISTORY) },
                             onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
+                            onLogActivity = { navController.navigate(ActivityEditorRoute()) },
                         ),
                     )
                 }
@@ -168,7 +170,13 @@ fun MyFitNavHost(
                         onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
                     )
                 }
-                composable<HistoryRoute> { HistoryScreen(onOpenSession = { navController.navigate(SessionDetailRoute(it)) }) }
+                composable<HistoryRoute> {
+                    HistoryScreen(
+                        onOpenSession = { navController.navigate(SessionDetailRoute(it)) },
+                        onOpenActivity = { navController.navigate(ActivityEditorRoute(activityId = it)) },
+                        onNewActivity = { navController.navigate(ActivityEditorRoute(dateEpochDay = it.toEpochDay())) },
+                    )
+                }
                 composable<EvolutionRoute> {
                     EvolutionScreen(
                         actions = EvolutionActions(
@@ -180,6 +188,7 @@ fun MyFitNavHost(
                     )
                 }
                 composable<AssessmentEditorRoute> { AssessmentEditorScreen(onClose = { navController.popBackStack() }) }
+                composable<ActivityEditorRoute> { ActivityEditorScreen(onClose = { navController.popBackStack() }) }
                 composable<AssessmentCompareRoute> { AssessmentCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<PhotoCompareRoute> { PhotoCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<SettingsRoute> {

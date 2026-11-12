@@ -113,6 +113,7 @@ private fun StepButton(onClick: () -> Unit, description: String, content: @Compo
     }
 }
 
+/** Multi-select chips in a scrolling row. With [allLabel], a leading chip selects or clears every option. */
 @Composable
 fun <T> FilterChipRow(
     options: List<T>,
@@ -120,11 +121,16 @@ fun <T> FilterChipRow(
     label: @Composable (T) -> String,
     onToggle: (T) -> Unit,
     modifier: Modifier = Modifier,
+    allLabel: String? = null,
+    onToggleAll: () -> Unit = {},
 ) {
     Row(
         modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
     ) {
+        if (allLabel != null) {
+            MyFitChip(text = allLabel, selected = selected.containsAll(options), onClick = onToggleAll)
+        }
         options.forEach { option ->
             MyFitChip(text = label(option), selected = option in selected, onClick = { onToggle(option) })
         }

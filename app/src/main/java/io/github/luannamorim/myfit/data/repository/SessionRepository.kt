@@ -7,6 +7,7 @@ import io.github.luannamorim.myfit.data.db.entity.SessionExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionSetEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionWithExercises
 import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.SessionStatus
 import io.github.luannamorim.myfit.domain.session.ActiveSession
@@ -92,7 +93,7 @@ class SessionRepository @Inject constructor(
      * Turns the session into history. Duration excludes pauses. When [updateRoutineLoads] is set, the
      * routine's planned load per exercise becomes the load of its last completed set.
      */
-    suspend fun finish(session: ActiveSession, now: Mark, updateRoutineLoads: Boolean): Long {
+    suspend fun finish(session: ActiveSession, now: Mark, updateRoutineLoads: Boolean, intensity: Intensity? = null, imagePath: String? = null): Long {
         val durationMs = SessionEngine.elapsedMs(session, now)
         db.withTransaction {
             writeState(
@@ -100,6 +101,8 @@ class SessionRepository @Inject constructor(
                 status = SessionStatus.FINISHED,
                 ended = now,
                 durationMs = durationMs,
+                intensity = intensity,
+                imagePath = imagePath,
             )
             val routineId = session.routineId
             if (updateRoutineLoads && routineId != null) {
@@ -118,7 +121,14 @@ class SessionRepository @Inject constructor(
         dao.deleteSession(sessionId)
     }
 
-    private suspend fun writeState(session: ActiveSession, status: SessionStatus, ended: Mark?, durationMs: Long?) {
+    private suspend fun writeState(
+        session: ActiveSession,
+        status: SessionStatus,
+        ended: Mark?,
+        durationMs: Long?,
+        intensity: Intensity? = null,
+        imagePath: String? = null,
+    ) {
         val current = dao.getSession(session.id) ?: throw IllegalStateException("session ${session.id} not found")
         dao.updateSession(
             current.session.copy(
@@ -131,6 +141,8 @@ class SessionRepository @Inject constructor(
                 cursorSet = session.cursor.setIndex,
                 restStarted = session.rest?.startedAt,
                 restDurationMs = session.rest?.durationMs,
+                intensity = intensity,
+                imagePath = imagePath,
             ),
         )
         val exercisesById = current.exercises.associateBy { it.exercise.id }

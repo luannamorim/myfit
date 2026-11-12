@@ -16,6 +16,7 @@ data class BackupDataV1(
     val sessionSets: List<SessionSetDto> = emptyList(),
     val assessments: List<AssessmentDto> = emptyList(),
     val photos: List<PhotoDto> = emptyList(),
+    val activities: List<ActivityDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "exercises" to exercises.size,
@@ -26,11 +27,17 @@ data class BackupDataV1(
         "sessionSets" to sessionSets.size,
         "assessments" to assessments.size,
         "photos" to photos.size,
+    ) + (
+        // Only when present, so backups made before activities existed still match their manifest.
+        if (activities.isEmpty()) emptyMap() else mapOf("activities" to activities.size)
     )
 
     /** Every image path referenced by the data (relative to filesDir). */
     fun referencedImages(): Set<String> =
-        (exercises.mapNotNull { it.imagePath } + sessionExercises.mapNotNull { it.imagePath } + photos.map { it.imagePath }).toSet()
+        (
+            exercises.mapNotNull { it.imagePath } + sessionExercises.mapNotNull { it.imagePath } + photos.map { it.imagePath } +
+                sessions.mapNotNull { it.imagePath } + activities.mapNotNull { it.imagePath }
+        ).toSet()
 }
 
 @Serializable data class MarkDto(val wallMs: Long, val elapsedMs: Long, val bootCount: Int)
@@ -57,6 +64,7 @@ data class SessionDto(
     val started: MarkDto, val paused: MarkDto? = null, val totalPausedMs: Long = 0, val ended: MarkDto? = null,
     val durationMs: Long? = null, val cursorExercise: Int = 0, val cursorSet: Int = 0,
     val restStarted: MarkDto? = null, val restDurationMs: Long? = null, val startDateEpochDay: Long,
+    val intensity: String? = null, val imagePath: String? = null,
 )
 
 @Serializable
@@ -84,3 +92,10 @@ data class AssessmentDto(
 
 @Serializable
 data class PhotoDto(val id: Long, val dateEpochDay: Long, val imagePath: String, val pose: String, val createdAtMs: Long)
+
+@Serializable
+data class ActivityDto(
+    val id: Long, val sport: String, val name: String? = null, val dateEpochDay: Long, val durationMinutes: Int,
+    val distanceKm: Double? = null, val intensity: String? = null, val notes: String? = null, val imagePath: String? = null,
+    val createdAtMs: Long,
+)

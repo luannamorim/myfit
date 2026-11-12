@@ -1,5 +1,9 @@
 package io.github.luannamorim.myfit.ui.feature.history
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +41,9 @@ import io.github.luannamorim.myfit.domain.history.SessionDetail
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
+import io.github.luannamorim.myfit.domain.model.Intensity
+import io.github.luannamorim.myfit.ui.common.IntensityPicker
+import io.github.luannamorim.myfit.ui.common.PhotoField
 import io.github.luannamorim.myfit.ui.components.MyFitCard
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.StatTile
@@ -49,11 +56,30 @@ fun SessionDetailScreen(onBack: () -> Unit, viewModel: SessionDetailViewModel = 
     LaunchedEffect(state.deleted, state.loading, state.detail) {
         if (state.deleted || (!state.loading && state.detail == null)) onBack()
     }
-    SessionDetailContent(state.detail, onBack, viewModel::delete)
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        if (uri != null) viewModel.setPhoto(uri)
+    }
+    SessionDetailContent(
+        state.detail,
+        onBack,
+        viewModel::delete,
+        onIntensity = viewModel::setIntensity,
+        onPickPhoto = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+        onRemovePhoto = viewModel::removePhoto,
+        photoError = state.photoError,
+    )
 }
 
 @Composable
-fun SessionDetailContent(detail: SessionDetail?, onBack: () -> Unit, onDelete: () -> Unit) {
+fun SessionDetailContent(
+    detail: SessionDetail?,
+    onBack: () -> Unit,
+    onDelete: () -> Unit,
+    onIntensity: (Intensity?) -> Unit = {},
+    onPickPhoto: () -> Unit = {},
+    onRemovePhoto: () -> Unit = {},
+    photoError: Boolean = false,
+) {
     val c = MyFitTheme.colors
     var confirm by remember { mutableStateOf(false) }
     Scaffold(
@@ -83,6 +109,8 @@ fun SessionDetailContent(detail: SessionDetail?, onBack: () -> Unit, onDelete: (
                     StatTile(stringResource(R.string.summary_duration), Durations.clock(s.durationMs), Modifier.weight(1f))
                     StatTile(stringResource(R.string.summary_sets), s.setsDone.toString(), Modifier.weight(1f))
                 }
+                IntensityPicker(s.intensity, onIntensity)
+                PhotoField(s.imagePath, onPick = onPickPhoto, onRemove = onRemovePhoto, error = photoError)
                 detail.exercises.forEach { ex ->
                     MyFitCard(Modifier.fillMaxWidth()) {
                         Text(ex.name, style = MyFitTheme.type.bodyStrong, color = if (ex.status == ItemStatus.SKIPPED) c.textTertiary else c.textPrimary)

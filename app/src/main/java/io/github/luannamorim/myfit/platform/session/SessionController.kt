@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.platform.session
 
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.data.repository.SessionRepository
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.session.ActiveSession
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 import kotlinx.coroutines.flow.Flow
@@ -55,9 +56,9 @@ class SessionController @Inject constructor(
     suspend fun resume() = update { s, now -> SessionEngine.resume(s, now) }
 
     /** Saves the session to history. Returns its id, or null if there was no active session. */
-    suspend fun finish(updateRoutineLoads: Boolean): Long? = mutex.withLock {
+    suspend fun finish(updateRoutineLoads: Boolean, intensity: Intensity? = null, imagePath: String? = null): Long? = mutex.withLock {
         val session = repository.getActive() ?: return@withLock null
-        val id = repository.finish(session, time.now(), updateRoutineLoads)
+        val id = repository.finish(session, time.now(), updateRoutineLoads, intensity, imagePath)
         tearDown()
         id
     }

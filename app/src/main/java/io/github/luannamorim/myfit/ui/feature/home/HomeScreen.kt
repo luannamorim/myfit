@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Pool
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -63,6 +64,7 @@ data class HomeActions(
     val onOpenSession: (Long) -> Unit = {},
     val onOpenHistory: () -> Unit = {},
     val onOpenBody: () -> Unit = {},
+    val onLogActivity: () -> Unit = {},
 )
 
 @Composable
@@ -112,6 +114,13 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
                 state.routines.forEach { RoutineTile(it, state.today.toEpochDay(), actions, enabled = active == null) }
             }
         }
+        // Swimming, bike, soccer...: logged after the fact, they count in the week and in History.
+        SecondaryButton(
+            stringResource(R.string.activity_log),
+            onClick = actions.onLogActivity,
+            icon = Icons.Rounded.Pool,
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         state.last?.let { last ->
             SectionHeader(stringResource(R.string.home_last_activity), Modifier.padding(top = Spacing.s))
@@ -225,7 +234,12 @@ private fun WeekCard(state: HomeUiState, onClick: () -> Unit) {
         Text(
             stringResource(
                 R.string.home_week_summary,
-                pluralStringResource(R.plurals.home_sessions_count, state.week.sessions, state.week.sessions),
+                pluralStringResource(R.plurals.home_sessions_count, state.week.sessions, state.week.sessions) +
+                    if (state.week.activities > 0) {
+                        " · " + pluralStringResource(R.plurals.home_activities_count, state.week.activities, state.week.activities)
+                    } else {
+                        ""
+                    },
                 Durations.human(state.week.totalDurationMs),
             ),
             style = MyFitTheme.type.caption,

@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
+import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.PeriodSummary
 import io.github.luannamorim.myfit.domain.history.SessionSummary
@@ -31,6 +33,8 @@ data class HistoryUiState(
     val marked: Set<LocalDate> = emptySet(),
     val daySessions: List<SessionSummary> = emptyList(),
     val monthSessions: List<SessionSummary> = emptyList(),
+    val dayActivities: List<Activity> = emptyList(),
+    val monthActivities: List<Activity> = emptyList(),
     val period: SummaryPeriod = SummaryPeriod.WEEK,
     val summary: PeriodSummary = PeriodSummary(0, 0, 0.0, emptyList()),
     val summaryRange: ClosedRange<LocalDate>,
@@ -41,6 +45,7 @@ data class HistoryUiState(
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val history: HistoryRepository,
+    activities: ActivityRepository,
     time: TimeSource,
 ) : ViewModel() {
     private val today = time.today()
@@ -55,9 +60,11 @@ class HistoryViewModel @Inject constructor(
         minOf(grid.start, week.start)..maxOf(grid.endInclusive, week.endInclusive)
     }.distinctUntilChanged()
 
-    private val sessions = queryRange.flatMapLatest { history.observeSummaries(it) }
+    private val sessions = queryRange.flatMapLatest { range ->
+        combine(history.observeSummaries(range), activities.observe(range)) { s, a -> s to a }
+    }
 
-    val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions) { m, d, p, items ->
+    val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions) { m, d, p, (items, logged) ->
         val range = when (p) {
             SummaryPeriod.WEEK -> HistoryCalculator.weekOf(d)
             SummaryPeriod.MONTH -> HistoryCalculator.monthOf(m)
@@ -67,11 +74,13 @@ class HistoryViewModel @Inject constructor(
             month = m,
             today = today,
             selected = d,
-            marked = HistoryCalculator.daysWithSessions(items),
+            marked = HistoryCalculator.activeDays(items, logged),
             daySessions = items.filter { it.startDate == d }.sortedBy { it.startTime },
             monthSessions = items.filter { it.startDate in monthRange },
+            dayActivities = logged.filter { it.date == d }.sortedBy { it.id },
+            monthActivities = logged.filter { it.date in monthRange },
             period = p,
-            summary = HistoryCalculator.summarize(items, range),
+            summary = HistoryCalculator.summarize(items, range, logged),
             summaryRange = range,
             isLoading = false,
         )

@@ -176,6 +176,47 @@
     <string name="summary_confirm">Concluir e salvar</string>
     <string name="summary_exercise_sets" tools:ignore="PluralsCandidate">%1$d/%2$d séries</string>
     <string name="summary_skipped">pulado</string>
+    <string name="intensity_title">Intensidade</string>
+    <string name="intensity_low">Baixa</string>
+    <string name="intensity_medium">Média</string>
+    <string name="intensity_high">Alta</string>
+    <string name="workout_photo_add">Adicionar foto</string>
+    <string name="workout_photo_change">Trocar foto</string>
+    <string name="workout_photo_remove">Remover</string>
+    <string name="workout_photo_a11y">Foto do treino</string>
+    <string name="sport_swimming">Natação</string>
+    <string name="sport_cycling">Bike</string>
+    <string name="sport_indoor_cycling">Bike indoor</string>
+    <string name="sport_running">Corrida</string>
+    <string name="sport_treadmill">Esteira</string>
+    <string name="sport_walking">Caminhada</string>
+    <string name="sport_soccer">Futebol</string>
+    <string name="sport_volleyball">Vôlei</string>
+    <string name="sport_basketball">Basquete</string>
+    <string name="sport_beach_tennis">Beach tennis</string>
+    <string name="sport_muay_thai">Muay thai</string>
+    <string name="sport_jiu_jitsu">Jiu-jitsu</string>
+    <string name="sport_boxing">Boxe</string>
+    <string name="sport_yoga" tools:ignore="Typos">Yoga</string>
+    <string name="sport_pilates">Pilates</string>
+    <string name="sport_stretching">Alongamento</string>
+    <string name="sport_other">Livre</string>
+    <string name="activity_log">Registrar atividade</string>
+    <string name="activity_title_new">Nova atividade</string>
+    <string name="activity_title_edit">Atividade</string>
+    <string name="activity_sport">Esporte</string>
+    <string name="activity_name">Nome da atividade</string>
+    <string name="activity_name_error">Dê um nome para a atividade.</string>
+    <string name="activity_date">Data</string>
+    <string name="activity_duration">Duração</string>
+    <string name="activity_duration_error">Informe a duração em minutos.</string>
+    <string name="activity_distance">Distância</string>
+    <string name="activity_notes">Observações</string>
+    <string name="activity_delete_title">Excluir atividade?</string>
+    <string name="activity_delete_message">Ela será removida do histórico. Não dá para desfazer.</string>
+    <string name="unit_min">min</string>
+    <string name="unit_km">km</string>
+    <string name="unit_m">m</string>
     <!-- Sessão em andamento -->
     <string name="active_bar_title">Treino em andamento</string>
     <string name="active_bar_resume">Retomar</string>
@@ -189,8 +230,12 @@
     <string name="history_frequency">Frequência</string>
     <string name="history_frequency_value">%1$s×/sem</string>
     <string name="history_exercises">Exercícios realizados</string>
-    <string name="history_no_sessions_day">Nenhum treino neste dia.</string>
+    <string name="history_no_sessions_day">Nada registrado neste dia.</string>
     <string name="history_month_sessions">Treinos do mês</string>
+    <string name="history_add_activity">Atividade</string>
+    <string name="history_activities">Atividades</string>
+    <string name="history_month_activities">Atividades do mês</string>
+    <string name="history_sports">Esportes</string>
     <string name="history_session_meta" tools:ignore="PluralsCandidate">%1$s · %2$s · %3$d séries</string>
     <string name="history_exercise_times">%d×</string>
     <string name="detail_title">Sessão</string>
@@ -218,6 +263,11 @@
         <item quantity="one">%d treino</item>
         <item quantity="other">%d treinos</item>
         <item quantity="many">%d treinos</item>
+    </plurals>
+    <plurals name="home_activities_count">
+        <item quantity="one">%d atividade</item>
+        <item quantity="other">%d atividades</item>
+        <item quantity="many">%d atividades</item>
     </plurals>
     <string name="home_empty_title">Comece pelo seu primeiro treino</string>
     <string name="home_empty_message">Monte uma sequência de exercícios e inicie quando chegar na academia.</string>
@@ -279,6 +329,10 @@
     <string name="charts_period_6m">6 meses</string>
     <string name="charts_not_enough">Precisa de pelo menos duas avaliações com esta medida.</string>
     <string name="charts_change">%1$s no período</string>
+    <string name="charts_all_measures">Todas</string>
+    <string name="charts_pick_measure">Escolha uma ou mais medidas acima.</string>
+    <string name="charts_no_data">Sem dados dessas medidas no período.</string>
+    <string name="photos_date">Data</string>
     <string name="photos_add">Adicionar foto</string>
     <string name="photos_empty">Fotos por data ajudam a ver a evolução que a fita métrica não mostra.</string>
     <string name="photos_pose">Pose</string>

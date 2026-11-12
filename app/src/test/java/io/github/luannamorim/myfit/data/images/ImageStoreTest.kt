@@ -42,6 +42,16 @@ class ImageStoreTest {
     }
 
     @Test
+    fun import_workoutPhotos_areSmaller() = runTest {
+        val path = store.import(sourceImage(4000, 3000), ImageKind.SESSION)
+        val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(store.file(path).path, opts)
+        assertEquals(1280, opts.outWidth)
+        assertEquals(960, opts.outHeight)
+        assertTrue(path.startsWith("images/sessions/"))
+    }
+
+    @Test
     fun import_keepsSmallImagesAtOriginalSize() = runTest {
         val path = store.import(sourceImage(800, 600), ImageKind.EXERCISE)
         val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
