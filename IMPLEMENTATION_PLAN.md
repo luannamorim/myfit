@@ -214,7 +214,7 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 
 **Arquivos:** `…/data/images/ImageStore.kt`, Teste: `…/data/images/ImageStoreTest.kt`
 
-**Produz:** `class ImageStore(context, io: CoroutineDispatcher)`: `suspend fun import(uri: Uri, kind: ImageKind): String` (retorna caminho relativo `images/<kind>/<uuid>.jpg`; decodifica reduzido para lado máx. 1600 px — `ImageDecoder` com `setTargetSize` no API 28+, `inSampleSize` + `ExifInterface` no 26–27; JPEG 85; grava `.tmp` e renomeia); `fun file(relativePath): File`; `suspend fun delete(relativePath)`; `suspend fun deleteOrphans(referenced: Set<String>): Int`. `enum class ImageKind(dir) { EXERCISE("exercises"), BODY("body") }`.
+**Produz:** `class ImageStore(context, io: CoroutineDispatcher)`: `suspend fun import(uri: Uri, kind: ImageKind): String` (retorna caminho relativo `images/<kind>/<uuid>.jpg`; decodifica reduzido para lado máx. 1600 px com `BitmapFactory` (`inSampleSize`) + `ExifInterface` em todas as versões (decodifica HEIF no API 28+; um único caminho, testável no Robolectric); JPEG 85; grava `.tmp` e renomeia); `fun file(relativePath): File`; `suspend fun delete(relativePath)`; `suspend fun deleteOrphans(referenced: Set<String>): Int`. `enum class ImageKind(dir) { EXERCISE("exercises"), BODY("body") }`.
 
 - [ ] Testes (Robolectric, bitmap 4000×3000 gravado como `file://`): `import_downscalesLongestSideTo1600`; `import_returnsRelativePathUnderKindDir`; `deleteOrphans_removesOnlyUnreferenced`.
 - [ ] Implementar; rodar; commit `feat(data): add local image store with downscaling`.
