@@ -1,5 +1,6 @@
 package io.github.luannamorim.myfit.data.backup
 
+import androidx.core.net.toUri
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
@@ -70,11 +71,11 @@ class SafBackupDestination(
     }
 
     override suspend fun open(file: BackupFileInfo): InputStream = guard {
-        resolver.openInputStream(Uri.parse(file.id)) ?: throw FileNotFoundException(file.name)
+        resolver.openInputStream(file.id.toUri()) ?: throw FileNotFoundException(file.name)
     }
 
     override suspend fun delete(file: BackupFileInfo) {
-        guard { DocumentFile.fromSingleUri(context, Uri.parse(file.id))?.delete() }
+        guard { DocumentFile.fromSingleUri(context, file.id.toUri())?.delete() }
     }
 
     private fun DocumentFile.toInfo(): BackupFileInfo {
@@ -98,7 +99,7 @@ class SafBackupDestination(
 class SafBackupDestinationFactory @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : BackupDestinationFactory {
-    override fun create(folderUri: String): BackupDestination = SafBackupDestination(context, Uri.parse(folderUri))
+    override fun create(folderUri: String): BackupDestination = SafBackupDestination(context, folderUri.toUri())
 }
 
 /** Plain directory destination (tests and debugging). */

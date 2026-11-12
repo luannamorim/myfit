@@ -34,7 +34,7 @@ import io.github.luannamorim.myfit.di.ApplicationScope
 import io.github.luannamorim.myfit.domain.backup.BackupError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -89,7 +89,7 @@ class BackupScheduler @Inject constructor(
     }
 
     fun observeManualRun(): Flow<WorkInfo?> =
-        workManager()?.getWorkInfosForUniqueWorkFlow(NOW)?.map { it.firstOrNull() } ?: emptyFlow()
+        workManager()?.getWorkInfosForUniqueWorkFlow(NOW)?.map { it.firstOrNull() } ?: flowOf(null)
 
     companion object {
         const val DEBOUNCE = "backup-debounce"

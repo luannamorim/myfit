@@ -119,6 +119,7 @@ class BackupManager @Inject constructor(
         if (!BackupCrypto.keyMatches(key, header)) {
             return if (password != null) RestoreResult.WrongPassword else RestoreResult.PasswordRequired
         }
+        @Suppress("UsableSpace") // a rough pre-check is enough; failures while writing are handled too
         if (sizeBytes != null && context.cacheDir.usableSpace < sizeBytes * 2) return RestoreResult.InsufficientSpace
 
         // 1. Decrypt fully (truncation/tampering is only detected at the end) and verify the archive.
