@@ -4,101 +4,95 @@
 
 # MyFit
 
-App Android pessoal e offline para montar treinos, executá-los com cronômetro confiável e acompanhar a evolução do corpo. Sem conta, sem servidor, sem anúncios.
+A personal, offline Android app to plan workouts, run them with a reliable rest timer and track how your body changes. No account, no server, no ads. Available in English and Brazilian Portuguese.
 
-> **Status:** `v1.0.0`: completo para uso diário. Roteiro de validação no celular em [`docs/TESTING.md`](docs/TESTING.md).
+## Features
 
-## Recursos
+- **Workouts:** create, edit, duplicate, reorder (drag) and delete exercise sequences, with sets, reps, rest, load and notes per exercise.
+- **Library:** 81 predefined exercises (in the device language), accent-insensitive search, muscle-group filters and custom exercises with a photo from the gallery.
+- **Workout mode:** an immersive screen with sets, automatic rest, ±15 s, pause/resume, skip set or exercise, adjustable load and reps, and a summary before saving.
+- **Reliable timer:** times come from persisted marks (wall clock + monotonic clock + boot count), never from UI counters. An exact alarm ends the rest with sound and vibration even with the screen locked. The ongoing notification has quick actions, and an interrupted session resumes where it stopped.
+- **History:** monthly calendar with training days, per-day sessions, per-set details and weekly/monthly summaries.
+- **Progress:** assessments with weight, body fat and 14 circumferences, comparison between two dates (signed differences), per-measure charts and dated photos with side-by-side comparison.
+- **Backup:** an encrypted file (AES-256-GCM streaming, key derived from your recovery password) written to a folder you pick and keep in sync with Google Drive (or any cloud) through a sync app. Runs daily and after changes, keeps the last 7, and supports export and restore with integrity checks.
+- **Settings:** dark (default), light or system theme, default rest, rest sound, keep screen on, notification and battery status.
 
-- **Treinos:** crie, edite, duplique, reordene (arrastar) e exclua sequências; séries, repetições, descanso, carga e observações por exercício.
-- **Biblioteca:** 81 exercícios pré-definidos em PT-BR, busca sem acento, filtro por grupo muscular e exercícios personalizados com imagem da galeria.
-- **Execução:** uma tela imersiva com séries, descanso automático, ±15 s, pausar/retomar, pular série/exercício, ajustar carga e repetições, resumo antes de salvar.
-- **Cronômetro confiável:** tempos derivados de marcas persistidas (relógio monotônico + contador de boots); alarme exato no fim do descanso com som e vibração mesmo com a tela bloqueada; notificação contínua com ações rápidas; sessão recuperada se o app for fechado.
-- **Histórico:** calendário mensal com dias treinados, sessões do dia, detalhe por série e resumos semanal/mensal.
-- **Início:** próximo treino sugerido, seus treinos, última atividade, indicadores do corpo e a semana.
-- **Evolução:** avaliações com peso, % de gordura e 14 circunferências, comparação entre duas datas (diferença com sinal), gráficos por indicador com período e fotos por data com comparação lado a lado.
-- **Backup:** arquivo criptografado (AES-256-GCM, chave derivada da sua senha de recuperação) gravado numa pasta que você escolhe e mantém sincronizada com o Google Drive. Roda todo dia e após mudanças, guarda os 7 últimos e permite exportar e restaurar com validação de integridade.
-- **Ajustes:** tema (escuro por padrão, claro ou do sistema), descanso padrão, som do descanso, tela ligada no treino, status de notificações e bateria.
-
-## Telas
+## Screenshots
 
 <p>
-  <img src="docs/screenshots/home_data_dark.png" width="200" alt="Início">
-  <img src="docs/screenshots/workout_set.png" width="200" alt="Execução: série">
-  <img src="docs/screenshots/workout_rest.png" width="200" alt="Execução: descanso">
-  <img src="docs/screenshots/history_month_dark.png" width="200" alt="Histórico">
+  <img src="docs/screenshots/home_data_dark.png" width="200" alt="Home">
+  <img src="docs/screenshots/workout_set.png" width="200" alt="Workout: set">
+  <img src="docs/screenshots/workout_rest.png" width="200" alt="Workout: rest">
+  <img src="docs/screenshots/history_month_dark.png" width="200" alt="History">
 </p>
 <p>
-  <img src="docs/screenshots/routines_list_dark.png" width="200" alt="Treinos">
-  <img src="docs/screenshots/routine_editor_dark.png" width="200" alt="Editor de treino">
-  <img src="docs/screenshots/session_summary_dark.png" width="200" alt="Resumo do treino">
-  <img src="docs/screenshots/evolution_charts_dark.png" width="200" alt="Gráficos de evolução">
+  <img src="docs/screenshots/routines_list_dark.png" width="200" alt="Workouts">
+  <img src="docs/screenshots/routine_editor_dark.png" width="200" alt="Workout editor">
+  <img src="docs/screenshots/session_summary_dark.png" width="200" alt="Workout summary">
+  <img src="docs/screenshots/evolution_charts_dark.png" width="200" alt="Progress charts">
 </p>
 <p>
-  <img src="docs/screenshots/evolution_measures_dark.png" width="200" alt="Medidas">
+  <img src="docs/screenshots/evolution_measures_dark.png" width="200" alt="Measurements">
   <img src="docs/screenshots/backup_dark.png" width="200" alt="Backup">
-  <img src="docs/screenshots/settings_light.png" width="200" alt="Ajustes (tema claro)">
+  <img src="docs/screenshots/settings_light.png" width="200" alt="Settings (light theme)">
 </p>
 
-## Instalação no celular
+## Install
 
-Baixe o APK em [Releases](../../releases). Desde 30/09/2026 o Android exige desenvolvedor verificado para instalar apps fora da Play Store no Brasil; o MyFit é um app pessoal não registrado, então use um destes caminhos:
+Download the APK from [Releases](../../releases). MyFit is not on the Play Store and is not registered with Android developer verification, which is enforced in some countries (e.g. Brazil since September 2026). Use one of these:
 
-1. **ADB (imediato, recomendado):** ative *Opções do desenvolvedor → Depuração USB* (ou *Depuração sem fio*), conecte ao computador e rode `adb install -r myfit-<versão>.apk`. Instalações via ADB não passam pela verificação.
-2. **Fluxo avançado (sem computador):** nas *Opções do desenvolvedor*, ative a permissão para apps de desenvolvedores não verificados; o Android pede reinício, espera de 24 h e nova autenticação. Depois disso, o APK instala tocando no arquivo.
+1. **ADB:** enable *Developer options → USB debugging* (or *Wireless debugging*), connect the phone and run `adb install -r myfit-<version>.apk`. ADB installs are not subject to verification.
+2. **Advanced flow:** in *Developer options*, allow apps from unverified developers. Android asks for a restart, a 24-hour wait and re-authentication; after that the APK installs from the file manager.
 
-Atualizações usam a mesma assinatura, então os dados são mantidos (`adb install -r` ou instalar por cima).
+Updates are signed with the same key, so `adb install -r` (or installing over) keeps your data.
 
-## Backup no Google Drive
+**Samsung (One UI) and other aggressive battery savers:** set MyFit's battery usage to **Unrestricted** (*Settings → Battery* inside the app links to it) and allow notifications when asked on your first workout.
 
-1. *Ajustes → Backup → Definir senha*. Guarde a senha: sem ela não há como restaurar.
-2. Crie uma pasta no celular (ex.: `MyFit Backup`) e mantenha-a sincronizada com o Drive por um app de sincronização de pastas.
-3. *Escolher pasta* no MyFit. A partir daí ele grava `myfit-backup-AAAAMMDD-HHmmss.myfit` todo dia e alguns minutos após mudanças, e mantém os 7 mais recentes.
-4. Para restaurar (por exemplo, num celular novo): instale o MyFit, sincronize a pasta, escolha-a em *Backup*, toque no arquivo desejado, confirme a data e digite a senha.
+## Backup to Google Drive (or any cloud)
 
-O MyFit não acessa a internet: o arquivo já sai criptografado do app.
+1. *Settings → Backup → Set password*. Keep it safe: backups cannot be restored without it.
+2. Create a folder on the phone (e.g. `MyFit Backup`) and keep it synced with your cloud using a folder-sync app.
+3. *Choose folder* in MyFit. From then on it writes `myfit-backup-YYYYMMDD-HHmmss.myfit` every day and a few minutes after changes, keeping the 7 most recent.
+4. To restore (e.g. on a new phone): install MyFit, sync the folder, choose it under *Backup*, tap a file, confirm the date and enter the password.
 
-**Samsung (One UI):** em *Configurações → Bateria → Limites de uso em segundo plano*, deixe o MyFit fora de "apps em suspensão" e marque a bateria do app como **Sem restrições**. Permita notificações quando o app pedir no primeiro treino.
+MyFit itself never touches the network: files are already encrypted when they leave the app.
 
-## Desenvolvimento
+## Build
 
-Requisitos: JDK 21 e Android SDK (platform 37, build-tools 37.0.0). Sem Android Studio, tudo pela linha de comando:
+Requirements: JDK 21 and the Android SDK (platform 37, build-tools 37.0.0). Everything works from the command line:
 
 ```bash
-export JAVA_HOME=~/.local/share/jdks/jdk-21.0.13+9
-export ANDROID_HOME=~/Android/Sdk
+export JAVA_HOME=/path/to/jdk-21 ANDROID_HOME=/path/to/Android/Sdk
 echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-./gradlew assembleDebug            # APK de debug (io.github.luannamorim.myfit.debug)
-./gradlew testDebugUnitTest        # testes (JVM + Robolectric)
-./gradlew recordRoborazziDebug     # screenshots em app/build/outputs/roborazzi/
+./gradlew assembleDebug            # debug APK (io.github.luannamorim.myfit.debug)
+./gradlew testDebugUnitTest        # tests (JVM + Robolectric)
+./gradlew recordRoborazziDebug     # screenshots in app/build/outputs/roborazzi/
 ./gradlew lintDebug
-./gradlew assembleRelease          # APK assinado (requer as propriedades MYFIT_* abaixo)
+./gradlew assembleRelease          # signed APK (needs the MYFIT_* properties below)
 ```
 
-Assinatura de release (fora do repositório, em `~/.gradle/gradle.properties`):
+Release signing reads these from `~/.gradle/gradle.properties` (never commit them). Without them the release build is unsigned:
 
 ```properties
-MYFIT_STORE_FILE=/caminho/para/myfit-release.jks
+MYFIT_STORE_FILE=/path/to/myfit-release.jks
 MYFIT_STORE_PASSWORD=...
 MYFIT_KEY_ALIAS=myfit
 MYFIT_KEY_PASSWORD=...
 ```
 
-Sem essas propriedades, o build de release sai sem assinatura.
+## Tech stack
 
-## Stack
+Kotlin 2.4 · Jetpack Compose + Material 3 (adaptive) · Navigation Compose (type-safe) · Hilt · Room · DataStore · WorkManager · Coil · Vico · Tink · JUnit, Robolectric and Roborazzi. A single `:app` module in layers: `ui/` → `domain/` ← `data/`, with platform services in `platform/`.
 
-Kotlin 2.4 · Jetpack Compose + Material 3 (adaptive) · Navigation Compose (type-safe) · Hilt · Room · DataStore · WorkManager · Coil · Vico · Tink · Robolectric + Roborazzi. Um módulo `:app` em camadas: `ui/` → `domain/` ← `data/`, com serviços de plataforma em `platform/`.
+## Documentation
 
-## Documentação
+- [`SPEC.md`](SPEC.md): product specification
+- [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md): stages and tasks
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): architecture, time model, backup format
+- [`docs/TESTING.md`](docs/TESTING.md): automated tests and the on-device checklist
+- [`docs/BRAND.md`](docs/BRAND.md): visual identity
 
-- [`SPEC.md`](SPEC.md) — especificação
-- [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) — etapas e tarefas
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — arquitetura, modelo de tempo, formato do backup
-- [`docs/TESTING.md`](docs/TESTING.md) — testes automáticos e roteiro manual no celular
-- [`docs/BRAND.md`](docs/BRAND.md) — identidade visual
+## License
 
-## Licenças
-
-Código: uso pessoal. Fonte Geist: SIL Open Font License 1.1 ([`docs/licenses/GEIST_OFL.txt`](docs/licenses/GEIST_OFL.txt)).
+[MIT](LICENSE). The bundled Geist font is under the SIL Open Font License 1.1 ([`docs/licenses/GEIST_OFL.txt`](docs/licenses/GEIST_OFL.txt)).
