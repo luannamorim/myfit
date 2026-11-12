@@ -12,6 +12,7 @@ import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.SessionRepository
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.RestSound
+import io.github.luannamorim.myfit.testutil.FakeServiceStarter
 import io.github.luannamorim.myfit.testutil.inMemoryDb
 import io.github.luannamorim.myfit.testutil.insertExercise
 import io.github.luannamorim.myfit.testutil.insertRoutine
@@ -29,12 +30,6 @@ import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowAlarmManager
-
-class FakeServiceStarter : WorkoutServiceStarter {
-    var running = false
-    override fun start() { running = true }
-    override fun stop() { running = false }
-}
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])

@@ -26,6 +26,12 @@ class FormatsTest {
     }
 
     @Test
+    fun thousands() {
+        assertEquals("4.870", formatThousands(4870.0))
+        assertEquals("12", formatThousands(12.0))
+    }
+
+    @Test
     fun durations() {
         assertEquals("1:30", Durations.clock(90_000))
         assertEquals("1:02:45", Durations.clock(3_765_000))

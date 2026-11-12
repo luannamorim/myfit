@@ -11,6 +11,7 @@
 
     <!-- Comum -->
     <string name="action_save">Salvar</string>
+    <string name="action_cancel">Cancelar</string>
     <string name="action_delete">Excluir</string>
     <string name="action_edit">Editar</string>
     <string name="action_duplicate">Duplicar</string>
@@ -129,4 +130,46 @@
     <string name="notif_action_skip_rest">Pular descanso</string>
     <string name="notif_rest_end_title">Descanso concluído</string>
     <string name="notif_rest_end_text">A seguir: %1$s</string>
+    <!-- Execução do treino -->
+    <string name="workout_set_of">Série %1$d de %2$d</string>
+    <string name="workout_planned">Planejado: %1$s</string>
+    <string name="workout_reps_short">%d reps</string>
+    <string name="workout_complete_set">Concluir série</string>
+    <string name="workout_skip_set">Pular série</string>
+    <string name="workout_rest">Descanso</string>
+    <string name="workout_rest_over">Descanso concluído</string>
+    <string name="workout_skip_rest">Pular descanso</string>
+    <string name="workout_rest_minus">−15 s</string>
+    <string name="workout_rest_plus">+15 s</string>
+    <string name="workout_next">A seguir</string>
+    <string name="workout_next_set">%1$s · série %2$d de %3$d</string>
+    <string name="workout_all_done">Todas as séries concluídas</string>
+    <string name="workout_all_done_hint">Finalize para salvar o treino no histórico.</string>
+    <string name="workout_finish">Finalizar treino</string>
+    <string name="workout_pause">Pausar</string>
+    <string name="workout_resume">Retomar</string>
+    <string name="workout_paused">Treino pausado</string>
+    <string name="workout_minimize">Minimizar</string>
+    <string name="workout_skip_exercise">Pular exercício</string>
+    <string name="workout_exercise_rest">Descanso deste exercício</string>
+    <string name="workout_end">Encerrar treino</string>
+    <string name="workout_discard">Descartar treino</string>
+    <string name="workout_discard_title">Descartar treino?</string>
+    <string name="workout_discard_message">Esta sessão não será salva no histórico.</string>
+    <string name="workout_nothing_done_title">Nenhuma série concluída</string>
+    <string name="workout_nothing_done_message">Não há nada para salvar. Descartar este treino?</string>
+    <string name="workout_exercises">Exercícios</string>
+    <string name="workout_load_none">sem carga</string>
+    <string name="workout_notifications_rationale">Ative as notificações para ouvir o fim do descanso com a tela bloqueada.</string>
+
+    <!-- Resumo -->
+    <string name="summary_title">Resumo do treino</string>
+    <string name="summary_duration">Duração</string>
+    <string name="summary_sets">Séries</string>
+    <string name="summary_volume">Volume</string>
+    <string name="summary_update_loads">Atualizar as cargas do treino com as de hoje</string>
+    <string name="summary_confirm">Concluir e salvar</string>
+    <string name="summary_back">Voltar ao treino</string>
+    <string name="summary_exercise_sets">%1$d/%2$d séries</string>
+    <string name="summary_skipped">pulado</string>
 </resources>

@@ -83,5 +83,8 @@ object Dates {
     }
 }
 
+/** Whole number with Brazilian thousands separator: 4870.0 -> "4.870". */
+fun formatThousands(value: Double): String = String.format(PtBr, "%,.0f", value)
+
 /** Weight with unit: "42,5 kg". */
 fun formatKg(value: Double?): String = if (value == null) "—" else "${DecimalInput.format(value)} kg"

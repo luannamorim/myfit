@@ -11,6 +11,10 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import io.github.luannamorim.myfit.ui.feature.workout.SessionSummaryScreen
+import io.github.luannamorim.myfit.ui.feature.workout.WorkoutScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
@@ -39,8 +43,23 @@ import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 fun MyFitNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    onStartRoutine: (Long) -> Unit = {},
+    openWorkoutRequest: Int = 0,
+    appViewModel: AppViewModel = hiltViewModel(),
 ) {
+    LaunchedEffect(appViewModel) {
+        appViewModel.events.collect { event ->
+            when (event) {
+                AppEvent.OpenWorkout -> navController.navigate(WorkoutRoute) { launchSingleTop = true }
+            }
+        }
+    }
+    // Notification tap / launcher intent asking to show the workout.
+    LaunchedEffect(openWorkoutRequest) {
+        if (openWorkoutRequest > 0) {
+            navController.navigate(WorkoutRoute) { launchSingleTop = true }
+        }
+    }
+
     val entry by navController.currentBackStackEntryAsState()
     val destination = entry?.destination
     val currentTop = TopLevelDestination.entries.firstOrNull { destination.isOn(it) }
@@ -97,7 +116,7 @@ fun MyFitNavHost(
                 RoutinesScreen(
                     onCreate = { navController.navigate(RoutineEditorRoute()) },
                     onEdit = { navController.navigate(RoutineEditorRoute(it)) },
-                    onStart = onStartRoutine,
+                    onStart = appViewModel::startRoutine,
                     onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
                 )
             }
@@ -135,6 +154,23 @@ fun MyFitNavHost(
             }
             composable<ExerciseEditorRoute> {
                 ExerciseEditorScreen(onClose = { navController.popBackStack() })
+            }
+            composable<WorkoutRoute> {
+                WorkoutScreen(
+                    onMinimize = { navController.popBackStack() },
+                    onFinish = { navController.navigate(SessionSummaryRoute(it)) },
+                    onSessionGone = { navController.popBackStack(WorkoutRoute, inclusive = true) },
+                )
+            }
+            composable<SessionSummaryRoute> {
+                SessionSummaryScreen(
+                    onBack = { navController.popBackStack() },
+                    onDone = {
+                        navController.navigate(HomeRoute) {
+                            popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                        }
+                    },
+                )
             }
         }
     }
