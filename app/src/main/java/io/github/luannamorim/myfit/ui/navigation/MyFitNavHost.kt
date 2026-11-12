@@ -12,6 +12,9 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import io.github.luannamorim.myfit.ui.feature.workout.SessionSummaryScreen
 import io.github.luannamorim.myfit.ui.feature.workout.WorkoutScreen
@@ -53,6 +56,12 @@ fun MyFitNavHost(
             }
         }
     }
+    // Re-arm rest alarm and foreground service whenever the app comes to the foreground.
+    LifecycleStartEffect(appViewModel) {
+        appViewModel.resync()
+        onStopOrDispose { }
+    }
+    val activeSession by appViewModel.activeSession.collectAsStateWithLifecycle()
     // Notification tap / launcher intent asking to show the workout.
     LaunchedEffect(openWorkoutRequest) {
         if (openWorkoutRequest > 0) {
@@ -110,67 +119,73 @@ fun MyFitNavHost(
             }
         },
     ) {
-        NavHost(navController = navController, startDestination = HomeRoute) {
-            composable<HomeRoute> { HomeScreen() }
-            composable<RoutinesRoute> {
-                RoutinesScreen(
-                    onCreate = { navController.navigate(RoutineEditorRoute()) },
-                    onEdit = { navController.navigate(RoutineEditorRoute(it)) },
-                    onStart = appViewModel::startRoutine,
-                    onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
-                )
-            }
-            composable<HistoryRoute> { HistoryScreen() }
-            composable<EvolutionRoute> { EvolutionScreen() }
-            composable<SettingsRoute> { SettingsScreen() }
+        Column(Modifier.fillMaxSize()) {
+            NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.weight(1f)) {
+                composable<HomeRoute> { HomeScreen() }
+                composable<RoutinesRoute> {
+                    RoutinesScreen(
+                        onCreate = { navController.navigate(RoutineEditorRoute()) },
+                        onEdit = { navController.navigate(RoutineEditorRoute(it)) },
+                        onStart = appViewModel::startRoutine,
+                        onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
+                    )
+                }
+                composable<HistoryRoute> { HistoryScreen() }
+                composable<EvolutionRoute> { EvolutionScreen() }
+                composable<SettingsRoute> { SettingsScreen() }
 
-            composable<RoutineEditorRoute> { entry ->
-                val picked by entry.savedStateHandle
-                    .getStateFlow<LongArray?>(RoutineEditorViewModel.PICKED_IDS_KEY, null)
-                    .collectAsStateWithLifecycle()
-                RoutineEditorScreen(
-                    pickedExerciseIds = picked,
-                    onPickedConsumed = { entry.savedStateHandle[RoutineEditorViewModel.PICKED_IDS_KEY] = null },
-                    onAddExercises = { navController.navigate(ExercisePickerRoute) },
-                    onClose = { navController.popBackStack() },
-                )
+                composable<RoutineEditorRoute> { entry ->
+                    val picked by entry.savedStateHandle
+                        .getStateFlow<LongArray?>(RoutineEditorViewModel.PICKED_IDS_KEY, null)
+                        .collectAsStateWithLifecycle()
+                    RoutineEditorScreen(
+                        pickedExerciseIds = picked,
+                        onPickedConsumed = { entry.savedStateHandle[RoutineEditorViewModel.PICKED_IDS_KEY] = null },
+                        onAddExercises = { navController.navigate(ExercisePickerRoute) },
+                        onClose = { navController.popBackStack() },
+                    )
+                }
+                composable<ExercisePickerRoute> {
+                    ExercisePickerScreen(
+                        onBack = { navController.popBackStack() },
+                        onConfirm = { ids ->
+                            navController.previousBackStackEntry?.savedStateHandle?.set(RoutineEditorViewModel.PICKED_IDS_KEY, ids)
+                            navController.popBackStack()
+                        },
+                        onCreate = { navController.navigate(ExerciseEditorRoute()) },
+                    )
+                }
+                composable<ExerciseLibraryRoute> {
+                    ExerciseLibraryScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpen = { navController.navigate(ExerciseEditorRoute(it)) },
+                        onCreate = { navController.navigate(ExerciseEditorRoute()) },
+                    )
+                }
+                composable<ExerciseEditorRoute> {
+                    ExerciseEditorScreen(onClose = { navController.popBackStack() })
+                }
+                composable<WorkoutRoute> {
+                    WorkoutScreen(
+                        onMinimize = { navController.popBackStack() },
+                        onFinish = { navController.navigate(SessionSummaryRoute(it)) },
+                        onSessionGone = { navController.popBackStack(WorkoutRoute, inclusive = true) },
+                    )
+                }
+                composable<SessionSummaryRoute> {
+                    SessionSummaryScreen(
+                        onBack = { navController.popBackStack() },
+                        onDone = {
+                            navController.navigate(HomeRoute) {
+                                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                            }
+                        },
+                    )
+                }
             }
-            composable<ExercisePickerRoute> {
-                ExercisePickerScreen(
-                    onBack = { navController.popBackStack() },
-                    onConfirm = { ids ->
-                        navController.previousBackStackEntry?.savedStateHandle?.set(RoutineEditorViewModel.PICKED_IDS_KEY, ids)
-                        navController.popBackStack()
-                    },
-                    onCreate = { navController.navigate(ExerciseEditorRoute()) },
-                )
-            }
-            composable<ExerciseLibraryRoute> {
-                ExerciseLibraryScreen(
-                    onBack = { navController.popBackStack() },
-                    onOpen = { navController.navigate(ExerciseEditorRoute(it)) },
-                    onCreate = { navController.navigate(ExerciseEditorRoute()) },
-                )
-            }
-            composable<ExerciseEditorRoute> {
-                ExerciseEditorScreen(onClose = { navController.popBackStack() })
-            }
-            composable<WorkoutRoute> {
-                WorkoutScreen(
-                    onMinimize = { navController.popBackStack() },
-                    onFinish = { navController.navigate(SessionSummaryRoute(it)) },
-                    onSessionGone = { navController.popBackStack(WorkoutRoute, inclusive = true) },
-                )
-            }
-            composable<SessionSummaryRoute> {
-                SessionSummaryScreen(
-                    onBack = { navController.popBackStack() },
-                    onDone = {
-                        navController.navigate(HomeRoute) {
-                            popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                        }
-                    },
-                )
+            val session = activeSession
+            if (session != null && currentTop != null) {
+                ActiveSessionBar(session, onResume = { navController.navigate(WorkoutRoute) { launchSingleTop = true } })
             }
         }
     }

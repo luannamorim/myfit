@@ -69,10 +69,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import coil3.compose.AsyncImage
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.DecimalInput
@@ -92,8 +89,6 @@ import io.github.luannamorim.myfit.ui.feature.routines.REST_STEP_SECONDS
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 
 @Composable
 fun WorkoutScreen(
@@ -101,22 +96,10 @@ fun WorkoutScreen(
     onFinish: (sessionId: Long) -> Unit,
     onSessionGone: () -> Unit,
     viewModel: WorkoutViewModel = hiltViewModel(),
-    ticking: Boolean = true,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    if (ticking) {
-        val lifecycle = LocalLifecycleOwner.current.lifecycle
-        LaunchedEffect(lifecycle) {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (isActive) {
-                    viewModel.tick()
-                    delay(TICK_MS)
-                }
-            }
-        }
-    }
     LaunchedEffect(state.loading, state.hasSession) {
         if (!state.loading && !state.hasSession) onSessionGone()
     }
@@ -160,8 +143,6 @@ fun WorkoutScreen(
         )
     }
 }
-
-private const val TICK_MS = 250L
 
 @Composable
 fun WorkoutContent(

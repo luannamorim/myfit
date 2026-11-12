@@ -15,7 +15,10 @@ import io.github.luannamorim.myfit.platform.session.SessionController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -64,7 +67,15 @@ class WorkoutViewModel @Inject constructor(
     settings: SettingsRepository,
 ) : ViewModel() {
 
-    private val now = MutableStateFlow(time.now())
+    /** Immediate refresh after actions; the ticker keeps clocks moving while the screen collects. */
+    private val manualNow = MutableStateFlow(time.now())
+    private val ticker = flow {
+        while (true) {
+            emit(time.now())
+            delay(TICK_MS)
+        }
+    }
+    private val now = merge(manualNow, ticker)
     private val draft = MutableStateFlow<SetDraft?>(null)
     private val discardPrompt = MutableStateFlow(false)
 
@@ -74,9 +85,9 @@ class WorkoutViewModel @Inject constructor(
         toUi(l.session, n, d, prompt, prefs)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WorkoutUiState())
 
-    /** Called by the screen while visible; all times are recomputed from persisted marks. */
+    /** Recomputes clocks now (they always derive from persisted marks). */
     fun tick() {
-        now.value = time.now()
+        manualNow.value = time.now()
     }
 
     fun changeReps(delta: Int) = editDraft { it.copy(reps = (it.reps + delta).coerceIn(0, 200)) }
@@ -190,3 +201,5 @@ class WorkoutViewModel @Inject constructor(
         )
     }
 }
+
+private const val TICK_MS = 250L

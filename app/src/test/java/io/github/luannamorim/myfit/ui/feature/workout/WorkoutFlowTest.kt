@@ -35,7 +35,7 @@ class WorkoutFlowTest {
         val vm = WorkoutViewModel(env.controller, env.time, env.settings)
         var finishedSession: Long? = null
         compose.setContent {
-            WorkoutScreen(onMinimize = {}, onFinish = { finishedSession = it }, onSessionGone = {}, viewModel = vm, ticking = false)
+            WorkoutScreen(onMinimize = {}, onFinish = { finishedSession = it }, onSessionGone = {}, viewModel = vm)
         }
 
         repeat(4) { index ->

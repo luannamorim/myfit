@@ -54,6 +54,12 @@ android {
         }
     }
 
+    lint {
+        // Lint's Kotlin analysis crashes on some test sources (Kotlin 2.4 FIR); app sources are still checked.
+        ignoreTestSources = true
+        checkTestSources = false
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"

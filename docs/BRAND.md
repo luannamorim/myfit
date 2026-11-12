@@ -10,7 +10,7 @@ A interface segue o mesmo princípio: neutros grafite, tipografia firme e **uma 
 
 - Grade de 24 unidades. Linha `M3,19 L8,9 L12,14.5 L16.74,8.18`, traço 2,6 com pontas e junções arredondadas.
 - Ponto: centro (19,5; 4,5), raio 2,3, separado da linha por um respiro de 1 unidade.
-- Fonte única da geometria: `ui/components/MyFitMark.kt` (`MarkGeometry`). Os vetores `ic_launcher_foreground`, `ic_launcher_monochrome`, `ic_stat_myfit` e `ic_myfit_mark` usam os mesmos números.
+- Fonte única da geometria: `ui/components/MyFitMark.kt` (`MarkGeometry`). Os vetores `ic_launcher_foreground`, `ic_launcher_monochrome` e `ic_stat_myfit` (ícone das notificações) usam os mesmos números.
 - Wordmark: `myfit` em minúsculas, Geist SemiBold, espaçamento −0,04 em, à direita do símbolo.
 - Ícone do app: fundo `#0B0B0C`, linha `#F5F5F4`, ponto `#47F55E`; versão monocromática para ícones temáticos (Android 13+).
 - Tamanho mínimo do símbolo: 16 dp.
