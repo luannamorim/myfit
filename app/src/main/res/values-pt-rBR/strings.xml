@@ -393,4 +393,37 @@
     <string name="calendar_has_workout">%1$s, com treino</string>
     <string name="detail_set_done" tools:ignore="PluralsCandidate">%1$d reps%2$s</string>
     <string name="routine_copy_suffix">(cópia)</string>
+    <!-- Reminders -->
+    <string name="reminders_title">Lembretes</string>
+    <string name="reminders_hint">Receba um aviso na hora de treinar</string>
+    <plurals name="reminders_active_count">
+        <item quantity="one">%1$d lembrete ativo</item>
+        <item quantity="many">%1$d lembretes ativos</item>
+        <item quantity="other">%1$d lembretes ativos</item>
+    </plurals>
+    <string name="reminders_new">Novo lembrete</string>
+    <string name="reminders_edit">Editar lembrete</string>
+    <string name="reminders_empty_title">Nenhum lembrete</string>
+    <string name="reminders_empty_message">Escolha um treino e quando quer ser avisado.</string>
+    <string name="reminders_every_day">Todos os dias</string>
+    <string name="reminders_today">Hoje</string>
+    <string name="reminders_tomorrow">Amanhã</string>
+    <string name="reminders_notifications_off">Desativadas: os lembretes não vão aparecer.</string>
+    <string name="reminders_switch_a11y">%1$s às %2$s</string>
+    <string name="reminder_what">O quê</string>
+    <string name="reminder_other">Outra atividade</string>
+    <string name="reminder_activity">Atividade</string>
+    <string name="reminder_activity_hint">Ex.: Corrida, Ioga</string>
+    <string name="reminder_activity_required">Informe a atividade</string>
+    <string name="reminder_time">Horário</string>
+    <string name="reminder_repeat">Repetir</string>
+    <string name="reminder_once">Nenhum dia marcado: avisa uma vez, na data abaixo.</string>
+    <string name="reminder_weekly">Toda semana, nos dias marcados.</string>
+    <string name="reminder_date">Data: %1$s</string>
+    <string name="reminder_past_error">Esse horário já passou. Escolha uma data ou hora mais tarde.</string>
+    <string name="reminder_delete_title">Excluir lembrete?</string>
+    <string name="reminder_delete_message">Você não será mais avisado por ele.</string>
+    <string name="channel_reminders">Lembretes</string>
+    <string name="channel_reminders_desc">Lembretes de treino que você agendou</string>
+    <string name="reminder_notif_title">Hora de treinar</string>
 </resources>

@@ -7,11 +7,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.github.luannamorim.myfit.domain.model.AppSettings
+import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Named
@@ -28,9 +30,11 @@ class SettingsRepository @Inject constructor(
         val keepScreenOn = booleanPreferencesKey("keep_screen_on")
         val updateLoads = booleanPreferencesKey("update_routine_loads_on_finish")
         val autoBackup = booleanPreferencesKey("auto_backup")
+        val reminders = stringPreferencesKey("reminders")
     }
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val remindersSerializer = ListSerializer(Reminder.serializer())
 
     val settings: Flow<AppSettings> = dataStore.data.map { it.toSettings() }
 
@@ -47,6 +51,7 @@ class SettingsRepository @Inject constructor(
             prefs[Keys.keepScreenOn] = next.keepScreenOn
             prefs[Keys.updateLoads] = next.updateRoutineLoadsOnFinish
             prefs[Keys.autoBackup] = next.autoBackup
+            prefs[Keys.reminders] = json.encodeToString(remindersSerializer, next.reminders)
         }
     }
 
@@ -66,6 +71,7 @@ class SettingsRepository @Inject constructor(
             keepScreenOn = this[Keys.keepScreenOn] ?: defaults.keepScreenOn,
             updateRoutineLoadsOnFinish = this[Keys.updateLoads] ?: defaults.updateRoutineLoadsOnFinish,
             autoBackup = this[Keys.autoBackup] ?: defaults.autoBackup,
+            reminders = this[Keys.reminders]?.let { runCatching { json.decodeFromString(remindersSerializer, it) }.getOrNull() } ?: defaults.reminders,
         )
     }
 }

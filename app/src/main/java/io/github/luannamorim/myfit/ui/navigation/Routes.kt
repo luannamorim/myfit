@@ -20,3 +20,5 @@ import kotlinx.serialization.Serializable
 @Serializable data class PhotoCompareRoute(val firstId: Long, val secondId: Long)
 @Serializable data object BackupRoute
 @Serializable data object CreditsRoute
+@Serializable data object RemindersRoute
+@Serializable data class ReminderEditorRoute(val reminderId: Long? = null)
