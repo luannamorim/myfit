@@ -7,6 +7,7 @@ import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +62,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.appLocale
+import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitCard
@@ -168,6 +171,13 @@ fun ReminderEditorContent(
                         isError = state.activityError,
                         supportingText = if (state.activityError) stringResource(R.string.reminder_activity_required) else null,
                     )
+                    // Quick pick: the sports that can be logged (swimming, bike...) fill in the name.
+                    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                        Sport.entries.filter { it != Sport.OTHER }.forEach { sport ->
+                            val name = stringResource(sport.labelRes)
+                            MyFitChip(name, selected = state.activity == name, onClick = { actions.onActivity(name) })
+                        }
+                    }
                 }
 
                 SectionHeader(stringResource(R.string.reminder_time), Modifier.padding(top = Spacing.s))
