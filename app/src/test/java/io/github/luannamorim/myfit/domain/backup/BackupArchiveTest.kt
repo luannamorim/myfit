@@ -86,6 +86,14 @@ class BackupArchiveTest {
     }
 
     @Test
+    fun unsafeImagePathInData_rejected() = assertFails<BackupError.Corrupted> {
+        val evil = data.copy(photos = listOf(PhotoDto(1, 20_000, "images/../../databases/myfit.db", "FRONT", 0)))
+        val file = tmp.newFile("evil.zip")
+        file.outputStream().use { BackupArchive.write(it, evil, "{}", emptyMap(), meta) }
+        BackupArchive.read(file, staging())
+    }
+
+    @Test
     fun missingManifest_rejected() = assertFails<BackupError.Corrupted> {
         BackupArchive.read(rewrite(archive(), { n, b -> if (n == BackupArchive.MANIFEST) null else n to b }), staging())
     }

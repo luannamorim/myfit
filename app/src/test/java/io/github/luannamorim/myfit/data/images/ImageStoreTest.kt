@@ -58,6 +58,15 @@ class ImageStoreTest {
     }
 
     @Test
+    fun traversalPaths_neverResolveOutsideImages() = runTest {
+        val secret = File(context.filesDir, "secret.txt").apply { writeText("x") }
+        assertFalse(store.file("images/../secret.txt").exists())
+        assertFalse(store.file("../files/secret.txt").exists())
+        store.delete("images/../secret.txt")
+        assertTrue(secret.exists())
+    }
+
+    @Test
     fun deleteOrphans_removesOnlyUnreferenced() = runTest {
         val keep = store.import(sourceImage(100, 100), ImageKind.BODY)
         val orphan = store.import(sourceImage(100, 100), ImageKind.EXERCISE)

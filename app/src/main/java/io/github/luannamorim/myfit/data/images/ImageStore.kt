@@ -51,11 +51,22 @@ class ImageStore @Inject constructor(
         relative
     }
 
-    fun file(relativePath: String): File = File(root, relativePath)
+    /**
+     * Resolves a stored relative path. Paths that would escape filesDir/images (e.g. "../") resolve
+     * to a non-existent file inside the images dir, so they can never read or delete app data.
+     */
+    fun file(relativePath: String): File {
+        val imagesDir = File(root, IMAGES_DIR).canonicalFile
+        val candidate = File(root, relativePath).canonicalFile
+        return if (candidate.path.startsWith(imagesDir.path + File.separator)) candidate else File(imagesDir, INVALID)
+    }
 
     suspend fun delete(relativePath: String?) {
         if (relativePath.isNullOrBlank()) return
-        withContext(io) { file(relativePath).delete() }
+        withContext(io) {
+            val target = file(relativePath)
+            if (target.name != INVALID) target.delete()
+        }
     }
 
     /** Deletes image files not present in [referenced] (relative paths). Returns how many were removed. */
@@ -98,6 +109,7 @@ class ImageStore @Inject constructor(
     companion object {
         const val IMAGES_DIR = "images"
         const val MAX_SIDE = 1600
+        private const val INVALID = ".invalid"
         private const val JPEG_QUALITY = 85
     }
 }

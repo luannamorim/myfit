@@ -132,6 +132,8 @@ object BackupArchive {
                 }
                 val data = json.decodeFromString(BackupDataV1.serializer(), checkNotNull(dataBytes).decodeToString())
                 if (data.counts() != manifest.counts) throw BackupError.Corrupted("counts do not match manifest")
+                // Paths stored in the data must stay inside images/ (no traversal into app storage).
+                if (data.referencedImages().any { !isSafeImagePath(it) }) throw BackupError.Corrupted("unsafe image path in data")
                 return ArchiveContents(manifest, data, checkNotNull(settingsBytes).decodeToString(), stagingDir)
             }
         } catch (e: ZipException) {
