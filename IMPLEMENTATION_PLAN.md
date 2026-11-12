@@ -1,6 +1,8 @@
 # MyFit — Plano de Implementação
 
-> **Para agentes:** SUB-SKILL: superpowers:executing-plans (execução nativa nesta sessão), delegando tarefas autocontidas a subagentes quando útil. Passos usam checkbox (`- [ ]`) para acompanhamento.
+> **Progresso:** Etapas 0–6 concluídas (MVP `v0.1.0` publicado em 12/11/2026). Próxima: Etapa 7.
+
+> **Para agentes:** SUB-SKILL: superpowers:executing-plans (execução nativa nesta sessão), delegando tarefas autocontidas a subagentes quando útil. Passos usam checkbox (`- [x]`) para acompanhamento.
 
 **Objetivo:** app Android nativo, pessoal e offline para montar treinos, executá-los com cronômetro confiável, ver histórico, acompanhar medidas/fotos e fazer backup criptografado numa pasta escolhida pelo usuário.
 
@@ -74,10 +76,10 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 
 **Arquivos:** `.gitignore`, `.gitattributes`, `SPEC.md`, `IMPLEMENTATION_PLAN.md`, `README.md`
 
-- [ ] `.gitignore`: Gradle/Android padrão + `local.properties`, `*.jks`, `*.keystore`, `keystore.properties`, `/captures`, `.idea/`, `.kotlin/`.
-- [ ] `README.md` esqueleto: nome, uma linha, status "em desenvolvimento", link para SPEC e plano.
-- [ ] Commit `docs: add spec, implementation plan and readme skeleton`.
-- [ ] `gh repo create myfit --private --source . --remote origin --push` (dentro de `~/my/myfit`, conta pessoal). Verificar: `git remote -v` mostra `git@github.com:luannamorim/myfit.git` e `gh repo view --json visibility` = `PRIVATE`.
+- [x] `.gitignore`: Gradle/Android padrão + `local.properties`, `*.jks`, `*.keystore`, `keystore.properties`, `/captures`, `.idea/`, `.kotlin/`.
+- [x] `README.md` esqueleto: nome, uma linha, status "em desenvolvimento", link para SPEC e plano.
+- [x] Commit `docs: add spec, implementation plan and readme skeleton`.
+- [x] `gh repo create myfit --private --source . --remote origin --push` (dentro de `~/my/myfit`, conta pessoal). Verificar: `git remote -v` mostra `git@github.com:luannamorim/myfit.git` e `gh repo view --json visibility` = `PRIVATE`.
 
 ---
 
@@ -89,13 +91,13 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 
 **Produz:** `MyFitApp : Application, Configuration.Provider` com `@Inject lateinit var workerFactory: HiltWorkerFactory`; `MainActivity : ComponentActivity` (`@AndroidEntryPoint`).
 
-- [ ] Gerar wrapper com `~/.local/share/gradle-dist/gradle-9.9.1/bin/gradle wrapper --gradle-version 9.9.1`.
-- [ ] Version catalog com as versões da Stack; plugins: android-application, kotlin-compose, kotlin-serialization, ksp, hilt, roborazzi.
-- [ ] `app/build.gradle.kts`: `buildFeatures.compose = true`; `testOptions.unitTests.isIncludeAndroidResources = true`; `ksp { arg("room.schemaLocation", "$projectDir/schemas") }`; release com `isMinifyEnabled = true`, `isShrinkResources = true`, `proguard-android-optimize.txt`.
-- [ ] Manifest: `android:allowBackup="false"`, `dataExtractionRules` excluindo tudo (cloud e device-transfer), `fullBackupContent` excluindo tudo; remover `androidx.work.WorkManagerInitializer` via `tools:node="remove"` no `InitializationProvider`.
-- [ ] Teste `AppLaunchTest` (Robolectric, `@HiltAndroidTest` + `HiltAndroidRule`, `@Config(application = HiltTestApplication::class)`): `ActivityScenario.launch(MainActivity::class.java)` chega a `RESUMED`.
-- [ ] Rodar `./gradlew assembleDebug testDebugUnitTest` → BUILD SUCCESSFUL.
-- [ ] Commit `build: scaffold android project with compose, hilt and room toolchain`.
+- [x] Gerar wrapper com `~/.local/share/gradle-dist/gradle-9.9.1/bin/gradle wrapper --gradle-version 9.9.1`.
+- [x] Version catalog com as versões da Stack; plugins: android-application, kotlin-compose, kotlin-serialization, ksp, hilt, roborazzi.
+- [x] `app/build.gradle.kts`: `buildFeatures.compose = true`; `testOptions.unitTests.isIncludeAndroidResources = true`; `ksp { arg("room.schemaLocation", "$projectDir/schemas") }`; release com `isMinifyEnabled = true`, `isShrinkResources = true`, `proguard-android-optimize.txt`.
+- [x] Manifest: `android:allowBackup="false"`, `dataExtractionRules` excluindo tudo (cloud e device-transfer), `fullBackupContent` excluindo tudo; remover `androidx.work.WorkManagerInitializer` via `tools:node="remove"` no `InitializationProvider`.
+- [x] Teste `AppLaunchTest` (Robolectric, `@HiltAndroidTest` + `HiltAndroidRule`, `@Config(application = HiltTestApplication::class)`): `ActivityScenario.launch(MainActivity::class.java)` chega a `RESUMED`.
+- [x] Rodar `./gradlew assembleDebug testDebugUnitTest` → BUILD SUCCESSFUL.
+- [x] Commit `build: scaffold android project with compose, hilt and room toolchain`.
 
 ### Tarefa 1.2: Tema (cores, tipografia, formas)
 
@@ -108,12 +110,12 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 - `MyFitType` com `display`, `headline`, `title`, `body`, `bodyStrong`, `label`, `caption`, `overline`, `numericHero`, `numericLarge`, `numeric` — tudo em Geist; os numéricos com `fontFeatureSettings = "tnum"` (Geist Mono descartada na revisão visual: vírgula larga e zero cortado).
 - Formas: `small = 10.dp`, `medium = 16.dp`, `large = 24.dp`, botões em pílula.
 
-- [ ] Baixar Geist (release oficial vercel/geist-font, OFL) → pesos Regular/Medium/SemiBold/Bold; licença em `docs/licenses/GEIST_OFL.txt`.
-- [ ] Escrever `ColorContrastTest` com função `contrast(a: Color, b: Color): Double` (WCAG) e asserts, para Dark e Light: `textPrimary/background ≥ 7.0`, `textSecondary/background ≥ 4.5`, `onAccent/accent ≥ 4.5`, `accent/background ≥ 3.0`.
-- [ ] Rodar → falha (tipos não existem). Implementar o tema calibrando os hex até passar.
-- [ ] `ThemeScreenshotTest` (Roborazzi, `@GraphicsMode(NATIVE)`, `@Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")`): catálogo de cores e tipografia nos dois temas.
-- [ ] `./gradlew testDebugUnitTest recordRoborazziDebug` → passa; revisar PNGs.
-- [ ] Commit `feat(ui): add myfit theme with color, type and shape tokens`.
+- [x] Baixar Geist (release oficial vercel/geist-font, OFL) → pesos Regular/Medium/SemiBold/Bold; licença em `docs/licenses/GEIST_OFL.txt`.
+- [x] Escrever `ColorContrastTest` com função `contrast(a: Color, b: Color): Double` (WCAG) e asserts, para Dark e Light: `textPrimary/background ≥ 7.0`, `textSecondary/background ≥ 4.5`, `onAccent/accent ≥ 4.5`, `accent/background ≥ 3.0`.
+- [x] Rodar → falha (tipos não existem). Implementar o tema calibrando os hex até passar.
+- [x] `ThemeScreenshotTest` (Roborazzi, `@GraphicsMode(NATIVE)`, `@Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")`): catálogo de cores e tipografia nos dois temas.
+- [x] `./gradlew testDebugUnitTest recordRoborazziDebug` → passa; revisar PNGs.
+- [x] Commit `feat(ui): add myfit theme with color, type and shape tokens`.
 
 ### Tarefa 1.3: Marca e componentes base
 
@@ -128,11 +130,11 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 - `RestRing(progress: Float, remainingText: String, modifier)` — anel com trilho `outline` e arco `accent`
 - `SectionHeader(title, modifier, action: (@Composable () -> Unit)? = null)`, `EmptyState(title, message, modifier, action: (@Composable () -> Unit)? = null)`, `FilterChipRow(options: List<T>, selected: Set<T>, label: (T) -> String, onToggle: (T) -> Unit)`, `ConfirmDialog(title, message, confirmText, onConfirm, onDismiss, destructive = false)`, `MyFitTopBar(title, onBack: (() -> Unit)?, actions)`
 
-- [ ] Desenhar o símbolo: "M" em traço contínuo (cantos arredondados, espessura uniforme) cujo último segmento sobe acima do primeiro pico e termina num ponto `accent`. Ícone: fundo `#0B0B0C`, símbolo branco; monocromático = só o traço.
-- [ ] `ComponentCatalogScreenshotTest`: todos os componentes nos dois temas + ícone renderizado em 108 dp.
-- [ ] Rodar `recordRoborazziDebug`, revisar PNGs, iterar até a marca ficar legível em 24 dp.
-- [ ] `docs/BRAND.md`: conceito, paleta (hex + uso), tipografia, espaçamentos, componentes, do/don't.
-- [ ] Commit `feat(ui): add brand mark, launcher icon and base components`.
+- [x] Desenhar o símbolo: "M" em traço contínuo (cantos arredondados, espessura uniforme) cujo último segmento sobe acima do primeiro pico e termina num ponto `accent`. Ícone: fundo `#0B0B0C`, símbolo branco; monocromático = só o traço.
+- [x] `ComponentCatalogScreenshotTest`: todos os componentes nos dois temas + ícone renderizado em 108 dp.
+- [x] Rodar `recordRoborazziDebug`, revisar PNGs, iterar até a marca ficar legível em 24 dp.
+- [x] `docs/BRAND.md`: conceito, paleta (hex + uso), tipografia, espaçamentos, componentes, do/don't.
+- [x] Commit `feat(ui): add brand mark, launcher icon and base components`.
 
 ### Tarefa 1.4: Navegação
 
@@ -143,10 +145,10 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 - `enum class TopLevelDestination(route, labelRes, icon, selectedIcon)` na ordem Início, Treinos, Histórico, Evolução, Ajustes.
 - `MyFitNavHost(navController)` com `NavigationSuiteScaffold` (barra no compacto, rail no médio/expandido) escondido em `WorkoutRoute`; back stack por aba com `saveState/restoreState`.
 
-- [ ] `NavigationTest` (Compose + Robolectric): clicar em cada aba mostra o título da tela; voltar da aba Treinos retorna ao Início.
-- [ ] Implementar; rodar testes; screenshots compacto (411 dp) e expandido (840 dp).
-- [ ] Commit `feat(ui): add adaptive navigation shell with five top-level destinations`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] `NavigationTest` (Compose + Robolectric): clicar em cada aba mostra o título da tela; voltar da aba Treinos retorna ao Início.
+- [x] Implementar; rodar testes; screenshots compacto (411 dp) e expandido (840 dp).
+- [x] Commit `feat(ui): add adaptive navigation shell with five top-level destinations`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -162,8 +164,8 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 - `interface TimeSource { fun now(): Mark; fun zone(): ZoneId }`; `SystemTimeSource` (`System.currentTimeMillis`, `SystemClock.elapsedRealtime`, `Settings.Global.BOOT_COUNT`).
 - `class FakeTimeSource(var current: Mark, var zoneId: ZoneId = ZoneId.of("America/Sao_Paulo")) : TimeSource` em `src/test` com `advance(ms)` (avança wall e elapsed), `jumpWall(ms)` (só wall), `reboot(wallMs)` (bootCount+1, elapsed=0).
 
-- [ ] Testes: `sameBoot_usesElapsed_evenIfWallJumpsBack` (wall −1h, elapsed +60 s ⇒ 60_000); `differentBoot_usesWall`; `neverNegative` (wall volta após reboot ⇒ 0).
-- [ ] Implementar; rodar; commit `feat(core): add boot-aware time marks`.
+- [x] Testes: `sameBoot_usesElapsed_evenIfWallJumpsBack` (wall −1h, elapsed +60 s ⇒ 60_000); `differentBoot_usesWall`; `neverNegative` (wall volta após reboot ⇒ 0).
+- [x] Implementar; rodar; commit `feat(core): add boot-aware time marks`.
 
 ### Tarefa 2.2: Modelo, entidades, DAOs e banco
 
@@ -184,8 +186,8 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 - DAOs: `ExerciseDao`, `RoutineDao`, `SessionDao`, `BodyDao` (consultas em `Flow` para leitura e `suspend` para escrita; `@Transaction` para gravações compostas). Índices em todas as FKs, `workout_session(status)`, `workout_session(startDateEpochDay)`, `body_assessment(dateEpochDay)`.
 - `MyFitDatabase` versão 1, `exportSchema = true`.
 
-- [ ] Testes (Robolectric, `Room.inMemoryDatabaseBuilder`): `deletingRoutine_cascadesRoutineExercises`; `deletingRoutine_keepsSessionWithNullRoutineId_andSnapshotName`; `deletingExerciseInUse_isRestricted`; `observeRoutineWithExercises_ordersByPosition`; `activeSession_returnsOnlyActive`; `assessments_orderedByDateDesc`.
-- [ ] Implementar; rodar; confirmar `app/schemas/…/1.json` gerado; commit `feat(data): add room schema for exercises, routines, sessions and body data`.
+- [x] Testes (Robolectric, `Room.inMemoryDatabaseBuilder`): `deletingRoutine_cascadesRoutineExercises`; `deletingRoutine_keepsSessionWithNullRoutineId_andSnapshotName`; `deletingExerciseInUse_isRestricted`; `observeRoutineWithExercises_ordersByPosition`; `activeSession_returnsOnlyActive`; `assessments_orderedByDateDesc`.
+- [x] Implementar; rodar; confirmar `app/schemas/…/1.json` gerado; commit `feat(data): add room schema for exercises, routines, sessions and body data`.
 
 ### Tarefa 2.3: Biblioteca de exercícios pré-definida
 
@@ -193,8 +195,8 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 
 **Produz:** `object ExerciseSeed { val items: List<SeedExercise> }` (`SeedExercise(name, muscleGroup, movementType)`), ~70 itens em PT-BR (ex.: Supino reto com barra, Remada curvada, Remada unilateral, Pullover, Puxada frontal, Agachamento livre, Leg press 45°, Stiff, Elevação lateral, Rosca direta, Tríceps corda, Panturrilha em pé, Prancha, Esteira); inserido por `RoomDatabase.Callback.onCreate` via `ExerciseDao.insertAll`.
 
-- [ ] Testes: `seed_namesAreUnique_caseAndAccentInsensitive`; `seed_coversEveryMuscleGroupExceptOther`; `freshDatabase_containsSeed` (contagem = `items.size`, `isCustom = false`).
-- [ ] Implementar; rodar; commit `feat(data): seed predefined exercise library`.
+- [x] Testes: `seed_namesAreUnique_caseAndAccentInsensitive`; `seed_coversEveryMuscleGroupExceptOther`; `freshDatabase_containsSeed` (contagem = `items.size`, `isCustom = false`).
+- [x] Implementar; rodar; commit `feat(data): seed predefined exercise library`.
 
 ### Tarefa 2.4: Repositórios de treino e configurações
 
@@ -207,8 +209,8 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 - `SettingsRepository`: `val settings: Flow<AppSettings>`; `AppSettings(themeMode = DARK, defaultRestSeconds = 90, restSound = RestSound.FOLLOW_RINGER, keepScreenOn = true, updateRoutineLoadsOnFinish = true, autoBackup = true)`; setters `suspend fun update(transform: (AppSettings) -> AppSettings)`; `exportJson(): String` / `importJson(json)` (usados no backup).
 - Toda escrita "importante" (rotina salva/duplicada/excluída) chama `BackupTrigger.onDataChanged()` — `interface BackupTrigger` definida aqui, implementação em 9.2 (até lá, binding no-op).
 
-- [ ] Testes: `save_assignsContiguousPositions`; `duplicate_copiesItemsWithNewIds_andSuffixName`; `librarySearch_ignoresAccentsAndCase` ("abdomen" encontra "Abdômen"; "SUPINO" encontra "Supino reto com barra"); `deleteExerciseInUse_archivesInsteadOfDeleting`; `settings_defaults` e `settings_exportImport_roundTrip`.
-- [ ] Implementar; rodar; commit `feat(data): add exercise, routine and settings repositories`.
+- [x] Testes: `save_assignsContiguousPositions`; `duplicate_copiesItemsWithNewIds_andSuffixName`; `librarySearch_ignoresAccentsAndCase` ("abdomen" encontra "Abdômen"; "SUPINO" encontra "Supino reto com barra"); `deleteExerciseInUse_archivesInsteadOfDeleting`; `settings_defaults` e `settings_exportImport_roundTrip`.
+- [x] Implementar; rodar; commit `feat(data): add exercise, routine and settings repositories`.
 
 ### Tarefa 2.5: Armazenamento de imagens
 
@@ -216,9 +218,9 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 
 **Produz:** `class ImageStore(context, io: CoroutineDispatcher)`: `suspend fun import(uri: Uri, kind: ImageKind): String` (retorna caminho relativo `images/<kind>/<uuid>.jpg`; decodifica reduzido para lado máx. 1600 px com `BitmapFactory` (`inSampleSize`) + `ExifInterface` em todas as versões (decodifica HEIF no API 28+; um único caminho, testável no Robolectric); JPEG 85; grava `.tmp` e renomeia); `fun file(relativePath): File`; `suspend fun delete(relativePath)`; `suspend fun deleteOrphans(referenced: Set<String>): Int`. `enum class ImageKind(dir) { EXERCISE("exercises"), BODY("body") }`.
 
-- [ ] Testes (Robolectric, bitmap 4000×3000 gravado como `file://`): `import_downscalesLongestSideTo1600`; `import_returnsRelativePathUnderKindDir`; `deleteOrphans_removesOnlyUnreferenced`.
-- [ ] Implementar; rodar; commit `feat(data): add local image store with downscaling`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] Testes (Robolectric, bitmap 4000×3000 gravado como `file://`): `import_downscalesLongestSideTo1600`; `import_returnsRelativePathUnderKindDir`; `deleteOrphans_removesOnlyUnreferenced`.
+- [x] Implementar; rodar; commit `feat(data): add local image store with downscaling`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -231,9 +233,9 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 **Consome:** `RoutineRepository.observeOverviews/duplicate/delete`.
 **Produz:** `RoutinesUiState(routines: List<RoutineOverview>, isLoading: Boolean)`; ações `onDuplicate(id)`, `onDelete(id)`; navega para `RoutineEditorRoute(id|null)` e inicia treino via `onStart(id)` (ligado em 4.4).
 
-- [ ] Teste VM: `duplicate_addsCopyToList`; `delete_removesFromList` (com Turbine sobre repositório real em memória).
-- [ ] Tela: lista de `MyFitCard` (nome, nº de exercícios, "feito há N dias"), botão Iniciar por card, menu (Editar, Duplicar, Excluir com `ConfirmDialog`), FAB "Novo treino", `EmptyState`.
-- [ ] Screenshots vazio e com 3 treinos; commit `feat(routines): add routines list`.
+- [x] Teste VM: `duplicate_addsCopyToList`; `delete_removesFromList` (com Turbine sobre repositório real em memória).
+- [x] Tela: lista de `MyFitCard` (nome, nº de exercícios, "feito há N dias"), botão Iniciar por card, menu (Editar, Duplicar, Excluir com `ConfirmDialog`), FAB "Novo treino", `EmptyState`.
+- [x] Screenshots vazio e com 3 treinos; commit `feat(routines): add routines list`.
 
 ### Tarefa 3.2: Editor de treino
 
@@ -245,10 +247,10 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 - Resultado do seletor via `previousBackStackEntry.savedStateHandle["picked_exercise_ids"]: LongArray`.
 - Reordenação por arrastar com a biblioteca `sh.calvin.reorderable` (versão estável atual) e alça dedicada.
 
-- [ ] Testes `DecimalInputTest`: `"42,5"→42.5`, `"42.5"→42.5`, `" 40 "→40.0`, `"abc"→null`, `"-5"→null`, `format(42.5)=="42,5"`, `format(40.0)=="40"`.
-- [ ] Testes VM: `save_withBlankName_fails`; `addExercises_usesDefaultRestFromSettings`; `move_reordersItems`; `save_persistsOrder`.
-- [ ] `RoutineEditorScreenTest`: adicionar 2 exercícios via resultado simulado, remover 1, salvar → repositório contém 1 item.
-- [ ] Implementar (sheet de item com `NumberStepper` para séries/reps/descanso em passos de 15 s, campo de carga com teclado decimal); screenshots; commit `feat(routines): add routine editor with reorder and per-exercise targets`.
+- [x] Testes `DecimalInputTest`: `"42,5"→42.5`, `"42.5"→42.5`, `" 40 "→40.0`, `"abc"→null`, `"-5"→null`, `format(42.5)=="42,5"`, `format(40.0)=="40"`.
+- [x] Testes VM: `save_withBlankName_fails`; `addExercises_usesDefaultRestFromSettings`; `move_reordersItems`; `save_persistsOrder`.
+- [x] `RoutineEditorScreenTest`: adicionar 2 exercícios via resultado simulado, remover 1, salvar → repositório contém 1 item.
+- [x] Implementar (sheet de item com `NumberStepper` para séries/reps/descanso em passos de 15 s, campo de carga com teclado decimal); screenshots; commit `feat(routines): add routine editor with reorder and per-exercise targets`.
 
 ### Tarefa 3.3: Biblioteca, seletor e exercício personalizado
 
@@ -257,9 +259,9 @@ docs/                              BRAND.md, ARCHITECTURE.md, TESTING.md, screen
 **Consome:** `ExerciseRepository`, `ImageStore`.
 **Produz:** busca + `FilterChipRow` de grupos; seletor multi-seleção que devolve `picked_exercise_ids`; editor com nome, grupo, tipo de movimento, observações e imagem (`PickVisualMedia(ImageOnly)` → `ImageStore.import` imediatamente).
 
-- [ ] Testes: `filterByGroup_andQuery_combine`; `editor_blankName_cannotSave`; `editor_replaceImage_deletesOldFile`.
-- [ ] Implementar; screenshots biblioteca e editor; commit `feat(library): add exercise library, picker and custom exercise editor`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] Testes: `filterByGroup_andQuery_combine`; `editor_blankName_cannotSave`; `editor_replaceImage_deletesOldFile`.
+- [x] Implementar; screenshots biblioteca e editor; commit `feat(library): add exercise library, picker and custom exercise editor`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -293,8 +295,8 @@ Regras:
 - `pause`: congela tempo total e descanso (`rest` reancorado no `resume` com o restante). `elapsedMs = startedAt.millisUntil(now) − totalPausedMs − (pausa corrente)`.
 - `adjustRest` limita o restante a ≥ 0; `skipRest` zera `rest`.
 
-- [ ] Testes (com `FakeTimeSource`): `completeSet_startsRestWithExerciseRest`; `completeLastSetOfExercise_movesToNextExercise_andRests`; `completeFinalSet_noRest_sessionComplete`; `skipSet_noRest`; `skipExercise_marksPendingSkipped_andAdvances`; `goToSkippedExercise_reopensSkippedSets`; `pauseResume_excludesPausedTimeFromElapsed`; `pauseDuringRest_freezesRemaining`; `adjustRest_plus15_minusBelowZeroClamps`; `elapsed_wallClockJumpSameBoot_unaffected`; `elapsed_afterReboot_usesWall`; `checkFinish_noDoneSets_returnsNothingCompleted`; `editSet_changesActualValues`.
-- [ ] Implementar; rodar; commit `feat(session): add pure workout session engine`.
+- [x] Testes (com `FakeTimeSource`): `completeSet_startsRestWithExerciseRest`; `completeLastSetOfExercise_movesToNextExercise_andRests`; `completeFinalSet_noRest_sessionComplete`; `skipSet_noRest`; `skipExercise_marksPendingSkipped_andAdvances`; `goToSkippedExercise_reopensSkippedSets`; `pauseResume_excludesPausedTimeFromElapsed`; `pauseDuringRest_freezesRemaining`; `adjustRest_plus15_minusBelowZeroClamps`; `elapsed_wallClockJumpSameBoot_unaffected`; `elapsed_afterReboot_usesWall`; `checkFinish_noDoneSets_returnsNothingCompleted`; `editSet_changesActualValues`.
+- [x] Implementar; rodar; commit `feat(session): add pure workout session engine`.
 
 ### Tarefa 4.2: Persistência da sessão
 
@@ -302,8 +304,8 @@ Regras:
 
 **Produz:** `SessionRepository`: `observeActive(): Flow<ActiveSession?>`, `getActive(): ActiveSession?`, `start(routineId: Long, now: Mark, zone: ZoneId): Long` (falha com `IllegalStateException` se já existe ativa ou rotina sem exercícios; cria snapshots), `save(session: ActiveSession)` (atualiza sessão + todos os exercícios/séries numa transação), `finish(session, now, updateRoutineLoads: Boolean): Long` (status `FINISHED`, `ended`, `durationMs = elapsedMs`; atualiza cargas da rotina com a carga da última série `DONE` de cada exercício; chama `BackupTrigger`), `discard(sessionId)`.
 
-- [ ] Testes: `start_snapshotsNamesAndTargets`; `start_withActiveSession_throws`; `start_emptyRoutine_throws`; `save_thenGetActive_roundTrips`; `routineDeletedDuringSession_sessionStillLoads`; `exerciseRenamedAfterFinish_historyKeepsOriginalName`; `finish_updatesRoutineLoadsWhenRequested`; `finish_storesDurationExcludingPauses`.
-- [ ] Implementar; rodar; commit `feat(session): persist active session state at every step`.
+- [x] Testes: `start_snapshotsNamesAndTargets`; `start_withActiveSession_throws`; `start_emptyRoutine_throws`; `save_thenGetActive_roundTrips`; `routineDeletedDuringSession_sessionStillLoads`; `exerciseRenamedAfterFinish_historyKeepsOriginalName`; `finish_updatesRoutineLoadsWhenRequested`; `finish_storesDurationExcludingPauses`.
+- [x] Implementar; rodar; commit `feat(session): persist active session state at every step`.
 
 ### Tarefa 4.3: Controlador, alarme, notificações e service
 
@@ -317,8 +319,8 @@ Regras:
 - `WorkoutService` (`foregroundServiceType="health"`): `ServiceCompat.startForeground(…, if (SDK ≥ 34) FOREGROUND_SERVICE_TYPE_HEALTH else 0)`; observa `active`; para quando `null`; `START_STICKY`; captura `ForegroundServiceStartNotAllowedException` → `stopSelf`.
 - Manifest: `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_HEALTH`, `HIGH_SAMPLING_RATE_SENSORS`, `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` (`maxSdkVersion="32"`), `VIBRATE`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 
-- [ ] Testes (Robolectric shadows): `completeSet_schedulesAlarmAtRestEnd` (`ShadowAlarmManager.nextScheduledAlarm.triggerAtTime == wall + 90_000`); `skipRest_cancelsAlarm`; `pause_cancelsAlarm_resume_reschedulesRemaining`; `restAlarmReceiver_postsRestEndNotification`; `actionReceiver_completeSet_advancesSession`; `resync_withActiveSession_startsService_andReschedules`; `finish_stopsService_andCancelsAlarm`.
-- [ ] Implementar; rodar; commit `feat(session): add foreground service, rest alarm and notification actions`.
+- [x] Testes (Robolectric shadows): `completeSet_schedulesAlarmAtRestEnd` (`ShadowAlarmManager.nextScheduledAlarm.triggerAtTime == wall + 90_000`); `skipRest_cancelsAlarm`; `pause_cancelsAlarm_resume_reschedulesRemaining`; `restAlarmReceiver_postsRestEndNotification`; `actionReceiver_completeSet_advancesSession`; `resync_withActiveSession_startsService_andReschedules`; `finish_stopsService_andCancelsAlarm`.
+- [x] Implementar; rodar; commit `feat(session): add foreground service, rest alarm and notification actions`.
 
 ### Tarefa 4.4: Tela de execução e resumo
 
@@ -334,10 +336,10 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 - Pede `POST_NOTIFICATIONS` no primeiro início de treino.
 - Encerrar: se `NothingCompleted` → diálogo "Nenhuma série concluída. Descartar treino?"; senão `SessionSummaryRoute`, com resumo (duração, séries, volume total), checkbox "Atualizar cargas do treino" (padrão de `updateRoutineLoadsOnFinish`) e "Concluir".
 
-- [ ] Teste VM: `restCountdown_derivesFromMarks_notTicks` (avançar `FakeTimeSource` 30 s sem tick ⇒ texto "1:00"); `finishWithoutCompletedSets_emitsDiscardPrompt`.
-- [ ] `WorkoutFlowTest` (Compose + Robolectric, rotina com 2 exercícios × 2 séries): concluir → descanso visível → pular descanso → … → encerrar → resumo mostra 4 séries.
-- [ ] Ligar `onStart(id)` de 3.1 a `controller.start` + navegação para `WorkoutRoute`.
-- [ ] Screenshots: série, descanso, pausado, resumo; commit `feat(workout): add immersive workout screen and session summary`.
+- [x] Teste VM: `restCountdown_derivesFromMarks_notTicks` (avançar `FakeTimeSource` 30 s sem tick ⇒ texto "1:00"); `finishWithoutCompletedSets_emitsDiscardPrompt`.
+- [x] `WorkoutFlowTest` (Compose + Robolectric, rotina com 2 exercícios × 2 séries): concluir → descanso visível → pular descanso → … → encerrar → resumo mostra 4 séries.
+- [x] Ligar `onStart(id)` de 3.1 a `controller.start` + navegação para `WorkoutRoute`.
+- [x] Screenshots: série, descanso, pausado, resumo; commit `feat(workout): add immersive workout screen and session summary`.
 
 ### Tarefa 4.5: Recuperação de sessão
 
@@ -345,9 +347,9 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `ActiveSessionBar(session, elapsedText, onResume)` exibida acima da navegação em todas as abas quando há sessão ativa; `MyFitApp.onCreate` e `MainActivity.onStart` chamam `controller.resync()`.
 
-- [ ] Teste: banco com sessão `ACTIVE` (descanso já vencido) → abrir `MainActivity` → barra "Treino em andamento" visível; tocar → `WorkoutRoute` no mesmo exercício/série, sem descanso.
-- [ ] Implementar; commit `feat(workout): resume in-progress session after app restart`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] Teste: banco com sessão `ACTIVE` (descanso já vencido) → abrir `MainActivity` → barra "Treino em andamento" visível; tocar → `WorkoutRoute` no mesmo exercício/série, sem descanso.
+- [x] Implementar; commit `feat(workout): resume in-progress session after app restart`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -359,8 +361,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `SessionSummary(id, routineName, startDate: LocalDate, startTime: LocalTime, durationMs, setsDone, exercises: List<String>)`; `PeriodSummary(sessions: Int, totalDurationMs: Long, avgPerWeek: Double, exercises: List<ExerciseFrequency(name, sessions)>)`; `object HistoryCalculator { fun summarize(items: List<SessionSummary>, range: ClosedRange<LocalDate>): PeriodSummary; fun daysWithSessions(items): Set<LocalDate>; fun weekOf(date): ClosedRange<LocalDate> /* seg–dom */; fun monthOf(yearMonth): ClosedRange<LocalDate> }`. `avgPerWeek = sessions / (dias do intervalo / 7.0)`.
 
-- [ ] Testes: `sessionCrossingMidnight_countsOnStartDate`; `summarize_week_countsAndTotals`; `avgPerWeek_forMonth_of30Days`; `exercises_sortedByFrequencyThenName`; `weekOf_sunday_returnsPreviousMonday`.
-- [ ] Implementar; commit `feat(history): add weekly and monthly summary calculations`.
+- [x] Testes: `sessionCrossingMidnight_countsOnStartDate`; `summarize_week_countsAndTotals`; `avgPerWeek_forMonth_of30Days`; `exercises_sortedByFrequencyThenName`; `weekOf_sunday_returnsPreviousMonday`.
+- [x] Implementar; commit `feat(history): add weekly and monthly summary calculations`.
 
 ### Tarefa 5.2: Consultas de histórico
 
@@ -368,8 +370,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `HistoryRepository`: `observeSummaries(range: ClosedRange<LocalDate>): Flow<List<SessionSummary>>` (só `FINISHED`), `observeDetail(sessionId): Flow<SessionDetail?>` (`SessionDetail(summary, exercises: List<SessionExerciseDetail(name, status, sets: List<SessionSet>)>)`), `deleteSession(id)`.
 
-- [ ] Testes: `summaries_excludeActive`; `summaries_filteredByRange`; `detail_returnsSetsInOrder`.
-- [ ] Implementar; commit `feat(history): add history queries`.
+- [x] Testes: `summaries_excludeActive`; `summaries_filteredByRange`; `detail_returnsSetsInOrder`.
+- [x] Implementar; commit `feat(history): add history queries`.
 
 ### Tarefa 5.3: Telas de histórico e detalhe
 
@@ -377,9 +379,9 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `MonthCalendar(month: YearMonth, marked: Set<LocalDate>, selected: LocalDate?, today: LocalDate, onSelect, onMonthChange)` (grade seg–dom, swipe entre meses, dia treinado = ponto/realce `accent`); resumo com alternância Semana/Mês (treinos, tempo total, frequência semanal, exercícios); lista do dia selecionado → `SessionDetailRoute`; detalhe com exercícios, séries (reps × carga, puladas esmaecidas) e excluir sessão.
 
-- [ ] Teste VM: `selectingDay_listsThatDaysSessions`; `toggleMonth_switchesSummaryRange`.
-- [ ] Screenshots: mês com treinos, dia selecionado, detalhe; commit `feat(history): add calendar, period summaries and session detail`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] Teste VM: `selectingDay_listsThatDaysSessions`; `toggleMonth_switchesSummaryRange`.
+- [x] Screenshots: mês com treinos, dia selecionado, detalhe; commit `feat(history): add calendar, period summaries and session detail`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -391,21 +393,21 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `HomeUiState(greeting /* Bom dia/Boa tarde/Boa noite */, dateText /* "quinta-feira, 12 de novembro" */, active: ActiveSession?, today: List<SessionSummary>, suggested: RoutineOverview?, routines: List<RoutineOverview>, last: SessionSummary?, body: BodySnapshot?, week: WeekStrip(days: List<DayMark>, sessions, totalDurationMs))`. `BodySnapshot` vem de 7.1 (até lá, `null`). Sugestão: rotina com exercícios nunca feita (menor posição) senão a de `lastDoneEpochDay` mais antigo.
 
-- [ ] Testes: `greeting_byHour` (5–11 dia, 12–17 tarde, resto noite); `suggestion_prefersNeverDone_thenOldest`; `today_listsOnlyTodaysFinishedSessions`.
-- [ ] Tela na ordem: saudação/data → sessão ativa (Retomar) ou treino de hoje → "Iniciar" com sugerido → treinos (carrossel) → última atividade → corpo → semana (7 pontos seg–dom). Screenshots vazio e com dados.
-- [ ] Commit `feat(home): add dashboard`.
+- [x] Testes: `greeting_byHour` (5–11 dia, 12–17 tarde, resto noite); `suggestion_prefersNeverDone_thenOldest`; `today_listsOnlyTodaysFinishedSessions`.
+- [x] Tela na ordem: saudação/data → sessão ativa (Retomar) ou treino de hoje → "Iniciar" com sugerido → treinos (carrossel) → última atividade → corpo → semana (7 pontos seg–dom). Screenshots vazio e com dados.
+- [x] Commit `feat(home): add dashboard`.
 
 ### Tarefa 6.2: Release assinado e MVP v0.1.0
 
 **Arquivos:** `app/build.gradle.kts`, `app/proguard-rules.pro`, `README.md`
 
-- [ ] `keytool -genkeypair -v -keystore ~/my/.keystores/myfit-release.jks -alias myfit -keyalg RSA -keysize 4096 -validity 36500` com senha aleatória; gravar `MYFIT_STORE_FILE`, `MYFIT_STORE_PASSWORD`, `MYFIT_KEY_ALIAS`, `MYFIT_KEY_PASSWORD` em `~/.gradle/gradle.properties` (fora do repo).
-- [ ] `signingConfigs.release` lido dessas propriedades; se ausentes, release sai sem assinatura (build não quebra).
-- [ ] Regras R8 para kotlinx.serialization (DTOs/rotas), Hilt/Room (geradas), Tink.
-- [ ] `versionCode = 1`, `versionName = "0.1.0"`; `./gradlew assembleRelease` sem avisos de classe ausente; `apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk` → assinado; tamanho < 15 MB.
-- [ ] README: seção "Instalação" (fluxo para apps de desenvolvedor não verificado / ADB) e "Status do MVP".
-- [ ] Commit `build: configure release signing and r8`; tag `v0.1.0`; `gh release create v0.1.0 --prerelease` com o APK `myfit-0.1.0.apk`; copiar para `/mnt/c/Users/luann.silva/Downloads/`.
-- [ ] Fim da etapa: verificação padrão de etapa + push (com tags).
+- [x] `keytool -genkeypair -v -keystore ~/my/.keystores/myfit-release.jks -alias myfit -keyalg RSA -keysize 4096 -validity 36500` com senha aleatória; gravar `MYFIT_STORE_FILE`, `MYFIT_STORE_PASSWORD`, `MYFIT_KEY_ALIAS`, `MYFIT_KEY_PASSWORD` em `~/.gradle/gradle.properties` (fora do repo).
+- [x] `signingConfigs.release` lido dessas propriedades; se ausentes, release sai sem assinatura (build não quebra).
+- [x] Regras R8 para kotlinx.serialization (DTOs/rotas), Hilt/Room (geradas), Tink.
+- [x] `versionCode = 1`, `versionName = "0.1.0"`; `./gradlew assembleRelease` sem avisos de classe ausente; `apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk` → assinado; tamanho < 15 MB.
+- [x] README: seção "Instalação" (fluxo para apps de desenvolvedor não verificado / ADB) e "Status do MVP".
+- [x] Commit `build: configure release signing and r8`; tag `v0.1.0`; `gh release create v0.1.0 --prerelease` com o APK `myfit-0.1.0.apk`; copiar para `/mnt/c/Users/luann.silva/Downloads/`.
+- [x] Fim da etapa: verificação padrão de etapa + push (com tags).
 
 ---
 
