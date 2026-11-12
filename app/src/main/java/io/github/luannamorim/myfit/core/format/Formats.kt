@@ -83,6 +83,17 @@ object Dates {
     }
 }
 
+/** Signed difference with unit, using a true minus sign: "+2 kg", "−1,5 cm", "0 cm". */
+fun formatSigned(value: Double, unit: String): String {
+    val abs = DecimalInput.format(kotlin.math.abs(value))
+    val sign = when {
+        value > 0 -> "+"
+        value < 0 -> "\u2212"
+        else -> ""
+    }
+    return "$sign$abs $unit".trim()
+}
+
 /** Whole number with Brazilian thousands separator: 4870.0 -> "4.870". */
 fun formatThousands(value: Double): String = String.format(PtBr, "%,.0f", value)
 
