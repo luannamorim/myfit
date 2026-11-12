@@ -115,7 +115,7 @@ private fun StepButton(onClick: () -> Unit, description: String, content: @Compo
 fun <T> FilterChipRow(
     options: List<T>,
     selected: Set<T>,
-    label: (T) -> String,
+    label: @Composable (T) -> String,
     onToggle: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
