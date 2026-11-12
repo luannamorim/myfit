@@ -12,7 +12,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.luannamorim.myfit.data.backup.AndroidKeystoreKeyWrapper
 import io.github.luannamorim.myfit.data.backup.KeyWrapper
+import io.github.luannamorim.myfit.data.backup.BackupDestinationFactory
+import io.github.luannamorim.myfit.data.backup.SafBackupDestinationFactory
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
+import io.github.luannamorim.myfit.platform.backup.BackupScheduler
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -34,8 +37,15 @@ object DataModule {
     @Provides
     fun provideKeyWrapper(impl: AndroidKeystoreKeyWrapper): KeyWrapper = impl
 
-    /** Replaced by the real scheduler in the backup stage. */
     @Provides
     @Singleton
-    fun provideBackupTrigger(): BackupTrigger = BackupTrigger { }
+    @Named("backup_state")
+    fun provideBackupStateDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("backup_state") }
+
+    @Provides
+    fun provideBackupTrigger(scheduler: BackupScheduler): BackupTrigger = scheduler
+
+    @Provides
+    fun provideBackupDestinationFactory(impl: SafBackupDestinationFactory): BackupDestinationFactory = impl
 }

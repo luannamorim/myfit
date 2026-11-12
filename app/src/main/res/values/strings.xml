@@ -280,4 +280,11 @@
     <string name="pose_side">Lado</string>
     <string name="pose_back">Costas</string>
     <string name="pose_other">Outra</string>
+    <!-- Backup -->
+    <string name="channel_backup">Backup</string>
+    <string name="backup_failed_title">Backup não realizado</string>
+    <string name="backup_error_folder">Não foi possível gravar na pasta de backup. Escolha a pasta de novo.</string>
+    <string name="backup_error_password">Digite a senha de backup para continuar fazendo cópias.</string>
+    <string name="backup_error_space">Sem espaço no aparelho para gerar o backup.</string>
+    <string name="backup_error_unknown">Falha inesperada ao gerar o backup. O MyFit tenta de novo mais tarde.</string>
 </resources>

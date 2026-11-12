@@ -38,5 +38,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val ACTION_OPEN_WORKOUT = "io.github.luannamorim.myfit.action.OPEN_WORKOUT"
+        const val ACTION_OPEN_BACKUP = "io.github.luannamorim.myfit.action.OPEN_BACKUP"
     }
 }
