@@ -6,16 +6,19 @@
 
 App Android pessoal e offline para montar treinos, executá-los com cronômetro confiável e acompanhar a evolução do corpo. Sem conta, sem servidor, sem anúncios.
 
-> **Status:** MVP `v0.1.0` — treinos, execução com descanso em segundo plano, histórico/calendário e início. Em seguida: evolução corporal, backup criptografado e polimento (ver [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md)).
+> **Status:** `v1.0.0`: completo para uso diário. Roteiro de validação no celular em [`docs/TESTING.md`](docs/TESTING.md).
 
-## Recursos do MVP
+## Recursos
 
 - **Treinos:** crie, edite, duplique, reordene (arrastar) e exclua sequências; séries, repetições, descanso, carga e observações por exercício.
 - **Biblioteca:** 81 exercícios pré-definidos em PT-BR, busca sem acento, filtro por grupo muscular e exercícios personalizados com imagem da galeria.
 - **Execução:** uma tela imersiva com séries, descanso automático, ±15 s, pausar/retomar, pular série/exercício, ajustar carga e repetições, resumo antes de salvar.
 - **Cronômetro confiável:** tempos derivados de marcas persistidas (relógio monotônico + contador de boots); alarme exato no fim do descanso com som e vibração mesmo com a tela bloqueada; notificação contínua com ações rápidas; sessão recuperada se o app for fechado.
 - **Histórico:** calendário mensal com dias treinados, sessões do dia, detalhe por série e resumos semanal/mensal.
-- **Início:** próximo treino sugerido, seus treinos, última atividade e a semana.
+- **Início:** próximo treino sugerido, seus treinos, última atividade, indicadores do corpo e a semana.
+- **Evolução:** avaliações com peso, % de gordura e 14 circunferências, comparação entre duas datas (diferença com sinal), gráficos por indicador com período e fotos por data com comparação lado a lado.
+- **Backup:** arquivo criptografado (AES-256-GCM, chave derivada da sua senha de recuperação) gravado numa pasta que você escolhe e mantém sincronizada com o Google Drive. Roda todo dia e após mudanças, guarda os 7 últimos e permite exportar e restaurar com validação de integridade.
+- **Ajustes:** tema (escuro por padrão, claro ou do sistema), descanso padrão, som do descanso, tela ligada no treino, status de notificações e bateria.
 
 ## Telas
 
@@ -29,6 +32,12 @@ App Android pessoal e offline para montar treinos, executá-los com cronômetro 
   <img src="docs/screenshots/routines_list_dark.png" width="200" alt="Treinos">
   <img src="docs/screenshots/routine_editor_dark.png" width="200" alt="Editor de treino">
   <img src="docs/screenshots/session_summary_dark.png" width="200" alt="Resumo do treino">
+  <img src="docs/screenshots/evolution_charts_dark.png" width="200" alt="Gráficos de evolução">
+</p>
+<p>
+  <img src="docs/screenshots/evolution_measures_dark.png" width="200" alt="Medidas">
+  <img src="docs/screenshots/backup_dark.png" width="200" alt="Backup">
+  <img src="docs/screenshots/settings_light.png" width="200" alt="Ajustes (tema claro)">
 </p>
 
 ## Instalação no celular
@@ -39,6 +48,15 @@ Baixe o APK em [Releases](../../releases). Desde 30/09/2026 o Android exige dese
 2. **Fluxo avançado (sem computador):** nas *Opções do desenvolvedor*, ative a permissão para apps de desenvolvedores não verificados; o Android pede reinício, espera de 24 h e nova autenticação. Depois disso, o APK instala tocando no arquivo.
 
 Atualizações usam a mesma assinatura, então os dados são mantidos (`adb install -r` ou instalar por cima).
+
+## Backup no Google Drive
+
+1. *Ajustes → Backup → Definir senha*. Guarde a senha: sem ela não há como restaurar.
+2. Crie uma pasta no celular (ex.: `MyFit Backup`) e mantenha-a sincronizada com o Drive por um app de sincronização de pastas.
+3. *Escolher pasta* no MyFit. A partir daí ele grava `myfit-backup-AAAAMMDD-HHmmss.myfit` todo dia e alguns minutos após mudanças, e mantém os 7 mais recentes.
+4. Para restaurar (por exemplo, num celular novo): instale o MyFit, sincronize a pasta, escolha-a em *Backup*, toque no arquivo desejado, confirme a data e digite a senha.
+
+O MyFit não acessa a internet: o arquivo já sai criptografado do app.
 
 **Samsung (One UI):** em *Configurações → Bateria → Limites de uso em segundo plano*, deixe o MyFit fora de "apps em suspensão" e marque a bateria do app como **Sem restrições**. Permita notificações quando o app pedir no primeiro treino.
 
@@ -77,6 +95,8 @@ Kotlin 2.4 · Jetpack Compose + Material 3 (adaptive) · Navigation Compose (typ
 
 - [`SPEC.md`](SPEC.md) — especificação
 - [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) — etapas e tarefas
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — arquitetura, modelo de tempo, formato do backup
+- [`docs/TESTING.md`](docs/TESTING.md) — testes automáticos e roteiro manual no celular
 - [`docs/BRAND.md`](docs/BRAND.md) — identidade visual
 
 ## Licenças

@@ -1,6 +1,6 @@
 # MyFit — Plano de Implementação
 
-> **Progresso:** Etapas 0–6 concluídas (MVP `v0.1.0` publicado em 12/11/2026). Próxima: Etapa 7.
+> **Progresso:** todas as etapas concluídas. MVP `v0.1.0` e versão `v1.0.0` publicados em 12/11/2026. Desvios do plano original: backup em pasta escolhida pelo usuário (sem API do Drive, pedido do usuário); gráficos com modelo síncrono do Vico; restauração sem arquivo-marcador (imagens mescladas antes do commit, órfãs removidas depois).
 
 > **Para agentes:** SUB-SKILL: superpowers:executing-plans (execução nativa nesta sessão), delegando tarefas autocontidas a subagentes quando útil. Passos usam checkbox (`- [x]`) para acompanhamento.
 
@@ -419,8 +419,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `BodyAssessment(id, date: LocalDate, values: Map<Measure, Double>, notes)`; `enum class Measure(labelRes, unit: MeasureUnit /* KG, PERCENT, CM */)` na ordem WEIGHT, BODY_FAT, NECK, SHOULDERS, CHEST, WAIST, ABDOMEN, HIPS, ARM_RIGHT, ARM_LEFT, FOREARM_RIGHT, FOREARM_LEFT, THIGH_RIGHT, THIGH_LEFT, CALF_RIGHT, CALF_LEFT; `MeasureDiff(measure, from: Double?, to: Double?, diff: Double?)`; `object BodyComparison { fun compare(from: BodyAssessment, to: BodyAssessment): List<MeasureDiff>; fun series(items: List<BodyAssessment>, measure: Measure): List<Pair<LocalDate, Double>> }`; `BodySnapshot(latest: BodyAssessment, weightDelta: Double?, highlights: List<MeasureDiff>)` para o Início.
 
-- [ ] Testes: `compare_diffIsToMinusFrom` (peso 71→73 = +2; cintura 78→79 = +1); `compare_missingValue_diffNull`; `series_sortedByDate_skipsMissing`; `diffFormat_signed` ("+2 kg", "−1,5 cm", "0 cm").
-- [ ] Implementar; commit `feat(body): add measures, comparison and series`.
+- [x] Testes: `compare_diffIsToMinusFrom` (peso 71→73 = +2; cintura 78→79 = +1); `compare_missingValue_diffNull`; `series_sortedByDate_skipsMissing`; `diffFormat_signed` ("+2 kg", "−1,5 cm", "0 cm").
+- [x] Implementar; commit `feat(body): add measures, comparison and series`.
 
 ### Tarefa 7.2: Avaliações (lista e editor)
 
@@ -428,8 +428,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `BodyRepository`: `observeAssessments(): Flow<List<BodyAssessment>>`, `get(id)`, `save(a): Long`, `delete(id)`, `observePhotos()`, `addPhoto(date, pose, relativePath)`, `deletePhoto(id)` (todas as escritas chamam `BackupTrigger`). Aba Evolução com seções: Medidas (lista com data e peso), Gráficos, Comparar, Fotos. Editor com data (DatePicker), campos agrupados (Gerais, Tronco, Braços, Pernas) usando `DecimalInput`, pré-preenchidos como placeholder com a última avaliação.
 
-- [ ] Testes: `save_thenObserve_newestFirst`; `editor_requiresDate_only`; `editor_rejectsInvalidDecimal_keepsPrevious`; `home_bodySnapshot_usesLatestTwo`.
-- [ ] Ligar `BodySnapshot` ao Início; screenshots; commit `feat(evolution): add body assessments list and editor`.
+- [x] Testes: `save_thenObserve_newestFirst`; `editor_requiresDate_only`; `editor_rejectsInvalidDecimal_keepsPrevious`; `home_bodySnapshot_usesLatestTwo`.
+- [x] Ligar `BodySnapshot` ao Início; screenshots; commit `feat(evolution): add body assessments list and editor`.
 
 ### Tarefa 7.3: Comparação e gráficos
 
@@ -437,8 +437,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** comparação com seletores "De"/"Para" (padrão: primeira e última), tabela Indicador | De | Para | Diferença (diferença com sinal em cor neutra, sem julgar se subir ou descer é bom); gráficos Vico `LineCartesianLayer` por indicador, seleção por `FilterChipRow` (padrão: Peso, Cintura, Braço D), período Tudo/1 ano/6 meses; um gráfico por indicador selecionado (unidades diferentes).
 
-- [ ] Testes: `compare_defaultsToFirstAndLast`; `charts_selectionKeptInViewModel`; `charts_periodFilter_trimsSeries`.
-- [ ] Screenshots: comparação e gráficos com 6 avaliações; commit `feat(evolution): add assessment comparison and measure charts`.
+- [x] Testes: `compare_defaultsToFirstAndLast`; `charts_selectionKeptInViewModel`; `charts_periodFilter_trimsSeries`.
+- [x] Screenshots: comparação e gráficos com 6 avaliações; commit `feat(evolution): add assessment comparison and measure charts`.
 
 ### Tarefa 7.4: Fotos corporais
 
@@ -446,9 +446,9 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** grade agrupada por data (mais recente primeiro), adicionar (data + pose + `PickVisualMedia` → `ImageStore.import(…, BODY)`), excluir (apaga arquivo), comparar duas fotos lado a lado (seleção de 2, mesma pose sugerida) com datas.
 
-- [ ] Testes: `photos_groupedByDateDesc`; `deletePhoto_removesFile`; `compare_requiresExactlyTwo`.
-- [ ] Screenshots; commit `feat(evolution): add body photos and side-by-side comparison`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] Testes: `photos_groupedByDateDesc`; `deletePhoto_removesFile`; `compare_requiresExactlyTwo`.
+- [x] Screenshots; commit `feat(evolution): add body photos and side-by-side comparison`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -460,8 +460,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `@Serializable data class BackupDataV1(exercises, routines, routineExercises, sessions, sessionExercises, sessionSets, assessments, photos: List<…Dto>)` — DTOs espelham as entidades com campos primitivos e nomes estáveis; `SnapshotMapper`: `suspend fun export(db): BackupDataV1`, `suspend fun replaceAll(db, data)` (uma `withTransaction`: apaga na ordem filho→pai e insere pai→filho preservando IDs), `fun referencedImages(data): Set<String>`, `fun counts(data): Map<String, Int>`.
 
-- [ ] Testes: `exportReplaceAll_roundTripsEveryTable` (popular todas as tabelas, exportar, limpar, reimportar, comparar listas); `json_isStable` (serializa → desserializa igual; campos desconhecidos ignorados).
-- [ ] Commit `feat(backup): add versioned data snapshot`.
+- [x] Testes: `exportReplaceAll_roundTripsEveryTable` (popular todas as tabelas, exportar, limpar, reimportar, comparar listas); `json_isStable` (serializa → desserializa igual; campos desconhecidos ignorados).
+- [x] Commit `feat(backup): add versioned data snapshot`.
 
 ### Tarefa 8.2: Criptografia e cabeçalho
 
@@ -472,8 +472,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 - `object KeyDerivation { fun derive(password: CharArray, salt: ByteArray, iterations: Int = 600_000): ByteArray /* 32 B, NFKC */; fun kcv(key): ByteArray /* HKDF-SHA256(key, info="myfit-kcv"), 16 B */ }`.
 - `object BackupCrypto { fun encrypt(key, header, plaintext: InputStream, out: OutputStream); fun decrypt(key, input: InputStream, out: OutputStream): BackupHeader }` — Tink `AesGcmHkdfStreaming` (AES-256, HKDF-SHA256, segmento 1 MiB), `associatedData = header.bytes()`. Erros: `BackupError.WrongPassword` (kcv ≠), `BackupError.Corrupted(reason)`, `BackupError.UnsupportedVersion(found)` (`sealed class BackupError : Exception`).
 
-- [ ] Testes (iterações baixas via parâmetro): `roundTrip_3MB`; `wrongPassword_detectedByKcv`; `flippedCiphertextByte_corrupted`; `tamperedHeaderCreatedAt_corrupted`; `truncatedFile_corrupted`; `badMagic_corrupted`; `headerVersion2_unsupported`.
-- [ ] Commit `feat(backup): add authenticated streaming encryption with password-derived key`.
+- [x] Testes (iterações baixas via parâmetro): `roundTrip_3MB`; `wrongPassword_detectedByKcv`; `flippedCiphertextByte_corrupted`; `tamperedHeaderCreatedAt_corrupted`; `truncatedFile_corrupted`; `badMagic_corrupted`; `headerVersion2_unsupported`.
+- [x] Commit `feat(backup): add authenticated streaming encryption with password-derived key`.
 
 ### Tarefa 8.3: Arquivo zip e manifest
 
@@ -481,8 +481,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `@Serializable BackupManifest(formatVersion = 1, appVersionName, appVersionCode, createdAtMs, dbSchemaVersion, counts: Map<String, Int>, entries: List<ManifestEntry(path, size, sha256)>)`; `object BackupArchive { fun write(out, data: BackupDataV1, settingsJson: String, images: Map<String, File>, meta: ManifestMeta); fun read(input, stagingDir: File, limits: ArchiveLimits = ArchiveLimits()): ArchiveContents(manifest, data, settingsJson, imageDir) }` — `data.json`/`settings.json` DEFLATED, imagens STORED; leitura valida hashes, nomes (`..`, absolutos, fora de `images/`), máximo 20 000 entradas e 2 GiB descomprimidos, `formatVersion ≤ 1`.
 
-- [ ] Testes: `writeRead_roundTrip_withImages`; `hashMismatch_rejected`; `zipSlipEntry_rejected`; `missingManifest_rejected`; `newerFormatVersion_rejected`; `entryNotInManifest_rejected`.
-- [ ] Commit `feat(backup): add backup archive with manifest and integrity checks`.
+- [x] Testes: `writeRead_roundTrip_withImages`; `hashMismatch_rejected`; `zipSlipEntry_rejected`; `missingManifest_rejected`; `newerFormatVersion_rejected`; `entryNotInManifest_rejected`.
+- [x] Commit `feat(backup): add backup archive with manifest and integrity checks`.
 
 ### Tarefa 8.4: Senha de recuperação e chave guardada
 
@@ -490,8 +490,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 **Produz:** `interface KeyWrapper { fun wrap(plain: ByteArray): ByteArray; fun unwrap(wrapped: ByteArray): ByteArray }` (Keystore AES-GCM, alias `myfit_backup_wrap`, sem auth, sem `setUnlockedDeviceRequired`, IV prefixado); `BackupKeyStore(dataStore/arquivo, wrapper, timeSource)`: `suspend fun setPassword(password: CharArray)` (gera salt, deriva, guarda `salt`, `iterations`, `kcv`, chave embrulhada), `suspend fun key(): StoredKey?` (`null` se não definida ou unwrap falhar → status "senha necessária"), `suspend fun unlock(password): Boolean` (re-deriva com salt salvo e confere kcv), `hasPassword(): Flow<Boolean>`. Diálogo: senha + confirmação, mínimo 8 caracteres, aviso "sem a senha não há como restaurar".
 
-- [ ] Testes (com `FakeKeyWrapper`): `setPassword_thenKey_returnsSameKey`; `unwrapFailure_returnsNull_andUnlockRestores`; `unlock_wrongPassword_false`.
-- [ ] Commit `feat(backup): store password-derived key wrapped by android keystore`.
+- [x] Testes (com `FakeKeyWrapper`): `setPassword_thenKey_returnsSameKey`; `unwrapFailure_returnsNull_andUnlockRestores`; `unlock_wrongPassword_false`.
+- [x] Commit `feat(backup): store password-derived key wrapped by android keystore`.
 
 ### Tarefa 8.5: Orquestração de criar e restaurar
 
@@ -501,8 +501,8 @@ Tela (imersiva, tema escuro forçado, `FLAG_KEEP_SCREEN_ON` se `keepScreenOn`):
 
 Restore: sessão ativa ⇒ `SessionActive`; espaço livre < 2× tamanho ⇒ `InsufficientSpace`; decripta para `cacheDir` → `BackupArchive.read` em `filesDir/restore_staging` → cancela workers de backup → grava marcador `filesDir/restore.pending` → `SnapshotMapper.replaceAll` → `images/` vira `images_old`, staging vira `images` → importa settings → remove `images_old` e marcador → valida contagens e que toda referência de imagem existe → `resync` de alarmes. `recoverInterruptedRestore` (chamado no `MyFitApp.onCreate`): com marcador, conclui a troca de diretórios.
 
-- [ ] Testes (Robolectric, banco + arquivos reais): `createRestore_roundTrip_restoresDbImagesAndSettings`; `restore_wrongPassword_leavesLocalDataUntouched`; `restore_corrupted_leavesLocalDataUntouched`; `restore_withActiveSession_refused`; `recoverInterruptedRestore_completesSwap`.
-- [ ] Commit `feat(backup): add backup creation and atomic restore`.
+- [x] Testes (Robolectric, banco + arquivos reais): `createRestore_roundTrip_restoresDbImagesAndSettings`; `restore_wrongPassword_leavesLocalDataUntouched`; `restore_corrupted_leavesLocalDataUntouched`; `restore_withActiveSession_refused`; `recoverInterruptedRestore_completesSwap`.
+- [x] Commit `feat(backup): add backup creation and atomic restore`.
 
 ### Tarefa 8.6: Backup manual e restauração por arquivo (UI)
 
@@ -510,9 +510,9 @@ Restore: sessão ativa ⇒ `SessionActive`; espaço livre < 2× tamanho ⇒ `Ins
 
 **Produz:** tela Backup com: senha (definir/alterar), "Exportar backup" (`CreateDocument("application/octet-stream")`, nome `myfit-backup-AAAAMMDD-HHmmss.myfit`), "Restaurar de arquivo" (`OpenDocument`) → mostra data do backup (`inspect`) → `ConfirmDialog` destrutivo → pede senha se `key()` nulo ou se o salt do arquivo difere → resultado em mensagem clara por caso de `RestoreResult`.
 
-- [ ] Testes VM: `export_withoutPassword_promptsPasswordFirst`; `restore_showsBackupDateBeforeConfirm`; `restoreResult_wrongPassword_message`.
-- [ ] Commit `feat(backup): add manual export and restore from file`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] Testes VM: `export_withoutPassword_promptsPasswordFirst`; `restore_showsBackupDateBeforeConfirm`; `restoreResult_wrongPassword_message`.
+- [x] Commit `feat(backup): add manual export and restore from file`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -528,8 +528,8 @@ Restore: sessão ativa ⇒ `SessionActive`; espaço livre < 2× tamanho ⇒ `Ins
 - `object Retention { val NAME_REGEX = Regex("""myfit-backup-(\d{8})-(\d{6})\.myfit"""); fun toDelete(files: List<BackupFileInfo>, keep: Int = 7): List<BackupFileInfo> }` — ignora arquivos fora do padrão.
 - `FolderBackupWriter(manager, destination)`: `suspend fun run(): BackupFileInfo` → escreve, relê o cabeçalho e compara tamanho, depois apaga os excedentes.
 
-- [ ] Testes: `toDelete_keepsNewest7`; `toDelete_ignoresForeignFiles`; `run_writesValidatesThenPrunes` (9 existentes → 7 após); `run_validationFails_doesNotPrune`.
-- [ ] Commit `feat(backup): write backups to user folder with retention`.
+- [x] Testes: `toDelete_keepsNewest7`; `toDelete_ignoresForeignFiles`; `run_writesValidatesThenPrunes` (9 existentes → 7 após); `run_validationFails_doesNotPrune`.
+- [x] Commit `feat(backup): write backups to user folder with retention`.
 
 ### Tarefa 9.2: Agendamento
 
@@ -537,8 +537,8 @@ Restore: sessão ativa ⇒ `SessionActive`; espaço livre < 2× tamanho ⇒ `Ins
 
 **Produz:** `BackupState(folderUri: String?, folderName: String?, dirtySinceMs: Long?, lastSuccessMs: Long?, lastFileName: String?, lastAttemptMs: Long?, lastError: BackupFailure?)`, `enum BackupFailure { NO_FOLDER, FOLDER_UNAVAILABLE, NO_PASSWORD, NO_SPACE, UNKNOWN }`; `BackupScheduler : BackupTrigger`: `onDataChanged()` (marca dirty + `enqueueUniqueWork("backup-debounce", REPLACE, delay 10 min)`), `ensurePeriodic()` (`"backup-daily"`, 24 h, `KEEP`, `requiresBatteryNotLow`, `requiresStorageNotLow`), `runNow()` (`"backup-run"` expedited com `force = true`). `BackupDebounceWorker` só enfileira `"backup-run"` com `KEEP`. `BackupWorker(force)`: se `!force && dirtySinceMs == null` ⇒ `success` sem gravar; se `autoBackup` off e `!force` ⇒ sem gravar; sucesso limpa dirty (só se `dirtySinceMs` não mudou durante a execução) e grava `lastSuccessMs`; falha grava `lastError`, mantém dirty, notifica (canal `backup_status`) e retorna `failure` (sem retry infinito para `FOLDER_UNAVAILABLE`/`NO_PASSWORD`; `retry` com backoff para `UNKNOWN`).
 
-- [ ] Testes (`TestListenableWorkerBuilder` + `FileBackupDestination`): `clean_notForced_skips`; `dirty_writes_andClearsDirty`; `changeDuringRun_keepsDirty`; `folderUnavailable_setsError_keepsDirty_noRetry`; `noPassword_setsError`; `onDataChanged_enqueuesDebounce`.
-- [ ] Ligar `BackupTrigger` real no Hilt; `ensurePeriodic()` no `MyFitApp.onCreate`; commit `feat(backup): schedule daily and change-triggered backups`.
+- [x] Testes (`TestListenableWorkerBuilder` + `FileBackupDestination`): `clean_notForced_skips`; `dirty_writes_andClearsDirty`; `changeDuringRun_keepsDirty`; `folderUnavailable_setsError_keepsDirty_noRetry`; `noPassword_setsError`; `onDataChanged_enqueuesDebounce`.
+- [x] Ligar `BackupTrigger` real no Hilt; `ensurePeriodic()` no `MyFitApp.onCreate`; commit `feat(backup): schedule daily and change-triggered backups`.
 
 ### Tarefa 9.3: Tela de backup automático
 
@@ -546,8 +546,8 @@ Restore: sessão ativa ⇒ `SessionActive`; espaço livre < 2× tamanho ⇒ `Ins
 
 **Produz:** seção "Pasta de backup" (escolher/trocar via `OpenDocumentTree` + `takePersistableUriPermission` read/write; nome da pasta), status (último backup "hoje às 14:32", último erro em `danger` com ação corretiva), toggle automático, "Fazer backup agora" (progresso via `WorkInfo`), lista dos backups da pasta (data, tamanho) → fluxo de restauração de 8.6, dica "use um app de sincronização para manter esta pasta no Drive".
 
-- [ ] Screenshots: sem pasta, OK, com erro; commit `feat(backup): add automatic folder backup settings and restore list`.
-- [ ] Fim da etapa: verificação padrão de etapa + push.
+- [x] Screenshots: sem pasta, OK, com erro; commit `feat(backup): add automatic folder backup settings and restore list`.
+- [x] Fim da etapa: verificação padrão de etapa + push.
 
 ---
 
@@ -559,17 +559,17 @@ Restore: sessão ativa ⇒ `SessionActive`; espaço livre < 2× tamanho ⇒ `Ins
 
 **Produz:** seções Aparência (tema), Treino (descanso padrão, som do descanso, manter tela ligada, atualizar cargas ao finalizar), Dados (Backup →, Biblioteca de exercícios →), Bateria (mostra se otimização está ativa; abre `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`; texto sobre "Sem restrições" na Samsung), Sobre (versão, licenças de fontes).
 
-- [ ] Testes: `themeChange_persists`; `defaultRest_clampedTo15to600`.
-- [ ] Commit `feat(settings): add preferences screen`.
+- [x] Testes: `themeChange_persists`; `defaultRest_clampedTo15to600`.
+- [x] Commit `feat(settings): add preferences screen`.
 
 ### Tarefa 10.2: Revisão de qualidade
 
-- [ ] Estados vazios e de carregamento em todas as telas; animações (`animateContentSize`, fade 200 ms nas transições de rota, descanso com `animateFloatAsState`).
-- [ ] Screenshots de todas as telas em: escuro, claro, 840 dp (rail), fonte 1.5×; corrigir cortes e contraste.
-- [ ] Acessibilidade: `contentDescription` em ícones de ação, alvos ≥ 48 dp, cronômetros com `semantics { liveRegion }` só no fim do descanso.
-- [ ] Limpeza de imagens órfãs agendada semanalmente (worker leve) usando `ImageStore.deleteOrphans`.
-- [ ] `./gradlew lintDebug` sem erros e sem avisos novos relevantes; `assembleRelease` limpo.
-- [ ] Commits `fix(ui): …` / `refactor: …` por assunto; push.
+- [x] Estados vazios e de carregamento em todas as telas; animações (`animateContentSize`, fade 200 ms nas transições de rota, descanso com `animateFloatAsState`).
+- [x] Screenshots de todas as telas em: escuro, claro, 840 dp (rail), fonte 1.5×; corrigir cortes e contraste.
+- [x] Acessibilidade: `contentDescription` em ícones de ação, alvos ≥ 48 dp, cronômetros com `semantics { liveRegion }` só no fim do descanso.
+- [x] Limpeza de imagens órfãs agendada semanalmente (worker leve) usando `ImageStore.deleteOrphans`.
+- [x] `./gradlew lintDebug` sem erros e sem avisos novos relevantes; `assembleRelease` limpo.
+- [x] Commits `fix(ui): …` / `refactor: …` por assunto; push.
 
 ---
 
@@ -579,12 +579,12 @@ Restore: sessão ativa ⇒ `SessionActive`; espaço livre < 2× tamanho ⇒ `Ins
 
 **Arquivos:** `README.md`, `docs/ARCHITECTURE.md`, `docs/TESTING.md`, `docs/BRAND.md`, `docs/screenshots/*.png`
 
-- [ ] README: o que é, screenshots, recursos, stack, instalação do APK (incluindo verificação de desenvolvedor no Brasil, conferida na data), backup na pasta + sincronização com o Drive, desenvolvimento (toolchain, comandos Gradle, testes, screenshots), estrutura, licença das fontes.
-- [ ] ARCHITECTURE: camadas, esquema do banco, motor da sessão e modelo de tempo, plataforma (service/alarme/notificações), formato do backup (cabeçalho, zip, criptografia, restauração atômica), decisões e trade-offs.
-- [ ] TESTING: roteiro manual no celular cobrindo os critérios de conclusão do SPEC (instalação, treino com tela bloqueada, matar app e retomar, reiniciar celular no meio, calendário, medidas/gráficos, backup na pasta, restauração em instalação limpa, perda de permissão da pasta, Samsung "Sem restrições").
-- [ ] Commit `docs: add architecture, testing guide and final readme`.
+- [x] README: o que é, screenshots, recursos, stack, instalação do APK (incluindo verificação de desenvolvedor no Brasil, conferida na data), backup na pasta + sincronização com o Drive, desenvolvimento (toolchain, comandos Gradle, testes, screenshots), estrutura, licença das fontes.
+- [x] ARCHITECTURE: camadas, esquema do banco, motor da sessão e modelo de tempo, plataforma (service/alarme/notificações), formato do backup (cabeçalho, zip, criptografia, restauração atômica), decisões e trade-offs.
+- [x] TESTING: roteiro manual no celular cobrindo os critérios de conclusão do SPEC (instalação, treino com tela bloqueada, matar app e retomar, reiniciar celular no meio, calendário, medidas/gráficos, backup na pasta, restauração em instalação limpa, perda de permissão da pasta, Samsung "Sem restrições").
+- [x] Commit `docs: add architecture, testing guide and final readme`.
 
 ### Tarefa 11.2: Release v1.0.0
 
-- [ ] `versionCode = 10`, `versionName = "1.0.0"`; `./gradlew lintDebug testDebugUnitTest assembleRelease`; `apksigner verify`; tamanho < 15 MB.
-- [ ] Commit `chore: release 1.0.0`; tag `v1.0.0`; `gh release create v1.0.0` com `myfit-1.0.0.apk` e notas em PT-BR; copiar para `/mnt/c/Users/luann.silva/Downloads/`; push com tags.
+- [x] `versionCode = 10`, `versionName = "1.0.0"`; `./gradlew lintDebug testDebugUnitTest assembleRelease`; `apksigner verify`; tamanho < 15 MB.
+- [x] Commit `chore: release 1.0.0`; tag `v1.0.0`; `gh release create v1.0.0` com `myfit-1.0.0.apk` e notas em PT-BR; copiar para `/mnt/c/Users/luann.silva/Downloads/`; push com tags.
