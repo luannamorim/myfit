@@ -112,4 +112,21 @@
     <string name="exercise_image_error">Não foi possível carregar a imagem</string>
     <string name="exercise_delete_title">Remover exercício?</string>
     <string name="exercise_delete_message">Se ele estiver em algum treino, sai só da biblioteca e continua no treino.</string>
+    <!-- Notificações do treino -->
+    <string name="channel_session_ongoing">Treino em andamento</string>
+    <string name="channel_session_ongoing_desc">Cronômetro e ações rápidas durante o treino</string>
+    <string name="channel_rest_end">Fim do descanso</string>
+    <string name="channel_rest_end_desc">Aviso sonoro quando o descanso termina (segue o modo do celular)</string>
+    <string name="channel_rest_end_alarm">Fim do descanso (toca sempre)</string>
+    <string name="channel_rest_end_alarm_desc">Aviso que toca mesmo com o celular no silencioso ou vibrar</string>
+    <string name="notif_workout_title">Treino em andamento</string>
+    <string name="notif_paused">Pausado</string>
+    <string name="notif_resting">Descanso · a seguir: %1$s</string>
+    <string name="notif_rest_over">Descanso concluído · %1$s</string>
+    <string name="notif_current">%1$s · série %2$d de %3$d</string>
+    <string name="notif_all_done">Todas as séries concluídas</string>
+    <string name="notif_action_complete_set">Concluir série</string>
+    <string name="notif_action_skip_rest">Pular descanso</string>
+    <string name="notif_rest_end_title">Descanso concluído</string>
+    <string name="notif_rest_end_text">A seguir: %1$s</string>
 </resources>
