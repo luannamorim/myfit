@@ -1,6 +1,5 @@
 package io.github.luannamorim.myfit.ui.feature.settings
 
-import androidx.core.net.toUri
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
@@ -19,6 +18,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,6 +55,7 @@ fun SettingsScreen(
     onOpenBackup: () -> Unit,
     onOpenLibrary: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenCredits: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,6 +81,7 @@ fun SettingsScreen(
                 .onFailure { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
         },
         modifier = modifier,
+        onOpenCredits = onOpenCredits,
     )
 }
 
@@ -91,6 +94,7 @@ fun SettingsContent(
     onOpenNotifications: () -> Unit,
     onAllowBattery: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenCredits: () -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     val s = state.settings
@@ -152,8 +156,10 @@ fun SettingsContent(
         SectionHeader(stringResource(R.string.settings_about), Modifier.padding(top = Spacing.s))
         MyFitCard(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.settings_version, state.versionName), style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
-            Text(stringResource(R.string.settings_licenses), style = MyFitTheme.type.caption, color = c.textSecondary)
+            Text(stringResource(R.string.settings_developed_by), style = MyFitTheme.type.body, color = c.textSecondary)
+            Text(stringResource(R.string.settings_licenses), style = MyFitTheme.type.caption, color = c.textTertiary)
         }
+        NavRow(Icons.Rounded.Image, stringResource(R.string.credits_title), stringResource(R.string.credits_hint), onOpenCredits)
     }
 }
 

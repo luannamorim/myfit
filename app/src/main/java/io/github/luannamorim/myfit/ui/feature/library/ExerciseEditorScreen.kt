@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -34,16 +36,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
+import io.github.luannamorim.myfit.ui.common.ArtSource
+import io.github.luannamorim.myfit.ui.common.ExerciseArt
+import io.github.luannamorim.myfit.ui.common.ExerciseDrawing
+import io.github.luannamorim.myfit.ui.common.MuscleMap
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.common.localImageModel
+import io.github.luannamorim.myfit.ui.common.openExerciseVideo
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitChip
@@ -126,6 +135,7 @@ fun ExerciseEditorContent(
                         MyFitChip(stringResource(group.labelRes), selected = state.muscleGroup == group, onClick = { onGroup(group) })
                     }
                 }
+                MuscleMap(state.muscleGroup, Modifier.fillMaxWidth().height(180.dp).padding(vertical = Spacing.xs))
                 SectionHeader(stringResource(R.string.exercise_movement))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     MovementType.entries.forEach { type ->
@@ -134,6 +144,15 @@ fun ExerciseEditorContent(
                 }
                 SectionHeader(stringResource(R.string.exercise_image))
                 ImageBox(state, onPickImage, onRemoveImage)
+                if (state.name.isNotBlank()) {
+                    val context = LocalContext.current
+                    SecondaryButton(
+                        stringResource(R.string.exercise_video),
+                        onClick = { openExerciseVideo(context, state.name.trim()) },
+                        icon = Icons.Rounded.PlayCircle,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 MyFitTextField(
                     value = state.notes,
                     onValueChange = onNotes,
@@ -169,6 +188,7 @@ fun ExerciseEditorContent(
 private fun ImageBox(state: ExerciseEditorUiState, onPick: () -> Unit, onRemove: () -> Unit) {
     val c = MyFitTheme.colors
     val model = localImageModel(state.imagePath)
+    val art = ExerciseArt.artFor(state.seedKey)
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
         Box(
             Modifier.fillMaxWidth().aspectRatio(16f / 10f).clip(MyFitShapes.medium).background(c.surfaceRaised),
@@ -177,8 +197,20 @@ private fun ImageBox(state: ExerciseEditorUiState, onPick: () -> Unit, onRemove:
             when {
                 state.isImporting -> CircularProgressIndicator(color = c.accent)
                 model != null -> AsyncImage(model, contentDescription = state.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                art != null -> ExerciseDrawing(art, c.textPrimary, Modifier.fillMaxSize().padding(Spacing.l), contentDescription = state.name)
                 else -> Icon(Icons.Rounded.Image, contentDescription = null, tint = c.textTertiary)
             }
+        }
+        if (model == null && art != null && !state.isImporting) {
+            val source = when (ExerciseArt.source(art)) {
+                ArtSource.EVERKINETIC -> "Everkinetic"
+                ArtSource.WORKOUT_GUIDE -> "Bryl Lim / Workout Guide"
+            }
+            Text(
+                stringResource(R.string.exercise_image_credit, source) + "\n" + stringResource(R.string.exercise_image_drawing_hint),
+                style = MyFitTheme.type.caption,
+                color = c.textTertiary,
+            )
         }
         if (state.imageError) {
             Text(stringResource(R.string.exercise_image_error), style = MyFitTheme.type.caption, color = c.danger)

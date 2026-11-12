@@ -19,3 +19,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object AssessmentCompareRoute
 @Serializable data class PhotoCompareRoute(val firstId: Long, val secondId: Long)
 @Serializable data object BackupRoute
+@Serializable data object CreditsRoute

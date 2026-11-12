@@ -8,22 +8,23 @@ import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.ItemStatus
+import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.domain.session.ActiveSession
 import io.github.luannamorim.myfit.domain.session.FinishCheck
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 import io.github.luannamorim.myfit.platform.session.SessionController
+import javax.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class ExerciseChip(val name: String, val status: ItemStatus, val isCurrent: Boolean, val done: Int, val total: Int)
 
@@ -40,6 +41,8 @@ data class WorkoutUiState(
     val exerciseName: String = "",
     val exerciseNotes: String? = null,
     val imagePath: String? = null,
+    val seedKey: String? = null,
+    val muscleGroup: MuscleGroup = MuscleGroup.OTHER,
     val setNumber: Int = 0,
     val setCount: Int = 0,
     val plannedReps: Int = 0,
@@ -183,6 +186,8 @@ class WorkoutViewModel @Inject constructor(
             exerciseName = exercise?.name.orEmpty(),
             exerciseNotes = exercise?.notes,
             imagePath = exercise?.imagePath,
+            seedKey = exercise?.seedKey,
+            muscleGroup = exercise?.muscleGroup ?: MuscleGroup.OTHER,
             setNumber = session.cursor.setIndex + 1,
             setCount = exercise?.sets?.size ?: 0,
             plannedReps = set?.plannedReps ?: 0,

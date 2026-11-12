@@ -113,6 +113,12 @@
     <string name="exercise_image_pick">Escolher da galeria</string>
     <string name="exercise_image_replace">Trocar imagem</string>
     <string name="exercise_image_remove">Remover imagem</string>
+    <string name="exercise_image_drawing_hint">Desenho da biblioteca. Escolha uma foto para usar a sua.</string>
+    <string name="exercise_image_credit">Ilustração: %1$s · CC BY-SA</string>
+    <string name="exercise_video">Ver execução</string>
+    <string name="exercise_video_query">%1$s execução correta</string>
+    <string name="exercise_video_unavailable">Nenhum app disponível para abrir vídeos</string>
+    <string name="muscle_map_a11y">Mapa do corpo destacando %1$s</string>
     <string name="exercise_image_error">Não foi possível carregar a imagem</string>
     <string name="exercise_delete_title">Remover exercício?</string>
     <string name="exercise_delete_message">Se ele estiver em algum treino, sai só da biblioteca e continua no treino.</string>
@@ -370,6 +376,16 @@
     <string name="settings_about">Sobre</string>
     <string name="settings_version">Versão %1$s</string>
     <string name="settings_licenses">Fonte Geist — SIL Open Font License 1.1</string>
+    <string name="settings_developed_by">Desenvolvido por luannamorim</string>
+    <string name="credits_title">Créditos das imagens</string>
+    <string name="credits_hint">Ilustrações dos exercícios e suas licenças</string>
+    <string name="credits_intro">As ilustrações dos exercícios vêm de duas coleções abertas e são licenciadas sob Creative Commons Atribuição-CompartilhaIgual (CC BY-SA). O MyFit as guarda no aparelho; nada é baixado.</string>
+    <string name="credits_everkinetic">Desenhos de Everkinetic (everkinetic.com), CC BY-SA 4.0. O desenho da remada curvada é a cópia do Everkinetic publicada pelo wger.de sob CC BY-SA 3.0.</string>
+    <string name="credits_workout_guide">Desenhos de Bryl Lim, do Workout Guide, uma extensão do Everkinetic, CC BY-SA 4.0.</string>
+    <string name="credits_changes">Alterações: escolha dos quadros de início e fim, recorte, redução, conversão para WebP e recoloração pelo app para combinar com o tema. Os desenhos alterados são compartilhados sob a mesma licença.</string>
+    <string name="credits_open_source">Fonte</string>
+    <string name="credits_open_license">Licença</string>
+    <string name="credits_exercises">Exercícios ilustrados (%1$d)</string>
     <!-- Acessibilidade e outros -->
     <string name="a11y_back">Voltar</string>
     <string name="a11y_decrease">Diminuir %1$s</string>

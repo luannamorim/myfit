@@ -31,6 +31,8 @@ data class ExerciseEditorUiState(
     val movementType: MovementType = MovementType.PUSH,
     val notes: String = "",
     val imagePath: String? = null,
+    /** Library entry of a predefined exercise (its bundled drawing); null for user-created ones. */
+    val seedKey: String? = null,
     val nameError: Boolean = false,
     val imageError: Boolean = false,
     val isImporting: Boolean = false,
@@ -67,6 +69,7 @@ class ExerciseEditorViewModel @Inject constructor(
                     movementType = existing.movementType,
                     notes = existing.notes.orEmpty(),
                     imagePath = existing.imagePath,
+                    seedKey = existing.seedKey,
                 )
             }
         }
@@ -113,6 +116,7 @@ class ExerciseEditorViewModel @Inject constructor(
                     imagePath = s.imagePath,
                     notes = s.notes,
                     isCustom = isCustom,
+                    seedKey = s.seedKey,
                 ),
             )
             if (originalImage != null && originalImage != s.imagePath) images.delete(originalImage)

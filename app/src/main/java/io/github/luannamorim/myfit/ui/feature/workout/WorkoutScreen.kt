@@ -38,6 +38,7 @@ import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -58,7 +59,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -70,13 +70,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.Durations
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.ThemeMode
-import io.github.luannamorim.myfit.ui.common.localImageModel
+import io.github.luannamorim.myfit.ui.common.ExerciseVisual
+import io.github.luannamorim.myfit.ui.common.openExerciseVideo
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.NumberStepper
@@ -331,7 +331,7 @@ private fun SetPanel(
     onSkipSet: () -> Unit,
 ) {
     val c = MyFitTheme.colors
-    val image = localImageModel(state.imagePath)
+    val context = LocalContext.current
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = Spacing.l),
         verticalArrangement = Arrangement.spacedBy(Spacing.l, Alignment.CenterVertically),
@@ -349,13 +349,21 @@ private fun SetPanel(
             Text(state.exerciseName, style = MyFitTheme.type.display, color = c.textPrimary)
             state.exerciseNotes?.let { Text(it, style = MyFitTheme.type.body, color = c.textSecondary) }
         }
-        if (image != null) {
-            AsyncImage(
-                model = image,
-                contentDescription = state.exerciseName,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().heightIn(max = 220.dp).aspectRatio(16f / 9f).clip(MyFitShapes.medium),
+        Box {
+            ExerciseVisual(
+                imagePath = state.imagePath,
+                seedKey = state.seedKey,
+                muscleGroup = state.muscleGroup,
+                name = state.exerciseName,
+                modifier = Modifier.fillMaxWidth().heightIn(max = 220.dp).aspectRatio(16f / 9f),
+                background = c.surface,
             )
+            IconButton(
+                onClick = { openExerciseVideo(context, state.exerciseName) },
+                modifier = Modifier.align(Alignment.BottomEnd),
+            ) {
+                Icon(Icons.Rounded.PlayCircle, contentDescription = stringResource(R.string.exercise_video), tint = c.textSecondary)
+            }
         }
         NumberStepper(
             value = state.reps.toString(),

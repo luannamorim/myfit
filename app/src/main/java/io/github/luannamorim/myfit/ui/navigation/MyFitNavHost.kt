@@ -1,28 +1,28 @@
 package io.github.luannamorim.myfit.ui.navigation
 
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.NavigationRailItemDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import io.github.luannamorim.myfit.ui.feature.workout.SessionSummaryScreen
-import io.github.luannamorim.myfit.ui.feature.workout.WorkoutScreen
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -41,18 +41,19 @@ import io.github.luannamorim.myfit.ui.feature.history.HistoryScreen
 import io.github.luannamorim.myfit.ui.feature.history.SessionDetailScreen
 import io.github.luannamorim.myfit.ui.feature.home.HomeActions
 import io.github.luannamorim.myfit.ui.feature.home.HomeScreen
-import io.github.luannamorim.myfit.ui.feature.routines.RoutinesScreen
-import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorScreen
-import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorViewModel
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseEditorScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseLibraryScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorScreen
+import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorViewModel
+import io.github.luannamorim.myfit.ui.feature.routines.RoutinesScreen
 import io.github.luannamorim.myfit.ui.feature.settings.BackupScreen
+import io.github.luannamorim.myfit.ui.feature.settings.CreditsScreen
 import io.github.luannamorim.myfit.ui.feature.settings.SettingsScreen
+import io.github.luannamorim.myfit.ui.feature.workout.SessionSummaryScreen
+import io.github.luannamorim.myfit.ui.feature.workout.WorkoutScreen
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
-import androidx.compose.foundation.layout.padding
 
 @Composable
 fun MyFitNavHost(
@@ -185,9 +186,11 @@ fun MyFitNavHost(
                     SettingsScreen(
                         onOpenBackup = { navController.navigate(BackupRoute) },
                         onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
+                        onOpenCredits = { navController.navigate(CreditsRoute) },
                     )
                 }
                 composable<BackupRoute> { BackupScreen(onBack = { navController.popBackStack() }) }
+                composable<CreditsRoute> { CreditsScreen(onBack = { navController.popBackStack() }) }
 
                 composable<RoutineEditorRoute> { entry ->
                     val picked by entry.savedStateHandle

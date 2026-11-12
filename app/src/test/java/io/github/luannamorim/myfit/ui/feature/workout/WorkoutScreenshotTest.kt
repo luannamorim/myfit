@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import io.github.luannamorim.myfit.domain.model.ItemStatus
+import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.testutil.PHONE
 import io.github.luannamorim.myfit.testutil.SCREENSHOT_DIR
@@ -32,6 +33,8 @@ class WorkoutScreenshotTest {
         exerciseIndex = 1,
         exerciseName = "One-arm dumbbell row",
         exerciseNotes = "Keep the elbow close to the body",
+        seedKey = "one-arm-dumbbell-row",
+        muscleGroup = MuscleGroup.BACK,
         setNumber = 2,
         setCount = 3,
         plannedReps = 10,
@@ -60,6 +63,8 @@ class WorkoutScreenshotTest {
     )
 
     @Test fun workout_set() = snap("workout_set", base.copy(restOver = true))
+
+    @Test fun workout_set_custom_exercise() = snap("workout_set_custom", base.copy(exerciseName = "Landmine row", seedKey = null))
 
     @Test fun workout_rest() = snap("workout_rest", base.copy(rest = RestUi(52_000, 0.58f, "One-arm dumbbell row", 2, 3)))
 

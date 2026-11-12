@@ -34,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -43,12 +42,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.domain.model.Exercise
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
+import io.github.luannamorim.myfit.ui.common.ExerciseThumbnail
 import io.github.luannamorim.myfit.ui.common.labelRes
-import io.github.luannamorim.myfit.ui.common.localImageModel
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.EmptyState
 import io.github.luannamorim.myfit.ui.components.FilterChipRow
@@ -223,7 +221,7 @@ private fun ExerciseRow(
                 .padding(horizontal = Spacing.screen, vertical = Spacing.m),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ExerciseThumb(exercise)
+            ExerciseThumbnail(exercise.imagePath, exercise.seedKey, exercise.muscleGroup, Modifier.size(44.dp))
             Spacer(Modifier.width(Spacing.m))
             Column(Modifier.weight(1f)) {
                 Text(exercise.name, style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
@@ -244,25 +242,5 @@ private fun ExerciseRow(
             }
         }
         HorizontalDivider(Modifier.padding(start = Spacing.screen + 44.dp + Spacing.m), color = c.outline)
-    }
-}
-
-@Composable
-private fun ExerciseThumb(exercise: Exercise) {
-    val c = MyFitTheme.colors
-    val model = localImageModel(exercise.imagePath)
-    Box(
-        Modifier.size(44.dp).clip(MyFitShapes.small).background(c.surfaceRaised),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (model != null) {
-            AsyncImage(model = model, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-        } else {
-            Text(
-                exercise.name.take(1).uppercase(),
-                style = MyFitTheme.type.bodyStrong,
-                color = c.textSecondary,
-            )
-        }
     }
 }
