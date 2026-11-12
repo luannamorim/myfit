@@ -20,31 +20,47 @@ Dependency rule: `domain` knows nothing about Android, except for the Tink libra
 | `core/time` | `Mark` (wall clock + monotonic clock + boot counter), `TimeSource` |
 | `core/format` | locale-aware numbers (`DecimalInput`), durations, dates |
 | `domain/session` | `SessionEngine`, `ActiveSession` |
-| `domain/history` | `HistoryCalculator` (summaries, Mon–Sun weeks) |
+| `domain/history` | `HistoryCalculator` (summaries with workouts and activities, Mon–Sun weeks) |
+| `domain/activity` | `Sport`, `Activity` (other sports logged after the fact) |
 | `domain/body` | `Measure`, `BodyComparison` (differences, series, snapshot) |
 | `domain/backup` | v1 DTOs, header and encryption, zip + manifest, retention |
-| `data/db` | entities, DAOs, `MyFitDatabase` (v3), library seed |
-| `data/repository` | workouts, exercises, session, history, body |
+| `data/db` | entities, DAOs, `MyFitDatabase` (v4), `Migrations`, library seed |
+| `data/repository` | workouts, exercises, session, history, activities, body |
 | `data/backup` | `BackupManager`, `BackupKeyStore`, destinations (SAF/file), `FolderBackupWriter` |
 | `platform/session` | `SessionController`, `WorkoutService`, alarm, receivers, notifications |
 | `platform/backup` | `BackupScheduler`, workers, failure notification, image cleanup |
+| `platform/reminder` | reminder alarms, notification, re-arming on start/boot/time change |
 
 ## Data
 
 ```
 exercise ─┐                       workout_session ── session_exercise ── session_set
           └── routine_exercise ── routine        (snapshots: name, group, image, planned/actual)
-body_assessment   body_photo
+body_assessment   body_photo   activity
 ```
 
 - `routine_exercise.exerciseId` uses RESTRICT. An exercise in use is archived instead of deleted.
 - `workout_session.routineId` uses SET NULL, and the session tables keep copies (workout name, exercise name/group/image, targets). Editing or deleting a workout never changes history.
 - `startDateEpochDay` is the local day the session started: a workout that crosses midnight counts on its start day.
-- Images live in `filesDir/images/{exercises,body}/<uuid>.jpg`, downscaled to 1600 px and stripped of EXIF. The database stores only the relative path. Paths that would escape `images/` don't resolve to any file.
+- Images live in `filesDir/images/{exercises,body,sessions}/<uuid>.jpg`, stripped of EXIF: exercise and body photos downscaled to 1600 px (JPEG 85), workout and activity photos to 1280 px (JPEG 80). The database stores only the relative path. Paths that would escape `images/` don't resolve to any file.
 - Schema exported to `app/schemas`. Any change requires a tested migration, because an installed APK already exists.
 - Database version 2 changed no tables: migration 1 → 2 (`ExerciseSeed.MIGRATION_1_2`) only adds the exercises introduced in library version 2, skipping names that already exist in either language, so user-created and deleted exercises are respected.
 - Database version 3 adds `seedKey` to `exercise` (unique) and `session_exercise` (snapshot). Migration 2 → 3 links existing library rows by name (either language; a row the user renamed stays unlinked), copies the key into session snapshots and adds the version-3 exercises. Keys are frozen in `app/src/test/resources/seed-keys.txt`.
-- `MigrationTest` builds real version-1 and version-2 databases from `app/schemas/.../1.json` and `2.json` and opens them with the current app.
+- Database version 4 adds `intensity` and `imagePath` to `workout_session` and the `activity` table (sport, optional name for "free", date, minutes, distance in km, intensity, notes, photo). Migration 3 → 4 (`Migrations.MIGRATION_3_4`) only adds them; existing sessions get no intensity.
+- `MigrationTest` builds real version-1, 2 and 3 databases from `app/schemas/.../<n>.json` and opens them with the current app (`Migrations.ALL`).
+
+## Other sports
+
+- `Activity` is logged after the fact (no live timer): it has no sets, so it lives in its own table and joins workouts only in History and the Home week (`HistoryCalculator.activeDays`, `summarize(..., activities)`).
+- Figures: every `Sport` has a Material icon; indoor cycling and treadmill reuse the Workout Guide drawings (`wg-cycling`, `wg-running`).
+- Distance is stored in km; swimming is typed and shown in meters.
+
+## Reminders
+
+- Stored in DataStore as part of `AppSettings.reminders` (one JSON key), so the backup's `settings.json` carries them; no table.
+- `ReminderSchedule.nextTrigger` (pure) returns the next instant strictly after now: weekly on the chosen days, or once on a date. DST gaps move the time forward.
+- `ReminderScheduler` arms one `AlarmManager` alarm per enabled reminder (exact when allowed). `ReminderSync`, started from `MyFitApp`, re-arms everything whenever the list changes (edits and backup restores); a manifest receiver does it after boot, time or time zone changes and app updates.
+- When it fires, the notification goes out on the "Reminders" channel; a weekly reminder arms its next occurrence and a one-off turns itself off.
 
 ## Exercise pictures
 
@@ -69,7 +85,7 @@ body_assessment   body_photo
 
 **Background**:
 - **Ongoing notification**: a foreground `WorkoutService` of type `health` (the API 34+ requirement is met by `HIGH_SAMPLING_RATE_SENSORS`, a normal permission) shows the system chronometer counting down during rest and counting up for the rest of the workout, with the "Complete set" and "Skip rest" actions. If the user swipes the notification away, it comes back.
-- **Rest end alarm**: uses `AlarmManager.setAlarmClock`, the only exact alarm immune to Doze and One UI optimizations. `RestEndHandler` ignores stale alarms and posts the notification with sound. There are two channels: one follows the phone's ringer mode and the other uses alarm audio and always rings.
+- **Rest end alarm**: uses `AlarmManager.setAlarmClock`, the only exact alarm immune to Doze and One UI optimizations. `RestEndHandler` ignores stale alarms and posts the notification with sound. There are two channels: by default the alert uses alarm audio and always rings, even with the phone on vibrate or silent; the other follows the phone's ringer mode (*Settings → Rest end sound*).
 - **Recovery**: if the process dies, the session remains in the database. When the app returns to the foreground, it calls `resync()`, which re-arms the alarm and the service, and shows the "Resume" bar.
 
 ## Backup
@@ -90,7 +106,7 @@ streaming AES-256-GCM-HKDF (Tink, 1 MiB segments, entire header as associated da
 - **Storage**: the derived key is stored wrapped by an Android Keystore AES key that doesn't require unlocking, so the worker can run with the screen locked. If that key disappears (reinstall or cleared data), the state becomes LOCKED and the app asks for the password again.
 - **Third-party files**: weak parameters from an imported file are never adopted.
 
-Exercise and session DTOs carry an optional `seedKey`; restoring a backup made before version 3 links library rows by name inside the same transaction.
+Exercise and session DTOs carry an optional `seedKey`; restoring a backup made before version 3 links library rows by name inside the same transaction. Session DTOs carry optional `intensity` and `imagePath`, and `activities` is a new optional list. Its count goes into the manifest only when there are activities, so backups made by earlier versions still pass the exact count check.
 
 **Restore** (`BackupManager.restore`):
 1. Refuses if a workout is in progress. Reads the header, gets the key (the device's, or the one derived from the typed password) and checks the verifier.

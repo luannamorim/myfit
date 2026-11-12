@@ -44,24 +44,34 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 ### 3. Locked screen and background
 - [ ] Complete a set and **lock the screen** during the rest: at the end, the phone rings and vibrates, and the notification shows "Rest complete".
 - [ ] On the lock screen, the notification shows the timer and the "Skip rest" button works.
-- [ ] With the phone on **vibrate**: with *Settings → Rest end sound → Always ring*, the alert rings anyway.
+- [ ] With the phone on **vibrate** and *Settings → Rest end sound → Always ring* (the default): the alert rings anyway, at the alarm volume.
+- [ ] With *Follow phone mode* and the phone on vibrate: the alert only vibrates.
 - [ ] Alarm icon in the status bar during the rest: expected (exact alarm).
 
 ### 4. Recovery
 - [ ] Mid-rest, close the app from recents (swipe it away). Reopen it: Home shows "Workout in progress". "Resume" goes back to the same set and the total time is still correct.
 - [ ] Restart the phone mid-workout. Open the app and resume: the session continues and the total time includes the reboot period.
-- [ ] Finish the workout → summary → keep "Update loads" checked → "Finish and save".
+- [ ] Finish the workout → summary → pick an intensity (Low/Medium/High) and add a photo → keep "Update loads" checked → "Finish and save".
 
 ### 5. History
 - [ ] The day is marked on the calendar. Tapping the day opens the session with sets, reps and loads.
 - [ ] Toggle Week/Month in the summaries. Workouts, total time and frequency match what was done.
+- [ ] The session row shows the intensity; the session detail shows the photo, and intensity and photo can be changed or removed there.
+- [ ] "+ Activity" on a past day: log swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name. They appear on that day, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it.
+- [ ] Home: "Log activity" opens the same screen; the week counts the activity days and their time.
 
 ### 6. Progress
 - [ ] Log two assessments on different dates (edit the date at the top). Weight with a decimal comma.
 - [ ] Compare the two: signed differences (+/−).
-- [ ] Charts: weight and waist appear; change the metrics and the period.
-- [ ] Photos: add two (front), select both → "Compare selected"; delete one.
-- [ ] Home shows weight, body fat and waist with their change.
+- [ ] Charts: weight and waist appear; change the metrics and the period. "All" shows every measure you have logged; tapping it again clears the selection.
+- [ ] Photos: add two (front), one with an older date picked with *Date*, select both → "Compare selected"; delete one.
+- [ ] Home and Measurements show weight and body fat (no waist) with their change.
+
+### 6a. Reminders
+- [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.
+- [ ] A one-off reminder with "Other activity" (tap "Swimming" to fill the name) on a date: it fires once and then shows as off.
+- [ ] Restart the phone: a weekly reminder still fires at its next time.
+- [ ] Turning a reminder's switch off stops it.
 
 ### 7. Backup
 - [ ] *Settings → Backup*: set the recovery password and store it in a password manager.
@@ -76,6 +86,8 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 ### 8. Update
 - [ ] Install a new version over the existing one (`adb install -r`): the data is kept.
 - [ ] Updating from 1.2: workouts and history are intact, the library gains the new exercises and the existing predefined ones show their drawings (a predefined exercise you renamed keeps no drawing).
+- [ ] Updating from 1.3: history is intact (old sessions have no intensity), and a backup made with 1.3 still restores.
+- [ ] If you had changed any setting before 1.4, check *Settings → Rest end sound*: the new default (Always ring) only applies to settings never saved.
 
 ## Known issues
 - The alarm icon appears in the status bar during the rest (`setAlarmClock`, chosen for its accuracy).

@@ -77,16 +77,18 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 12. MUST follow the flow: complete set (1 tap) → automatic rest → visual and audible alert when it ends → next set → next exercise → finish.
 13. MUST allow pausing/resuming, skipping a set, skipping an exercise, adjusting the set's load and reps, changing the rest (including ±15 s during the rest) and ending early.
 14. MUST keep timers correct with the app in the background, the screen locked, the process killed by the system or after a device restart. Time MUST be derived from persisted timestamps, never from UI counters.
-15. MUST signal the end of rest with a notification with sound and vibration even with the app closed, and show an ongoing workout notification with the timer and quick actions.
+15. MUST signal the end of rest with a notification with sound and vibration even with the app closed (by default the sound plays even with the phone on vibrate), and show an ongoing workout notification with the timer and quick actions.
 16. MUST persist every session step immediately and offer exact resumption when the app is reopened.
 17. When finishing, MUST automatically save: date, start and end time, duration (excluding pauses), workout, exercises, completed/skipped sets, and the reps and loads performed.
 18. SHOULD offer, when finishing, to update the workout's loads with the ones used in the session.
+18a. SHOULD let the user rate the workout's intensity (low, medium, high) and attach a photo (stored reduced) when finishing, both optional and editable later in History.
 
 ### History and calendar
 
 19. MUST show a monthly calendar with workout days highlighted.
+19a. MUST allow logging other sports after the fact (swimming, cycling, indoor cycling, running, treadmill, walking, soccer, volleyball, basketball, beach tennis, muay thai, jiu-jitsu, boxing, yoga, pilates, stretching, or a free activity named by the user), each with a figure, date, duration, optional distance, intensity, notes and photo; they appear in the calendar, the day list, the summaries and the Home week.
 20. When a day is tapped, MUST list its sessions with duration and allow opening the detail (exercises, sets, reps, loads).
-21. MUST show weekly and monthly summaries: number of workouts, total time, average weekly frequency and exercises performed.
+21. MUST show weekly and monthly summaries: number of workouts and activities, total time, average weekly frequency, exercises performed and sports practiced.
 22. History MUST stay intact even if the source workout or exercise is later edited or deleted.
 
 ### Body progress
@@ -94,8 +96,8 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 23. MUST allow creating, editing and deleting assessments with date, weight (kg), body fat % (optional) and 14 circumferences in cm (neck, shoulders, chest, waist, abdomen, hips, right/left arms, right/left forearms, right/left thighs, right/left calves), all optional except the date.
 24. MUST list the assessment history.
 25. MUST compare two chosen assessments, showing values and the signed absolute difference per metric.
-26. MUST show progress charts over time for each metric, with selection of the metrics displayed.
-27. MUST allow logging body photos by date (front/side/back), browsing by date and comparing two photos side by side.
+26. MUST show progress charts over time for each metric, with selection of the metrics displayed (including all at once).
+27. MUST allow logging body photos by date (front/side/back), including past dates for older photos, browsing by date and comparing two photos side by side.
 
 ### Backup and data
 
@@ -110,6 +112,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 ### Settings
 
 35. MUST allow choosing the theme (Dark, default; Light; System), the default rest, the rest sound behavior and keeping the screen on during workouts.
+35a. SHOULD allow scheduling workout reminders (a workout or activity, a time, and either a date or weekly days) that notify at that time.
 36. MUST bring together backup management (folder, password, automatic, manual, restore) and exercise library management.
 37. SHOULD guide the user to remove battery optimization for the app (relevant on Samsung devices).
 
