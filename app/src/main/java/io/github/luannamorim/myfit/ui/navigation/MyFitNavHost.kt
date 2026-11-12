@@ -29,7 +29,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import io.github.luannamorim.myfit.ui.feature.evolution.AssessmentCompareScreen
+import io.github.luannamorim.myfit.ui.feature.evolution.AssessmentEditorScreen
+import io.github.luannamorim.myfit.ui.feature.evolution.EvolutionActions
 import io.github.luannamorim.myfit.ui.feature.evolution.EvolutionScreen
+import io.github.luannamorim.myfit.ui.feature.evolution.PhotoCompareScreen
 import io.github.luannamorim.myfit.ui.feature.history.HistoryScreen
 import io.github.luannamorim.myfit.ui.feature.history.SessionDetailScreen
 import io.github.luannamorim.myfit.ui.feature.home.HomeActions
@@ -148,7 +152,19 @@ fun MyFitNavHost(
                     )
                 }
                 composable<HistoryRoute> { HistoryScreen(onOpenSession = { navController.navigate(SessionDetailRoute(it)) }) }
-                composable<EvolutionRoute> { EvolutionScreen() }
+                composable<EvolutionRoute> {
+                    EvolutionScreen(
+                        actions = EvolutionActions(
+                            onNewAssessment = { navController.navigate(AssessmentEditorRoute()) },
+                            onOpenAssessment = { navController.navigate(AssessmentEditorRoute(it)) },
+                            onCompare = { navController.navigate(AssessmentCompareRoute) },
+                            onComparePhotos = { a, b -> navController.navigate(PhotoCompareRoute(a, b)) },
+                        ),
+                    )
+                }
+                composable<AssessmentEditorRoute> { AssessmentEditorScreen(onClose = { navController.popBackStack() }) }
+                composable<AssessmentCompareRoute> { AssessmentCompareScreen(onBack = { navController.popBackStack() }) }
+                composable<PhotoCompareRoute> { PhotoCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<SettingsRoute> { SettingsScreen() }
 
                 composable<RoutineEditorRoute> { entry ->

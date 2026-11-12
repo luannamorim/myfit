@@ -17,5 +17,5 @@ import kotlinx.serialization.Serializable
 @Serializable data class SessionDetailRoute(val sessionId: Long)
 @Serializable data class AssessmentEditorRoute(val assessmentId: Long? = null)
 @Serializable data object AssessmentCompareRoute
-@Serializable data object PhotosRoute
+@Serializable data class PhotoCompareRoute(val firstId: Long, val secondId: Long)
 @Serializable data object BackupRoute
