@@ -1,126 +1,126 @@
-# MyFit — Arquitetura
+# MyFit — Architecture
 
-## Visão geral
+## Overview
 
-App Android nativo, um módulo (`:app`), MVVM, offline. Room é a fonte da verdade; nada sai do aparelho além dos arquivos de backup que o usuário manda gravar numa pasta.
+Native Android app, single module (`:app`), MVVM, offline. Room is the source of truth; nothing leaves the device except the backup files the user chooses to write to a folder.
 
 ```
-ui/        Compose: telas + ViewModels (Hilt), design system, navegação
-  │  observa StateFlow, chama ações
-domain/    Kotlin puro: motor da sessão, cálculos de histórico/medidas, formato de backup
-  ▲  usado por
-data/      Room, DataStore, ImageStore, repositórios, BackupManager, destino SAF
-platform/  foreground service, alarme, receivers, notificações, WorkManager
+ui/        Compose: screens + ViewModels (Hilt), design system, navigation
+  │  observes StateFlow, calls actions
+domain/    pure Kotlin: session engine, history/measurement calculations, backup format
+  ▲  used by
+data/      Room, DataStore, ImageStore, repositories, BackupManager, SAF destination
+platform/  foreground service, alarm, receivers, notifications, WorkManager
 ```
 
-Regra de dependência: `domain` não conhece Android, exceto a lib Tink. `ui` não fala com Room diretamente. `platform` orquestra `data` e `domain`.
+Dependency rule: `domain` knows nothing about Android, except for the Tink library. `ui` doesn't talk to Room directly. `platform` orchestrates `data` and `domain`.
 
-| Pacote | Conteúdo |
+| Package | Contents |
 |---|---|
-| `core/time` | `Mark` (relógio real + monotônico + contador de boots), `TimeSource` |
-| `core/format` | números PT-BR (`DecimalInput`), durações, datas |
+| `core/time` | `Mark` (wall clock + monotonic clock + boot counter), `TimeSource` |
+| `core/format` | locale-aware numbers (`DecimalInput`), durations, dates |
 | `domain/session` | `SessionEngine`, `ActiveSession` |
-| `domain/history` | `HistoryCalculator` (resumos, semanas seg–dom) |
-| `domain/body` | `Measure`, `BodyComparison` (diferenças, séries, snapshot) |
-| `domain/backup` | DTOs v1, cabeçalho e criptografia, zip + manifest, retenção |
-| `data/db` | entidades, DAOs, `MyFitDatabase` (v1), seed da biblioteca |
-| `data/repository` | treinos, exercícios, sessão, histórico, corpo |
-| `data/backup` | `BackupManager`, `BackupKeyStore`, destinos (SAF/arquivo), `FolderBackupWriter` |
-| `platform/session` | `SessionController`, `WorkoutService`, alarme, receivers, notificações |
-| `platform/backup` | `BackupScheduler`, workers, notificação de falha, limpeza de imagens |
+| `domain/history` | `HistoryCalculator` (summaries, Mon–Sun weeks) |
+| `domain/body` | `Measure`, `BodyComparison` (differences, series, snapshot) |
+| `domain/backup` | v1 DTOs, header and encryption, zip + manifest, retention |
+| `data/db` | entities, DAOs, `MyFitDatabase` (v1), library seed |
+| `data/repository` | workouts, exercises, session, history, body |
+| `data/backup` | `BackupManager`, `BackupKeyStore`, destinations (SAF/file), `FolderBackupWriter` |
+| `platform/session` | `SessionController`, `WorkoutService`, alarm, receivers, notifications |
+| `platform/backup` | `BackupScheduler`, workers, failure notification, image cleanup |
 
-## Dados
+## Data
 
 ```
 exercise ─┐                       workout_session ── session_exercise ── session_set
-          └── routine_exercise ── routine        (snapshots: nome, grupo, imagem, planejado/realizado)
+          └── routine_exercise ── routine        (snapshots: name, group, image, planned/actual)
 body_assessment   body_photo
 ```
 
-- `routine_exercise.exerciseId` usa RESTRICT. Exercício em uso é arquivado em vez de excluído.
-- `workout_session.routineId` usa SET NULL, e as tabelas da sessão guardam cópias (nome do treino, nome/grupo/imagem do exercício, metas). Editar ou excluir um treino nunca altera o histórico.
-- `startDateEpochDay` é o dia local em que a sessão começou: um treino que atravessa a meia-noite conta no dia de início.
-- Imagens ficam em `filesDir/images/{exercises,body}/<uuid>.jpg`, reduzidas a 1600 px e sem EXIF. O banco guarda só o caminho relativo. Caminhos que escapariam de `images/` não resolvem para nenhum arquivo.
-- Schema exportado em `app/schemas`. Qualquer mudança exige migração testada, porque já existe APK instalado.
+- `routine_exercise.exerciseId` uses RESTRICT. An exercise in use is archived instead of deleted.
+- `workout_session.routineId` uses SET NULL, and the session tables keep copies (workout name, exercise name/group/image, targets). Editing or deleting a workout never changes history.
+- `startDateEpochDay` is the local day the session started: a workout that crosses midnight counts on its start day.
+- Images live in `filesDir/images/{exercises,body}/<uuid>.jpg`, downscaled to 1600 px and stripped of EXIF. The database stores only the relative path. Paths that would escape `images/` don't resolve to any file.
+- Schema exported to `app/schemas`. Any change requires a tested migration, because an installed APK already exists.
 
-## Sessão de treino
+## Workout session
 
-**Motor puro** (`SessionEngine`): cada ação (`completeSet`, `skipSet`, `skipExercise`, `goToExercise`, `adjustRest`, `pause`, `resume`…) devolve uma nova `ActiveSession`. Regras principais:
+**Pure engine** (`SessionEngine`): each action (`completeSet`, `skipSet`, `skipExercise`, `goToExercise`, `adjustRest`, `pause`, `resume`…) returns a new `ActiveSession`. Main rules:
 
-- O cursor avança para a próxima série pendente do exercício, depois para os exercícios seguintes e, por fim, volta aos anteriores que ficaram pendentes.
-- O descanso começa depois de concluir uma série, exceto na última série do treino. Pular não gera descanso.
-- A carga usada numa série é levada para as séries pendentes do mesmo exercício.
-- Pausar congela o tempo total e o descanso. Ao retomar, o descanso recomeça com o tempo que faltava.
+- The cursor moves to the exercise's next pending set, then to the following exercises and, finally, back to earlier ones that were left pending.
+- Rest starts after completing a set, except on the workout's last set. Skipping doesn't trigger a rest.
+- The load used in a set carries over to the pending sets of the same exercise.
+- Pausing freezes the total time and the rest. On resume, the rest restarts with the time that was left.
 
-**Tempo** (`Mark`): cada marca guarda `wallMs`, `elapsedMs` e `bootCount`. No mesmo boot vale o relógio monotônico, imune a ajuste de hora; depois de um reboot vale o relógio real. O resultado nunca é negativo. A UI só redesenha a partir das marcas: um ticker de 250 ms no ViewModel roda apenas enquanto a tela coleta o estado.
+**Time** (`Mark`): each mark stores `wallMs`, `elapsedMs` and `bootCount`. Within the same boot the monotonic clock is used, which is immune to time changes; after a reboot the wall clock is used. The result is never negative. The UI only redraws from the marks: a 250 ms ticker in the ViewModel runs only while the screen is collecting state.
 
-**Persistência**: o `SessionController` serializa as ações com um mutex. Cada ação roda o motor, grava a sessão inteira numa transação, reagenda ou cancela o alarme e atualiza as notificações.
+**Persistence**: `SessionController` serializes actions with a mutex. Each action runs the engine, writes the whole session in one transaction, reschedules or cancels the alarm and updates the notifications.
 
-**Segundo plano**:
-- **Notificação contínua**: um `WorkoutService` em foreground, do tipo `health` (o requisito do API 34+ é atendido por `HIGH_SAMPLING_RATE_SENSORS`, permissão normal), mostra o cronômetro do sistema em contagem regressiva no descanso e progressiva no resto do treino, com as ações "Concluir série" e "Pular descanso". Se o usuário arrastar a notificação, ela volta.
-- **Alarme de fim do descanso**: usa `AlarmManager.setAlarmClock`, o único alarme exato imune ao Doze e às otimizações da One UI. O `RestEndHandler` ignora alarmes velhos e posta a notificação com som. Há dois canais: um segue o modo do celular e o outro usa áudio de alarme e toca sempre.
-- **Recuperação**: se o processo morrer, a sessão continua no banco. Ao voltar ao primeiro plano, o app chama `resync()`, que rearma o alarme e o service, e mostra a barra "Retomar".
+**Background**:
+- **Ongoing notification**: a foreground `WorkoutService` of type `health` (the API 34+ requirement is met by `HIGH_SAMPLING_RATE_SENSORS`, a normal permission) shows the system chronometer counting down during rest and counting up for the rest of the workout, with the "Complete set" and "Skip rest" actions. If the user swipes the notification away, it comes back.
+- **Rest end alarm**: uses `AlarmManager.setAlarmClock`, the only exact alarm immune to Doze and One UI optimizations. `RestEndHandler` ignores stale alarms and posts the notification with sound. There are two channels: one follows the phone's ringer mode and the other uses alarm audio and always rings.
+- **Recovery**: if the process dies, the session remains in the database. When the app returns to the foreground, it calls `resync()`, which re-arms the alarm and the service, and shows the "Resume" bar.
 
 ## Backup
 
-**Arquivo** (`.myfit`):
+**File** (`.myfit`):
 
 ```
-"MYFITBAK" | u16 versão | u8 kdf | u32 iterações | 16 B salt | 16 B verificador | u64 criadoEm
-AES-256-GCM-HKDF em streaming (Tink, segmentos de 1 MiB, cabeçalho inteiro como dado associado)
-  └─ zip: manifest.json (formatVersion, app, contagens, SHA-256 por entrada)
-          data.json (BackupDataV1, independente do schema do Room)
+"MYFITBAK" | u16 version | u8 kdf | u32 iterations | 16 B salt | 16 B verifier | u64 createdAt
+streaming AES-256-GCM-HKDF (Tink, 1 MiB segments, entire header as associated data)
+  └─ zip: manifest.json (formatVersion, app, counts, SHA-256 per entry)
+          data.json (BackupDataV1, independent of the Room schema)
           settings.json
-          images/<tipo>/<uuid>.jpg (sem recompressão)
+          images/<type>/<uuid>.jpg (no recompression)
 ```
 
-**Chave**:
-- **Derivação**: a chave sai de PBKDF2-HMAC-SHA256 (600k iterações, senha normalizada em NFKC) aplicado sobre a senha de recuperação. O verificador é um HKDF da chave, e não a própria chave, e permite distinguir "senha errada" de "arquivo corrompido".
-- **Armazenamento**: a chave derivada fica guardada embrulhada por uma chave AES do Android Keystore, sem exigir desbloqueio, para o worker rodar com a tela bloqueada. Se essa chave sumir (reinstalação ou dados limpos), o estado vira LOCKED e o app pede a senha de novo.
-- **Arquivos de terceiros**: parâmetros fracos de um arquivo importado nunca são adotados.
+**Key**:
+- **Derivation**: the key comes from PBKDF2-HMAC-SHA256 (600k iterations, password normalized to NFKC) applied to the recovery password. The verifier is an HKDF of the key, not the key itself, and makes it possible to tell "wrong password" apart from "corrupted file".
+- **Storage**: the derived key is stored wrapped by an Android Keystore AES key that doesn't require unlocking, so the worker can run with the screen locked. If that key disappears (reinstall or cleared data), the state becomes LOCKED and the app asks for the password again.
+- **Third-party files**: weak parameters from an imported file are never adopted.
 
-**Restauração** (`BackupManager.restore`):
-1. Recusa se houver um treino em andamento. Lê o cabeçalho, obtém a chave (a do aparelho ou a da senha digitada) e confere o verificador.
-2. Decripta tudo para o cache, porque truncamento e adulteração só aparecem no fim do stream. Valida nomes (sem zip-slip), limites, versão do formato, hashes, contagens e caminhos de imagem.
-3. Copia as imagens novas para `images/` antes do commit. Os nomes são UUIDs, então as antigas continuam lá.
-4. Substitui o banco numa única transação, importa as configurações e só então apaga as imagens que nenhuma linha referencia.
-5. Revalida contagens e imagens.
+**Restore** (`BackupManager.restore`):
+1. Refuses if a workout is in progress. Reads the header, gets the key (the device's, or the one derived from the typed password) and checks the verifier.
+2. Decrypts everything to the cache, because truncation and tampering only show up at the end of the stream. Validates names (no zip-slip), limits, format version, hashes, counts and image paths.
+3. Copies the new images to `images/` before the commit. Names are UUIDs, so the old ones stay in place.
+4. Replaces the database in a single transaction, imports the settings and only then deletes the images that no row references.
+5. Revalidates counts and images.
 
-Se o app morrer em qualquer ponto, o banco fica inteiro (o antigo ou o novo) e com todas as suas imagens. Na inicialização, `recoverInterruptedRestore` limpa as sobras.
+If the app dies at any point, the database stays whole (either the old one or the new one) along with all of its images. On startup, `recoverInterruptedRestore` cleans up the leftovers.
 
-**Pasta e agendamento**:
-- **Destino**: `SafBackupDestination` grava, via SAF, na pasta escolhida (permissão persistente). Escreve `<nome>.partial`, renomeia e relê o cabeçalho; só então apaga os excedentes, mantendo 7 e nunca o arquivo recém-gravado. Arquivos que não são do MyFit são ignorados.
-- **Sincronização**: fica por conta de um app de sincronização com o Drive. O MyFit não fala com a rede.
-- **Quando roda**: o `BackupScheduler` agenda uma execução diária (bateria e armazenamento não baixos), um debounce de 10 min após mudanças importantes e o "Fazer backup agora".
-- **Contador de alterações**: `changeCount` sobe a cada mudança e `savedChangeCount` registra o que o último backup cobriu. Uma mudança feita durante um backup continua pendente.
-- **Falhas**: viram estado (pasta indisponível, sem senha, sem espaço, desconhecida) e uma notificação.
+**Folder and scheduling**:
+- **Destination**: `SafBackupDestination` writes, via SAF, to the chosen folder (persistable permission). It writes `<name>.partial`, renames it and rereads the header; only then does it delete the extra files, keeping 7 and never the file it just wrote. Files that don't belong to MyFit are ignored.
+- **Sync**: left to a Drive sync app. MyFit doesn't talk to the network.
+- **When it runs**: `BackupScheduler` schedules a daily run (battery and storage not low), a 10 min debounce after important changes, and "Back up now".
+- **Change counter**: `changeCount` goes up with every change and `savedChangeCount` records what the last backup covered. A change made during a backup stays pending.
+- **Failures**: become state (folder unavailable, no password, no space, unknown) and a notification.
 
-## Navegação e UI
+## Navigation and UI
 
-- Navigation Compose com rotas type-safe, num `NavigationSuiteScaffold`: barra inferior no celular e rail em telas largas, escondido nas telas cheias. O conteúdo fica limitado a 640 dp.
-- A execução do treino é imersiva, sempre no tema escuro, com tela ligada.
-- O tema vem das configurações (escuro por padrão). Tokens de cor, tipografia (Geist com algarismos tabulares) e componentes estão em `docs/BRAND.md`.
+- Navigation Compose with type-safe routes, in a `NavigationSuiteScaffold`: bottom bar on phones and rail on large screens, hidden on full-screen screens. Content is capped at 640 dp.
+- Workout execution is immersive, always in the dark theme, with the screen kept on.
+- The theme comes from the settings (dark by default). Color tokens, typography (Geist with tabular figures) and components are in `docs/BRAND.md`.
 
-## Testes
+## Tests
 
-| Camada | Ferramenta | Exemplos |
+| Layer | Tool | Examples |
 |---|---|---|
-| Domínio puro | JUnit | motor da sessão (17 casos), `Mark`, resumos, comparação corporal, cripto, zip, retenção |
-| Dados | Robolectric + Room em memória | DAOs, cascata e restrições, repositórios, snapshot ida e volta, backup criar/restaurar/corromper |
-| Plataforma | Robolectric shadows | alarme agendado/cancelado/reagendado, notificações, service, workers (`work-testing`) |
-| UI | Compose test + Robolectric | fluxo completo de treino, navegação, recuperação de sessão |
-| Visual | Roborazzi | screenshots de todas as telas em tema escuro e claro, fonte 1,5× e tablet |
+| Pure domain | JUnit | session engine (17 cases), `Mark`, summaries, body comparison, crypto, zip, retention |
+| Data | Robolectric + in-memory Room | DAOs, cascades and constraints, repositories, snapshot round trip, backup create/restore/corrupt |
+| Platform | Robolectric shadows | alarm scheduled/canceled/rescheduled, notifications, service, workers (`work-testing`) |
+| UI | Compose test + Robolectric | full workout flow, navigation, session recovery |
+| Visual | Roborazzi | screenshots of every screen in dark and light themes, 1.5× font and tablet |
 
 ```bash
-./gradlew testDebugUnitTest          # todos os testes
-./gradlew recordRoborazziDebug       # gera PNGs em app/build/outputs/roborazzi/
+./gradlew testDebugUnitTest          # all tests
+./gradlew recordRoborazziDebug       # generates PNGs in app/build/outputs/roborazzi/
 ./gradlew lintDebug
 ```
 
-## Decisões e trade-offs
+## Decisions and trade-offs
 
-- **Pasta em vez da API do Drive**: pedido do usuário. Elimina OAuth e Google Cloud. A sincronização fica com outro app, e o seletor do Drive oficial não oferece acesso a uma pasta inteira.
-- **`setAlarmClock`**: confiabilidade acima de tudo no descanso. O efeito colateral é o ícone de alarme na barra de status enquanto o descanso corre.
-- **Um módulo**: o app é pessoal e pequeno, então as fronteiras ficam nos pacotes e na regra de dependência.
-- **Navigation 2 e Room 2.8**: estáveis e bem documentados. Navigation 3 e Room 3 são recentes e não trariam ganho aqui.
-- **Sem dispositivo no desenvolvimento**: a validação de plataforma é feita com shadows do Robolectric mais o roteiro manual de `docs/TESTING.md`.
+- **Folder instead of the Drive API**: user request. It removes the need for OAuth and Google Cloud. Sync is left to another app, and the official Drive picker doesn't grant access to a whole folder.
+- **`setAlarmClock`**: reliability above all for the rest timer. The side effect is the alarm icon in the status bar while the rest is running.
+- **Single module**: the app is personal and small, so the boundaries live in the packages and the dependency rule.
+- **Navigation 2 and Room 2.8**: stable and well documented. Navigation 3 and Room 3 are recent and wouldn't bring any gain here.
+- **No device during development**: platform validation is done with Robolectric shadows plus the manual checklist in `docs/TESTING.md`.

@@ -1,75 +1,77 @@
-# MyFit — Testes
+# MyFit — Testing
 
-## Automáticos
+## Automated
 
 ```bash
 export JAVA_HOME=~/.local/share/jdks/jdk-21.0.13+9 ANDROID_HOME=~/Android/Sdk
-./gradlew testDebugUnitTest      # unitários + Robolectric (domínio, banco, plataforma, UI)
-./gradlew recordRoborazziDebug   # screenshots em app/build/outputs/roborazzi/
+./gradlew testDebugUnitTest      # unit + Robolectric (domain, database, platform, UI)
+./gradlew recordRoborazziDebug   # screenshots in app/build/outputs/roborazzi/
 ./gradlew lintDebug
-./gradlew assembleRelease        # build com R8 (assinado se MYFIT_* estiver configurado)
+./gradlew assembleRelease        # R8 build (signed if MYFIT_* is configured)
 ```
 
-O que cada camada cobre está em [ARCHITECTURE.md](ARCHITECTURE.md#testes).
+What each layer covers is described in [ARCHITECTURE.md](ARCHITECTURE.md#tests).
 
-## Roteiro manual no celular
+## Manual checklist on the phone
 
-O desenvolvimento foi feito sem dispositivo. Os itens abaixo validam o que só o aparelho prova: som, tela bloqueada, service, pasta real e o comportamento da One UI. Marque cada item; se algo falhar, anote o passo e o modelo do celular.
+Development was done without a device. The items below validate what only the device can prove: sound, locked screen, service, real folder and One UI behavior. Check off each item; if something fails, note the step and the phone model.
 
-### 0. Instalação e permissões
-- [ ] Instalar o APK (`adb install -r myfit-<versão>.apk` ou fluxo avançado, ver README).
-- [ ] Abrir: tema escuro, cinco abas na barra inferior.
-- [ ] *Ajustes → Bateria → Liberar*: marcar o MyFit como **Sem restrições**. O status passa a mostrar ✓.
+UI labels are quoted in English; on a phone set to Portuguese, the same labels appear in Portuguese.
 
-### 1. Treinos
-- [ ] Criar "Treino Costas" com 3 exercícios da biblioteca (busca "remada" sem acento funciona).
-- [ ] Editar séries, repetições, descanso e carga digitando "42,5" (vírgula). Reordenar arrastando pela alça.
-- [ ] Criar um exercício personalizado com imagem da galeria. Ela aparece na lista e no treino.
-- [ ] Duplicar o treino (aparece "(cópia)") e excluir a cópia.
+### 0. Installation and permissions
+- [ ] Install the APK (`adb install -r myfit-<version>.apk` or the advanced flow, see README).
+- [ ] Open it: dark theme, five tabs in the bottom bar.
+- [ ] *Settings → Battery → Allow*: set MyFit to **Unrestricted**. The status then shows ✓.
 
-### 2. Execução (com o app aberto)
-- [ ] Iniciar: na primeira vez o app pede permissão de notificações. Aceite.
-- [ ] Concluir série → o descanso começa sozinho. Usar +15 s e −15 s.
-- [ ] No fim do descanso: vibração, som e pulso verde; aparece "DESCANSO CONCLUÍDO".
-- [ ] Ajustar carga com +/− e concluir: a próxima série herda a carga.
-- [ ] Pausar (o tempo total para) e retomar. Pular série e pular exercício; tocar no exercício pulado na faixa superior para voltar a ele.
+### 1. Workouts
+- [ ] Create "Back Workout" with 3 exercises from the library (searching "remada" without accents works).
+- [ ] Edit sets, reps, rest and load, typing "42,5" (comma). Reorder by dragging the handle.
+- [ ] Create a custom exercise with an image from the gallery. It shows up in the list and in the workout.
+- [ ] Duplicate the workout ("(copy)" appears) and delete the copy.
 
-### 3. Tela bloqueada e segundo plano
-- [ ] Concluir uma série e **bloquear a tela** durante o descanso: no fim, o celular toca e vibra, e a notificação mostra "Descanso concluído".
-- [ ] Na tela de bloqueio, a notificação mostra o cronômetro e o botão "Pular descanso" funciona.
-- [ ] Com o celular no **vibrar**: em *Ajustes → Som do fim do descanso → Toca sempre*, o alerta toca mesmo assim.
-- [ ] Ícone de alarme na barra de status durante o descanso: é esperado (alarme exato).
+### 2. Execution (with the app open)
+- [ ] Start: the first time, the app asks for notification permission. Accept it.
+- [ ] Complete set → the rest starts on its own. Use +15 s and −15 s.
+- [ ] At the end of the rest: vibration, sound and a green pulse; "REST COMPLETE" appears.
+- [ ] Adjust the load with +/− and complete the set: the next set inherits the load.
+- [ ] Pause (the total time stops) and resume. Skip set and skip exercise; tap the skipped exercise in the top strip to go back to it.
 
-### 4. Recuperação
-- [ ] No meio do descanso, fechar o app pelos recentes (arrastar para fora). Reabrir: o Início mostra "Treino em andamento". "Retomar" volta na mesma série e o tempo total segue correto.
-- [ ] Reiniciar o celular no meio do treino. Abrir o app e retomar: a sessão continua e o tempo total inclui o período do reboot.
-- [ ] Finalizar o treino → resumo → manter "Atualizar cargas" → "Concluir e salvar".
+### 3. Locked screen and background
+- [ ] Complete a set and **lock the screen** during the rest: at the end, the phone rings and vibrates, and the notification shows "Rest complete".
+- [ ] On the lock screen, the notification shows the timer and the "Skip rest" button works.
+- [ ] With the phone on **vibrate**: with *Settings → Rest end sound → Always ring*, the alert rings anyway.
+- [ ] Alarm icon in the status bar during the rest: expected (exact alarm).
 
-### 5. Histórico
-- [ ] O dia aparece marcado no calendário. Tocar no dia abre a sessão com séries, repetições e cargas.
-- [ ] Alternar Semana/Mês nos resumos. Treinos, tempo total e frequência batem com o que foi feito.
+### 4. Recovery
+- [ ] Mid-rest, close the app from recents (swipe it away). Reopen it: Home shows "Workout in progress". "Resume" goes back to the same set and the total time is still correct.
+- [ ] Restart the phone mid-workout. Open the app and resume: the session continues and the total time includes the reboot period.
+- [ ] Finish the workout → summary → keep "Update loads" checked → "Finish and save".
 
-### 6. Evolução
-- [ ] Registrar duas avaliações em datas diferentes (editar a data no topo). Peso com vírgula.
-- [ ] Comparar as duas: diferenças com sinal (+/−).
-- [ ] Gráficos: peso e cintura aparecem; trocar indicadores e período.
-- [ ] Fotos: adicionar duas (frente), selecionar ambas → "Comparar selecionadas"; excluir uma.
-- [ ] O Início mostra peso, gordura e cintura com a variação.
+### 5. History
+- [ ] The day is marked on the calendar. Tapping the day opens the session with sets, reps and loads.
+- [ ] Toggle Week/Month in the summaries. Workouts, total time and frequency match what was done.
+
+### 6. Progress
+- [ ] Log two assessments on different dates (edit the date at the top). Weight with a decimal comma.
+- [ ] Compare the two: signed differences (+/−).
+- [ ] Charts: weight and waist appear; change the metrics and the period.
+- [ ] Photos: add two (front), select both → "Compare selected"; delete one.
+- [ ] Home shows weight, body fat and waist with their change.
 
 ### 7. Backup
-- [ ] *Ajustes → Backup*: definir a senha de recuperação e guardá-la num gerenciador de senhas.
-- [ ] Criar uma pasta (ex.: `MyFit Backup`) sincronizada com o Google Drive por um app de sincronização. Escolher essa pasta no MyFit.
-- [ ] "Fazer backup agora": aparece um arquivo `myfit-backup-AAAAMMDD-HHmmss.myfit` na lista e no Drive depois da sincronização.
-- [ ] Editar algo e esperar cerca de 10 min (ou o dia seguinte): um novo arquivo surge sozinho. No máximo 7 ficam na pasta.
-- [ ] "Exportar backup para arquivo" (ex.: Downloads) funciona.
-- [ ] **Restauração em instalação limpa**: desinstalar, reinstalar, *Ajustes → Backup → Restaurar de um arquivo* (ou escolher a pasta e tocar num backup) → confirmar a data → digitar a senha → treinos, histórico, medidas e fotos voltam.
-- [ ] Senha errada mostra "Senha incorreta" e nada é alterado.
-- [ ] Apagar a pasta escolhida e tocar "Fazer backup agora": o status mostra o erro em vermelho e chega uma notificação de falha.
+- [ ] *Settings → Backup*: set the recovery password and store it in a password manager.
+- [ ] Create a folder (e.g., `MyFit Backup`) synced with Google Drive by a sync app. Choose that folder in MyFit.
+- [ ] "Back up now": a `myfit-backup-YYYYMMDD-HHmmss.myfit` file appears in the list, and in Drive after syncing.
+- [ ] Edit something and wait about 10 min (or until the next day): a new file shows up on its own. At most 7 are kept in the folder.
+- [ ] "Export backup to file" (e.g., to Downloads) works.
+- [ ] **Restore on a clean install**: uninstall, reinstall, *Settings → Backup → Restore from a file* (or choose the folder and tap a backup) → confirm the date → type the password → workouts, history, measurements and photos come back.
+- [ ] A wrong password shows "Wrong password" and nothing is changed.
+- [ ] Delete the chosen folder and tap "Back up now": the status shows the error in red and a failure notification arrives.
 
-### 8. Atualização
-- [ ] Instalar uma versão nova por cima (`adb install -r`): os dados continuam.
+### 8. Update
+- [ ] Install a new version over the existing one (`adb install -r`): the data is kept.
 
-## Problemas conhecidos
-- O ícone de alarme aparece na barra durante o descanso (`setAlarmClock`, escolhido pela precisão).
-- Com o app aberto, o fim do descanso também mostra a notificação no topo: é ela que toca o som.
-- O seletor de pastas pode não listar o Google Drive diretamente. Use uma pasta local mantida por um app de sincronização.
+## Known issues
+- The alarm icon appears in the status bar during the rest (`setAlarmClock`, chosen for its accuracy).
+- With the app open, the end of the rest also shows the heads-up notification: that's what plays the sound.
+- The folder picker may not list Google Drive directly. Use a local folder kept in sync by a sync app.

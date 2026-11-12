@@ -1,168 +1,168 @@
-# MyFit — Especificação
+# MyFit — Specification
 
-> App Android pessoal e offline para montar treinos, executá-los com cronômetro confiável e acompanhar a evolução do corpo.
+> A personal, offline Android app for building workouts, running them with a reliable timer and tracking body progress.
 
-## Problema e por que importa
+## Problem and why it matters
 
-Quem treina musculação com regularidade precisa de três coisas ao mesmo tempo: saber o que fazer (sequência, séries, repetições, carga, descanso), executar sem atrito no meio do treino (marcar a série, descansar o tempo certo, ajustar a carga) e enxergar a evolução ao longo de meses (frequência, cargas, medidas, fotos). Hoje isso fica espalhado entre bloco de notas, cronômetro do celular, planilhas e a galeria de fotos. O resultado é histórico perdido, descanso no "olhômetro" e nenhuma visão de progresso.
+People who lift regularly need three things at once: knowing what to do (order, sets, reps, load, rest), executing without friction mid-workout (logging the set, resting for the right amount of time, adjusting the load) and seeing progress over months (frequency, loads, measurements, photos). Today this is scattered across a notes app, the phone's timer, spreadsheets and the photo gallery. The result is lost history, rest timed "by eye" and no view of progress.
 
-Os apps de fitness do mercado resolvem parte disso, mas exigem conta, mandam os dados para servidores de terceiros, empurram assinatura e gamificação, e têm interfaces carregadas. Para uso pessoal diário, o custo é atrito em cada treino e dados que não são realmente do usuário.
+Fitness apps on the market solve part of this, but they require an account, send data to third-party servers, push subscriptions and gamification, and have cluttered interfaces. For daily personal use, the cost is friction in every workout and data that doesn't really belong to the user.
 
-O MyFit é um app de um usuário só: rápido durante o treino, 100% local, com backup criptografado sob controle do próprio usuário.
+MyFit is a single-user app: fast during the workout, 100% local, with encrypted backups under the user's own control.
 
-## Objetivos
+## Goals
 
-- Executar um treino completo (séries, descansos, ajustes) sem tirar o foco do exercício, com cronômetro correto mesmo com tela bloqueada ou o app em segundo plano.
-- Nunca perder uma sessão em andamento: fechar o app, matar o processo ou reiniciar o celular não apaga o progresso do treino.
-- Guardar o histórico completo de treinos e medidas, consultável por calendário, resumos e gráficos.
-- Proteger os dados contra perda do aparelho com backup automático e criptografado, sem backend próprio.
-- Ter identidade visual própria, minimalista e escura, que não pareça template de app fitness.
+- Run a full workout (sets, rests, adjustments) without losing focus on the exercise, with a correct timer even with the screen locked or the app in the background.
+- Never lose an in-progress session: closing the app, killing the process or restarting the phone doesn't erase workout progress.
+- Keep the full history of workouts and measurements, browsable through a calendar, summaries and charts.
+- Protect data against device loss with automatic, encrypted backups, without a backend of its own.
+- Have its own visual identity, minimal and dark, that doesn't look like a fitness app template.
 
-## Não objetivos
+## Non-goals
 
-- Não é rede social: sem compartilhamento, ranking, amigos ou feed.
-- Sem gamificação: nada de medalhas, pontos ou sequências com pressão para não "quebrar".
-- Sem conta, login ou servidor: os dados vivem no aparelho e nos arquivos de backup do usuário.
-- Não é coach: não gera treinos, não prescreve cargas nem dá recomendações de saúde ou nutrição.
-- Não integra com wearables, Health Connect ou sensores de frequência cardíaca.
+- Not a social network: no sharing, rankings, friends or feed.
+- No gamification: no badges, points or streaks that pressure you not to "break" them.
+- No account, login or server: data lives on the device and in the user's backup files.
+- Not a coach: it doesn't generate workouts, prescribe loads or give health or nutrition advice.
+- No integration with wearables, Health Connect or heart-rate sensors.
 
-## Critérios de sucesso
+## Success criteria
 
-| Critério | Medição | Meta |
+| Criterion | Measurement | Target |
 |---|---|---|
-| Precisão do descanso | Desvio entre o fim real do descanso e o alerta, com tela bloqueada | ≤ 2 s |
-| Recuperação de sessão | Treino retomado no mesmo exercício/série após matar o processo ou reiniciar o celular | 100% dos casos do roteiro de teste |
-| Atrito na execução | Toques para concluir uma série e iniciar o descanso | 1 toque |
-| Abertura do app | Tempo até o Início ficar interativo (cold start, celular intermediário) | < 1,5 s |
-| Integridade do backup | Restaurar um backup recria banco e imagens idênticos (contagens e hashes) | 100% nos testes de ida e volta |
-| Detecção de corrupção | Arquivo adulterado ou senha errada rejeitados antes de tocar nos dados locais | 100% nos testes |
-| Tamanho do APK | APK de release minificado | < 15 MB |
-| Critérios de aceite do usuário | Roteiro manual em `docs/TESTING.md` no celular do usuário | Todos os itens passam |
+| Rest accuracy | Deviation between the actual end of rest and the alert, with the screen locked | ≤ 2 s |
+| Session recovery | Workout resumed at the same exercise/set after killing the process or restarting the phone | 100% of the test script cases |
+| Execution friction | Taps to complete a set and start the rest | 1 tap |
+| App launch | Time until Home is interactive (cold start, mid-range phone) | < 1.5 s |
+| Backup integrity | Restoring a backup recreates an identical database and images (counts and hashes) | 100% in round-trip tests |
+| Corruption detection | Tampered file or wrong password rejected before touching local data | 100% in tests |
+| APK size | Minified release APK | < 15 MB |
+| User acceptance criteria | Manual checklist in `docs/TESTING.md` on the user's phone | All items pass |
 
-## Usuário e casos de uso
+## User and use cases
 
-**Usuário:** uma pessoa (o dono do app) que treina musculação de 3 a 6 vezes por semana com treinos divididos (ex.: Costas, Peito, Pernas), usa um Samsung com Android recente e quer o histórico sob controle próprio.
+**User:** one person (the app's owner) who lifts 3 to 6 times a week on a split routine (e.g., Back, Chest, Legs), uses a Samsung phone with a recent Android version and wants their history under their own control.
 
-**Casos de uso principais:**
+**Main use cases:**
 
-1. "Chego na academia, abro o app, toco em Iniciar no treino de Costas e vou marcando as séries; o descanso conta sozinho e o celular vibra/toca quando acaba, mesmo bloqueado no banco."
-2. "No meio do treino a máquina está ocupada: pulo o exercício, faço o próximo e volto depois; subo a carga de 40 para 42,5 kg numa série."
-3. "O app fechou (ou o celular reiniciou) no meio do treino: reabro e continuo de onde parei, com o tempo total certo."
-4. "No fim do mês, olho no calendário quantas vezes treinei, quanto tempo no total e quais exercícios fiz."
-5. "A cada 4 semanas registro peso e medidas, comparo com a avaliação inicial e vejo o gráfico do braço e da cintura subindo e descendo."
-6. "Troquei de celular: instalo o app, aponto para a pasta de backup sincronizada com o Drive, digito a senha e está tudo de volta, com as fotos."
+1. "I get to the gym, open the app, tap Start on the Back workout and log sets as I go; the rest timer runs on its own and the phone vibrates/rings when it ends, even while locked on the bench."
+2. "Mid-workout the machine is taken: I skip the exercise, do the next one and come back later; I bump the load from 40 to 42.5 kg on one set."
+3. "The app closed (or the phone restarted) mid-workout: I reopen it and pick up where I left off, with the correct total time."
+4. "At the end of the month, I check the calendar to see how many times I trained, the total time and which exercises I did."
+5. "Every 4 weeks I log my weight and measurements, compare them with the initial assessment and watch the arm and waist charts go up and down."
+6. "I switched phones: I install the app, point it to the backup folder synced with Drive, type the password and everything is back, photos included."
 
-## Requisitos funcionais
+## Functional requirements
 
-### Início (dashboard)
+### Home (dashboard)
 
-1. DEVE mostrar saudação e data atual.
-2. DEVE mostrar, com prioridade máxima, um treino em andamento com ação "Retomar".
-3. DEVE mostrar o treino realizado hoje, se houver.
-4. DEVE oferecer atalho para iniciar um treino, sugerindo o treino feito há mais tempo.
-5. DEVE listar os treinos disponíveis, o resumo da última atividade, os indicadores corporais mais recentes (com variação) e o resumo da semana.
+1. MUST show a greeting and the current date.
+2. MUST show, with top priority, an in-progress workout with a "Resume" action.
+3. MUST show the workout done today, if any.
+4. MUST offer a shortcut to start a workout, suggesting the one done longest ago.
+5. MUST list the available workouts, a summary of the latest activity, the most recent body metrics (with change) and the week summary.
 
-### Treinos e exercícios
+### Workouts and exercises
 
-6. DEVE permitir criar, editar, duplicar e excluir treinos (nome, descrição opcional, lista ordenada de exercícios), sem limite de quantidade.
-7. DEVE permitir adicionar, remover e reordenar exercícios num treino.
-8. Cada exercício no treino DEVE ter: séries, repetições por série, descanso entre séries (s), carga (kg, opcional) e observações.
-9. DEVE oferecer uma biblioteca de exercícios pré-definidos (nome, grupo muscular, tipo de movimento push/pull/legs/outros) com busca e filtro por grupo.
-10. DEVE permitir cadastrar exercícios personalizados com imagem demonstrativa opcional escolhida da galeria.
+6. MUST allow creating, editing, duplicating and deleting workouts (name, optional description, ordered list of exercises), with no limit on how many.
+7. MUST allow adding, removing and reordering exercises in a workout.
+8. Each exercise in a workout MUST have: sets, reps per set, rest between sets (s), load (kg, optional) and notes.
+9. MUST offer a library of predefined exercises (name, muscle group, push/pull/legs/other movement type) with search and filtering by group.
+10. MUST allow creating custom exercises with an optional demo image picked from the gallery.
 
-### Execução do treino
+### Workout execution
 
-11. DEVE iniciar uma sessão a partir de um treino e mostrar: nome do treino, exercício atual, imagem (se houver), série atual/total, repetições planejadas, carga, cronômetro de descanso e tempo total.
-12. DEVE seguir o fluxo: concluir série (1 toque) → descanso automático → alerta visual e sonoro ao fim → próxima série → próximo exercício → finalizar.
-13. DEVE permitir pausar/retomar, pular série, pular exercício, ajustar carga e repetições da série, alterar o descanso (inclusive ±15 s durante o descanso) e encerrar antes.
-14. DEVE manter os cronômetros corretos com o app em segundo plano, a tela bloqueada, o processo encerrado pelo sistema ou após reinício do aparelho. O tempo DEVE ser derivado de marcas temporais persistidas, nunca de contadores na interface.
-15. DEVE alertar o fim do descanso por notificação com som e vibração mesmo com o app fechado, e mostrar uma notificação contínua do treino com o cronômetro e ações rápidas.
-16. DEVE persistir cada passo da sessão imediatamente e oferecer a retomada exata ao reabrir o app.
-17. Ao finalizar, DEVE salvar automaticamente: data, horário de início e fim, duração (sem pausas), treino, exercícios, séries concluídas/puladas, repetições e cargas realizadas.
-18. DEVERIA oferecer, ao finalizar, atualizar as cargas do treino com as usadas na sessão.
+11. MUST start a session from a workout and show: workout name, current exercise, image (if any), current set/total, planned reps, load, rest timer and total time.
+12. MUST follow the flow: complete set (1 tap) → automatic rest → visual and audible alert when it ends → next set → next exercise → finish.
+13. MUST allow pausing/resuming, skipping a set, skipping an exercise, adjusting the set's load and reps, changing the rest (including ±15 s during the rest) and ending early.
+14. MUST keep timers correct with the app in the background, the screen locked, the process killed by the system or after a device restart. Time MUST be derived from persisted timestamps, never from UI counters.
+15. MUST signal the end of rest with a notification with sound and vibration even with the app closed, and show an ongoing workout notification with the timer and quick actions.
+16. MUST persist every session step immediately and offer exact resumption when the app is reopened.
+17. When finishing, MUST automatically save: date, start and end time, duration (excluding pauses), workout, exercises, completed/skipped sets, and the reps and loads performed.
+18. SHOULD offer, when finishing, to update the workout's loads with the ones used in the session.
 
-### Histórico e calendário
+### History and calendar
 
-19. DEVE mostrar um calendário mensal com os dias treinados destacados.
-20. Ao tocar num dia, DEVE listar as sessões com duração e permitir abrir o detalhe (exercícios, séries, repetições, cargas).
-21. DEVE mostrar resumos semanal e mensal: quantidade de treinos, tempo total, frequência semanal média e exercícios realizados.
-22. O histórico DEVE se manter íntegro mesmo que o treino ou o exercício de origem sejam editados ou excluídos depois.
+19. MUST show a monthly calendar with workout days highlighted.
+20. When a day is tapped, MUST list its sessions with duration and allow opening the detail (exercises, sets, reps, loads).
+21. MUST show weekly and monthly summaries: number of workouts, total time, average weekly frequency and exercises performed.
+22. History MUST stay intact even if the source workout or exercise is later edited or deleted.
 
-### Evolução corporal
+### Body progress
 
-23. DEVE permitir criar, editar e excluir avaliações com data, peso (kg), % de gordura (opcional) e 14 circunferências em cm (pescoço, ombros, peitoral, cintura, abdômen, quadril, braços D/E, antebraços D/E, coxas D/E, panturrilhas D/E), todas opcionais exceto a data.
-24. DEVE listar o histórico de avaliações.
-25. DEVE comparar duas avaliações escolhidas, mostrando valores e diferença absoluta com sinal por indicador.
-26. DEVE mostrar gráficos de evolução no tempo para cada indicador, com seleção dos indicadores exibidos.
-27. DEVE permitir registrar fotos corporais por data (frente/lado/costas), navegar por data e comparar duas fotos lado a lado.
+23. MUST allow creating, editing and deleting assessments with date, weight (kg), body fat % (optional) and 14 circumferences in cm (neck, shoulders, chest, waist, abdomen, hips, right/left arms, right/left forearms, right/left thighs, right/left calves), all optional except the date.
+24. MUST list the assessment history.
+25. MUST compare two chosen assessments, showing values and the signed absolute difference per metric.
+26. MUST show progress charts over time for each metric, with selection of the metrics displayed.
+27. MUST allow logging body photos by date (front/side/back), browsing by date and comparing two photos side by side.
 
-### Backup e dados
+### Backup and data
 
-28. DEVE gerar backup único e compactado com todos os dados (treinos, biblioteca personalizada, sessões completas, medidas, fotos, imagens de exercícios, configurações), incluindo versão do formato e metadados.
-29. DEVE criptografar todo backup com uma senha de recuperação definida pelo usuário.
-30. DEVE gravar backups numa pasta escolhida pelo usuário no aparelho (que ele pode sincronizar com o Google Drive por conta própria), mantendo os 7 mais recentes.
-31. DEVE fazer backup automático diário e após alterações importantes, com intervalo mínimo para evitar gravações excessivas, sem atrapalhar o uso offline.
-32. DEVE permitir backup manual e mostrar data/hora do último backup, status e o último erro de forma clara.
-33. DEVE permitir restaurar um backup da pasta ou de um arquivo avulso, mostrando a data do backup e pedindo confirmação antes de substituir os dados locais.
-34. DEVE validar a integridade (senha, autenticidade, hashes, versão do formato) antes de restaurar e de novo depois, sem alterar os dados locais se a validação falhar.
+28. MUST generate a single, compressed backup with all data (workouts, custom library, full sessions, measurements, photos, exercise images, settings), including the format version and metadata.
+29. MUST encrypt every backup with a user-defined recovery password.
+30. MUST write backups to a user-chosen folder on the device (which they can sync with Google Drive on their own), keeping the 7 most recent.
+31. MUST back up automatically every day and after important changes, with a minimum interval to avoid excessive writes, without getting in the way of offline use.
+32. MUST allow manual backups and clearly show the date/time of the last backup, the status and the last error.
+33. MUST allow restoring a backup from the folder or from a standalone file, showing the backup date and asking for confirmation before replacing local data.
+34. MUST validate integrity (password, authenticity, hashes, format version) before restoring and again afterwards, without changing local data if validation fails.
 
-### Configurações
+### Settings
 
-35. DEVE permitir escolher tema (Escuro, padrão; Claro; Sistema), descanso padrão, comportamento do som do descanso e manter a tela ligada durante o treino.
-36. DEVE reunir gerenciamento de backup (pasta, senha, automático, manual, restaurar) e da biblioteca de exercícios.
-37. DEVERIA orientar a remover a otimização de bateria do app (relevante em aparelhos Samsung).
+35. MUST allow choosing the theme (Dark, default; Light; System), the default rest, the rest sound behavior and keeping the screen on during workouts.
+36. MUST bring together backup management (folder, password, automatic, manual, restore) and exercise library management.
+37. SHOULD guide the user to remove battery optimization for the app (relevant on Samsung devices).
 
-## Requisitos não funcionais
+## Non-functional requirements
 
-- **Offline-first:** toda funcionalidade opera sem internet; não há chamada de rede no app.
-- **Confiabilidade:** dados preservados após reinício do aparelho; banco com migrações testadas a partir da primeira versão instalada; restauração atômica (ou tudo ou nada).
-- **Privacidade e segurança:** sem coleta de dados, sem analytics, sem permissões de mídia (seletor de fotos do sistema); backups criptografados com autenticação (AES-256-GCM em streaming, chave derivada da senha); backup automático do Android desligado para não copiar chaves que não funcionam em outro aparelho.
-- **Desempenho:** interface a 60 fps na execução do treino; consultas do histórico e gráficos fluidos com 5 anos de dados (~1.500 sessões, ~60 avaliações).
-- **Experiência:** tema escuro priorizado e tema claro completo; layouts adaptados a celulares de tamanhos diferentes e telas largas; animações discretas (150–250 ms); alvos de toque grandes na execução; suporte a fonte grande do sistema.
-- **Compatibilidade:** Android 8.0 (API 26) ou superior; alvo API 37.
-- **Idioma:** interface em PT-BR, unidades métricas (kg, cm).
+- **Offline-first:** every feature works without internet; the app makes no network calls.
+- **Reliability:** data preserved after a device restart; database with migrations tested from the first installed version; atomic (all-or-nothing) restore.
+- **Privacy and security:** no data collection, no analytics, no media permissions (system photo picker); backups encrypted with authentication (streaming AES-256-GCM, password-derived key); Android auto backup disabled so it doesn't copy keys that don't work on another device.
+- **Performance:** 60 fps UI during workout execution; smooth history queries and charts with 5 years of data (~1,500 sessions, ~60 assessments).
+- **Experience:** dark theme first and a complete light theme; layouts adapted to phones of different sizes and to large screens; subtle animations (150–250 ms); large touch targets during execution; support for large system font sizes.
+- **Compatibility:** Android 8.0 (API 26) or higher; target API 37.
+- **Language:** UI in English by default with a Brazilian Portuguese translation (strings in `res/values` and `res/values-pt-rBR`); metric units (kg, cm); locale-aware number and date formatting.
 
-## Identidade visual
+## Visual identity
 
-- Marca MyFit com símbolo e logotipo próprios, ícone adaptativo e versão monocromática.
-- Predominância de preto, branco e cinzas; verde como única cor de destaque, reservada para progresso e ações positivas.
-- Referências estéticas: Linear, Apple Fitness, Whoop. Evitar aparência de template de app fitness.
-- Sistema de componentes consistente em todas as telas, documentado em `docs/BRAND.md`.
+- MyFit brand with its own symbol and logotype, adaptive icon and monochrome version.
+- Mostly black, white and grays; green as the only accent color, reserved for progress and positive actions.
+- Aesthetic references: Linear, Apple Fitness, Whoop. Avoid looking like a fitness app template.
+- Consistent component system across all screens, documented in `docs/BRAND.md`.
 
-## Visão geral da arquitetura
+## Architecture overview
 
-App Android nativo (Kotlin, Jetpack Compose, Material 3), MVVM com camadas de UI, domínio e dados:
+Native Android app (Kotlin, Jetpack Compose, Material 3), MVVM with UI, domain and data layers:
 
 ```
-ui/       telas Compose + ViewModels por feature; design system compartilhado
-domain/   modelos e regras puras (motor da sessão de treino, resumos, comparações, formato de backup)
-data/     Room (fonte da verdade), DataStore (configurações), armazenamento de imagens, pasta de backup (SAF)
+ui/       Compose screens + ViewModels per feature; shared design system
+domain/   pure models and rules (workout session engine, summaries, comparisons, backup format)
+data/     Room (source of truth), DataStore (settings), image storage, backup folder (SAF)
 ```
 
-Componentes de plataforma: foreground service da sessão de treino, alarme exato para o fim do descanso, WorkManager para backups. Detalhes em `docs/ARCHITECTURE.md`.
+Platform components: a foreground service for the workout session, an exact alarm for the end of rest, WorkManager for backups. Details in `docs/ARCHITECTURE.md`.
 
-## Restrições e premissas
+## Constraints and assumptions
 
-- Distribuição por APK assinado instalado manualmente (sem Play Store). Premissa: o usuário consegue instalar apps fora da loja no seu aparelho, seja pelo fluxo de desenvolvedor não verificado, seja via ADB.
-- Sem backend, autenticação ou serviços pagos.
-- A sincronização da pasta de backup com a nuvem é responsabilidade do usuário (app de sincronização de sua escolha). Premissa: o provedor de documentos da pasta permite criar, listar e apagar arquivos.
-- Desenvolvimento e validação sem dispositivo Android: testes na JVM (unitários, Robolectric, screenshots). Comportamentos de plataforma (alarmes, service, som, pasta real) são validados pelo usuário com roteiro manual.
-- A perda simultânea do aparelho e da senha de recuperação torna os backups irrecuperáveis, por design.
+- Distributed as a signed APK installed manually (no Play Store). Assumption: the user can install apps from outside the store on their device, either through the unverified developer flow or via ADB.
+- No backend, authentication or paid services.
+- Syncing the backup folder to the cloud is the user's responsibility (with a sync app of their choice). Assumption: the folder's document provider allows creating, listing and deleting files.
+- Developed and validated without an Android device: JVM tests (unit, Robolectric, screenshots). Platform behavior (alarms, service, sound, real folder) is validated by the user with a manual checklist.
+- Losing both the device and the recovery password makes the backups unrecoverable, by design.
 
-## Fora do escopo (v1)
+## Out of scope (v1)
 
-- Sincronização em tempo real entre aparelhos.
-- Integração direta com a API do Google Drive (substituída pela pasta escolhida pelo usuário).
-- Exportação para CSV/planilha.
-- Supersets, drop-sets e séries com metas diferentes por série no planejamento (o realizado é registrado por série).
-- Cálculo automático de 1RM, volume por grupo muscular e recordes pessoais.
-- Widgets de tela inicial, Wear OS e Live Updates do Android 16.
-- Imagens demonstrativas na biblioteca pré-definida (só exercícios com imagem escolhida pelo usuário).
-- Outros idiomas e unidades imperiais.
+- Real-time sync between devices.
+- Direct integration with the Google Drive API (replaced by the user-chosen folder).
+- Export to CSV/spreadsheet.
+- Supersets, drop sets and sets with different targets per set in planning (what was actually done is logged per set).
+- Automatic calculation of 1RM, volume per muscle group and personal records.
+- Home screen widgets, Wear OS and Android 16 Live Updates.
+- Demo images in the predefined library (only exercises with an image chosen by the user have one).
+- Other languages and imperial units.
 
-## Questões em aberto
+## Open questions
 
-1. **Instalação fora da Play Store no Brasil:** a exigência de desenvolvedor verificado estava prevista para 30/09/2026. Confirmar antes do release se está vigente e documentar o caminho (fluxo avançado, ADB ou conta de distribuição limitada).
-2. **Provedores de documentos:** apps de sincronização expõem pastas com comportamentos diferentes (renomear, listar). O fallback é gravar direto no nome final; validar no aparelho do usuário.
-3. **Atualizar cargas do treino ao finalizar:** padrão marcado (opção visível na tela de resumo). Revisar depois de algumas semanas de uso.
-4. **Sugestão de próximo treino:** "o feito há mais tempo" é a regra inicial; pode virar ordem fixa de rotação se não refletir a divisão do usuário.
+1. **Installing outside the Play Store in Brazil:** the verified developer requirement was scheduled for September 30, 2026. Before the release, confirm whether it is in effect and document the path (advanced flow, ADB or limited distribution account).
+2. **Document providers:** sync apps expose folders with different behaviors (renaming, listing). The fallback is to write directly to the final name; validate on the user's device.
+3. **Updating workout loads when finishing:** checked by default (option visible on the summary screen). Revisit after a few weeks of use.
+4. **Next workout suggestion:** "the one done longest ago" is the initial rule; it may become a fixed rotation order if it doesn't reflect the user's split.
