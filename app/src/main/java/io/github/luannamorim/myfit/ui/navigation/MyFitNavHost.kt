@@ -31,6 +31,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.luannamorim.myfit.ui.feature.evolution.EvolutionScreen
 import io.github.luannamorim.myfit.ui.feature.history.HistoryScreen
+import io.github.luannamorim.myfit.ui.feature.history.SessionDetailScreen
 import io.github.luannamorim.myfit.ui.feature.home.HomeScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutinesScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorScreen
@@ -130,7 +131,7 @@ fun MyFitNavHost(
                         onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
                     )
                 }
-                composable<HistoryRoute> { HistoryScreen() }
+                composable<HistoryRoute> { HistoryScreen(onOpenSession = { navController.navigate(SessionDetailRoute(it)) }) }
                 composable<EvolutionRoute> { EvolutionScreen() }
                 composable<SettingsRoute> { SettingsScreen() }
 
@@ -164,6 +165,9 @@ fun MyFitNavHost(
                 }
                 composable<ExerciseEditorRoute> {
                     ExerciseEditorScreen(onClose = { navController.popBackStack() })
+                }
+                composable<SessionDetailRoute> {
+                    SessionDetailScreen(onBack = { navController.popBackStack() })
                 }
                 composable<WorkoutRoute> {
                     WorkoutScreen(

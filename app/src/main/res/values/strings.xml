@@ -170,4 +170,24 @@
     <!-- Sessão em andamento -->
     <string name="active_bar_title">Treino em andamento</string>
     <string name="active_bar_resume">Retomar</string>
+    <!-- Histórico -->
+    <string name="history_prev_month">Mês anterior</string>
+    <string name="history_next_month">Próximo mês</string>
+    <string name="history_week">Semana</string>
+    <string name="history_month">Mês</string>
+    <string name="history_sessions">Treinos</string>
+    <string name="history_total_time">Tempo total</string>
+    <string name="history_frequency">Frequência</string>
+    <string name="history_frequency_value">%1$s×/sem</string>
+    <string name="history_exercises">Exercícios realizados</string>
+    <string name="history_no_sessions_day">Nenhum treino neste dia.</string>
+    <string name="history_month_sessions">Treinos do mês</string>
+    <string name="history_session_meta" tools:ignore="PluralsCandidate">%1$s · %2$s · %3$d séries</string>
+    <string name="history_exercise_times">%d×</string>
+    <string name="detail_title">Sessão</string>
+    <string name="detail_delete_title">Excluir sessão?</string>
+    <string name="detail_delete_message">Ela sai do histórico e do calendário. Isso não pode ser desfeito.</string>
+    <string name="detail_set_skipped">pulada</string>
+    <string name="detail_set_not_done">não feita</string>
+    <string name="detail_started_at">Início às %1$s</string>
 </resources>
