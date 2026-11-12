@@ -43,4 +43,20 @@ class SnapshotMapperTest {
         val withExtra = text.replaceFirst("{", """{"futureField":42,""")
         assertEquals(exported, BackupArchive.json.decodeFromString(BackupDataV1.serializer(), withExtra))
     }
+
+    @Test
+    fun replaceAll_linksLibraryRowsOfBackupsMadeBeforeSeedKeys() = runBlocking {
+        val db = inMemoryDb(seed = true)
+        val old = SnapshotMapper.export(db).let { data ->
+            data.copy(exercises = data.exercises.map { it.copy(seedKey = null) }) // a v1.2 backup
+        }
+        val other = inMemoryDb(seed = false)
+        SnapshotMapper.replaceAll(other, old)
+        val restored = other.exerciseDao().getAll()
+        assertEquals(old.exercises.size, restored.size)
+        assertTrue(restored.all { it.seedKey != null })
+        assertEquals("barbell-bench-press", restored.single { it.name == "Supino reto com barra" }.seedKey)
+        db.close()
+        other.close()
+    }
 }

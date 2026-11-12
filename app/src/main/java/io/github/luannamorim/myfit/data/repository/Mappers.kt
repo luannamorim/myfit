@@ -17,6 +17,7 @@ fun ExerciseEntity.toDomain() = Exercise(
     imagePath = imagePath,
     notes = notes,
     isCustom = isCustom,
+    seedKey = seedKey,
 )
 
 fun RoutineItemWithExercise.toDomain() = RoutineItem(

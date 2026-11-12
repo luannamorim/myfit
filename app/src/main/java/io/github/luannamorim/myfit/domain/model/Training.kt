@@ -8,6 +8,8 @@ data class Exercise(
     val imagePath: String? = null,
     val notes: String? = null,
     val isCustom: Boolean = true,
+    /** Library entry this exercise came from (drawing, original name); null when user-created. */
+    val seedKey: String? = null,
 )
 
 data class RoutineItem(

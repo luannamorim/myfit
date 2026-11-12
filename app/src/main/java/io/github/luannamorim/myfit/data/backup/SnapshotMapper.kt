@@ -11,6 +11,7 @@ import io.github.luannamorim.myfit.data.db.entity.RoutineExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionSetEntity
 import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
+import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.backup.AssessmentDto
 import io.github.luannamorim.myfit.domain.backup.BackupDataV1
 import io.github.luannamorim.myfit.domain.backup.ExerciseDto
@@ -38,7 +39,10 @@ object SnapshotMapper {
         )
     }
 
-    /** Replaces every table with [data] in a single transaction, preserving ids. */
+    /**
+     * Replaces every table with [data] in a single transaction, preserving ids. Backups made before
+     * library keys existed get their library rows linked by name, as the 2 → 3 migration does.
+     */
     suspend fun replaceAll(db: MyFitDatabase, data: BackupDataV1) {
         val dao = db.backupDao()
         db.withTransaction {
@@ -59,14 +63,15 @@ object SnapshotMapper {
             dao.insertSessionSets(data.sessionSets.map { it.toEntity() })
             dao.insertAssessments(data.assessments.map { it.toEntity() })
             dao.insertPhotos(data.photos.map { it.toEntity() })
+            ExerciseSeed.linkKeys(db.openHelper.writableDatabase)
         }
     }
 
     private fun Mark.toDto() = MarkDto(wallMs, elapsedMs, bootCount)
     private fun MarkDto.toMark() = Mark(wallMs, elapsedMs, bootCount)
 
-    private fun ExerciseEntity.toDto() = ExerciseDto(id, name, muscleGroup.name, movementType.name, imagePath, notes, isCustom, archived, createdAtMs)
-    private fun ExerciseDto.toEntity() = ExerciseEntity(id, name, enumOf(muscleGroup), enumOf(movementType), imagePath, notes, isCustom, archived, createdAtMs)
+    private fun ExerciseEntity.toDto() = ExerciseDto(id, name, muscleGroup.name, movementType.name, imagePath, notes, isCustom, archived, createdAtMs, seedKey)
+    private fun ExerciseDto.toEntity() = ExerciseEntity(id, name, enumOf(muscleGroup), enumOf(movementType), imagePath, notes, isCustom, archived, createdAtMs, seedKey)
 
     private fun RoutineEntity.toDto() = RoutineDto(id, name, description, position, createdAtMs, updatedAtMs)
     private fun RoutineDto.toEntity() = RoutineEntity(id, name, description, position, createdAtMs, updatedAtMs)
@@ -84,10 +89,10 @@ object SnapshotMapper {
     )
 
     private fun SessionExerciseEntity.toDto() = SessionExerciseDto(
-        id, sessionId, exerciseId, position, name, muscleGroup.name, movementType.name, imagePath, restSeconds, notes, status.name,
+        id, sessionId, exerciseId, position, name, muscleGroup.name, movementType.name, imagePath, restSeconds, notes, status.name, seedKey,
     )
     private fun SessionExerciseDto.toEntity() = SessionExerciseEntity(
-        id, sessionId, exerciseId, position, name, enumOf(muscleGroup), enumOf(movementType), imagePath, restSeconds, notes, enumOf(status),
+        id, sessionId, exerciseId, position, name, enumOf(muscleGroup), enumOf(movementType), imagePath, restSeconds, notes, enumOf(status), seedKey,
     )
 
     private fun SessionSetEntity.toDto() = SessionSetDto(id, sessionExerciseId, setIndex, plannedReps, plannedLoadKg, actualReps, actualLoadKg, status.name, completedAtWallMs)

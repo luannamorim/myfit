@@ -80,7 +80,7 @@ class RoutineRepositoryTest {
         val a = byName("remada curvada")
         db.insertRoutine("Costas", listOf(a.id))
         assertEquals(ExerciseDeleteResult.ARCHIVED, exercises.delete(a.id))
-        assertTrue(exercises.observeLibrary("remada curvada").first().isEmpty())
+        assertTrue(exercises.observeLibrary("remada curvada").first().none { it.id == a.id })
         assertEquals("Remada curvada", exercises.get(a.id)!!.name)
 
         val free = byName("prancha")

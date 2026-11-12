@@ -39,6 +39,7 @@ data class BackupDataV1(
 data class ExerciseDto(
     val id: Long, val name: String, val muscleGroup: String, val movementType: String,
     val imagePath: String? = null, val notes: String? = null, val isCustom: Boolean, val archived: Boolean = false, val createdAtMs: Long,
+    val seedKey: String? = null,
 )
 
 @Serializable
@@ -62,7 +63,7 @@ data class SessionDto(
 data class SessionExerciseDto(
     val id: Long, val sessionId: Long, val exerciseId: Long? = null, val position: Int, val name: String,
     val muscleGroup: String, val movementType: String, val imagePath: String? = null, val restSeconds: Int,
-    val notes: String? = null, val status: String,
+    val notes: String? = null, val status: String, val seedKey: String? = null,
 )
 
 @Serializable

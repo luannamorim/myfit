@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 
-@Entity(tableName = "exercise")
+@Entity(tableName = "exercise", indices = [Index(value = ["seedKey"], unique = true)])
 data class ExerciseEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
@@ -18,6 +18,8 @@ data class ExerciseEntity(
     val isCustom: Boolean,
     val archived: Boolean = false,
     val createdAtMs: Long,
+    /** Key of the library entry this row came from (see ExerciseSeed); null for user-created ones. */
+    val seedKey: String? = null,
 )
 
 @Entity(tableName = "routine")

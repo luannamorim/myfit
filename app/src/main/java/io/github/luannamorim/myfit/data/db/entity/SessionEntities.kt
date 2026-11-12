@@ -57,6 +57,7 @@ data class SessionExerciseEntity(
     val restSeconds: Int,
     val notes: String? = null,
     val status: ItemStatus = ItemStatus.PENDING,
+    val seedKey: String? = null,
 )
 
 @Entity(

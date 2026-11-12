@@ -31,6 +31,7 @@ data class SessionExercise(
     val notes: String?,
     val status: ItemStatus,
     val sets: List<SessionSet>,
+    val seedKey: String? = null,
 ) {
     val hasPending: Boolean get() = sets.any { it.status == ItemStatus.PENDING }
     val doneCount: Int get() = sets.count { it.status == ItemStatus.DONE }

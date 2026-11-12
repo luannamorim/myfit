@@ -38,7 +38,7 @@ abstract class MyFitDatabase : RoomDatabase() {
     abstract fun backupDao(): BackupDao
 
     companion object {
-        const val VERSION = 2
+        const val VERSION = 3
         const val NAME = "myfit.db"
     }
 }
