@@ -10,6 +10,9 @@ plugins {
     alias(libs.plugins.roborazzi)
 }
 
+// Release signing comes from ~/.gradle/gradle.properties (never committed). Without it, release is unsigned.
+val releaseStoreFile: String? = providers.gradleProperty("MYFIT_STORE_FILE").orNull
+
 android {
     namespace = "io.github.luannamorim.myfit"
     compileSdk = 37
@@ -23,12 +26,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = providers.gradleProperty("MYFIT_STORE_PASSWORD").get()
+                keyAlias = providers.gradleProperty("MYFIT_KEY_ALIAS").get()
+                keyPassword = providers.gradleProperty("MYFIT_KEY_PASSWORD").get()
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
