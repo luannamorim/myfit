@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.ui.feature.home
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
+import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
@@ -55,6 +56,7 @@ class HomeViewModelTest {
             RoutineRepository(env.db, env.time, BackupTrigger { }),
             HistoryRepository(env.db, env.time, BackupTrigger { }),
             env.controller,
+            BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { }),
             env.time,
         )
         val state = vm.state.awaitUntil { !it.loading && it.todaySessions.isNotEmpty() && it.active != null }

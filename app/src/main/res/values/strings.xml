@@ -194,7 +194,6 @@
     <string name="home_morning">Bom dia</string>
     <string name="home_afternoon">Boa tarde</string>
     <string name="home_evening">Boa noite</string>
-    <string name="home_in_progress">Treino em andamento</string>
     <string name="home_today_done">Treino de hoje concluído</string>
     <string name="home_next">Próximo treino</string>
     <string name="home_start">Iniciar treino</string>
@@ -212,4 +211,73 @@
     </plurals>
     <string name="home_empty_title">Comece pelo seu primeiro treino</string>
     <string name="home_empty_message">Monte uma sequência de exercícios e inicie quando chegar na academia.</string>
+    <!-- Medidas -->
+    <string name="measure_weight">Peso</string>
+    <string name="measure_body_fat">Gordura corporal</string>
+    <string name="measure_neck">Pescoço</string>
+    <string name="measure_shoulders">Ombros</string>
+    <string name="measure_chest">Peitoral</string>
+    <string name="measure_waist">Cintura</string>
+    <string name="measure_abdomen">Abdômen</string>
+    <string name="measure_hips">Quadril</string>
+    <string name="measure_arm_right">Braço direito</string>
+    <string name="measure_arm_left">Braço esquerdo</string>
+    <string name="measure_forearm_right">Antebraço direito</string>
+    <string name="measure_forearm_left">Antebraço esquerdo</string>
+    <string name="measure_thigh_right">Coxa direita</string>
+    <string name="measure_thigh_left">Coxa esquerda</string>
+    <string name="measure_calf_right">Panturrilha direita</string>
+    <string name="measure_calf_left">Panturrilha esquerda</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_percent">%</string>
+
+    <!-- Evolução -->
+    <string name="evolution_tab_measures">Medidas</string>
+    <string name="evolution_tab_charts">Gráficos</string>
+    <string name="evolution_tab_photos">Fotos</string>
+    <string name="evolution_new_assessment">Nova avaliação</string>
+    <string name="evolution_compare">Comparar</string>
+    <string name="evolution_history">Avaliações</string>
+    <string name="evolution_empty_title">Nenhuma avaliação ainda</string>
+    <string name="evolution_empty_message">Registre peso e circunferências para acompanhar a evolução do corpo.</string>
+    <plurals name="evolution_measures_count">
+        <item quantity="one">%d medida</item>
+        <item quantity="other">%d medidas</item>
+    </plurals>
+    <string name="evolution_vs_previous">vs. avaliação anterior</string>
+    <string name="assessment_new">Nova avaliação</string>
+    <string name="assessment_edit">Editar avaliação</string>
+    <string name="assessment_date">Data</string>
+    <string name="assessment_group_general">Dados gerais</string>
+    <string name="assessment_group_trunk">Tronco</string>
+    <string name="assessment_group_arms">Braços</string>
+    <string name="assessment_group_legs">Pernas</string>
+    <string name="assessment_notes">Observações</string>
+    <string name="assessment_empty_error">Preencha pelo menos uma medida</string>
+    <string name="assessment_delete_title">Excluir avaliação?</string>
+    <string name="assessment_delete_message">As medidas desta data serão removidas do histórico e dos gráficos.</string>
+    <string name="assessment_last_hint">última: %1$s</string>
+    <string name="compare_title">Comparar avaliações</string>
+    <string name="compare_from">De</string>
+    <string name="compare_to">Para</string>
+    <string name="compare_indicator">Indicador</string>
+    <string name="compare_diff">Diferença</string>
+    <string name="compare_need_two">Registre pelo menos duas avaliações para comparar.</string>
+    <string name="charts_period_all">Tudo</string>
+    <string name="charts_period_year">1 ano</string>
+    <string name="charts_period_6m">6 meses</string>
+    <string name="charts_not_enough">Precisa de pelo menos duas avaliações com esta medida.</string>
+    <string name="charts_change">%1$s no período</string>
+    <string name="photos_add">Adicionar foto</string>
+    <string name="photos_empty">Fotos por data ajudam a ver a evolução que a fita métrica não mostra.</string>
+    <string name="photos_pose">Pose</string>
+    <string name="photos_compare">Comparar selecionadas</string>
+    <string name="photos_select_two">Selecione duas fotos para comparar</string>
+    <string name="photos_delete_title">Excluir foto?</string>
+    <string name="photos_delete_message">A foto será removida do aparelho.</string>
+    <string name="photo_compare_title">Comparar fotos</string>
+    <string name="pose_front">Frente</string>
+    <string name="pose_side">Lado</string>
+    <string name="pose_back">Costas</string>
+    <string name="pose_other">Outra</string>
 </resources>

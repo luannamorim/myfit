@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
+import io.github.luannamorim.myfit.domain.body.BodyComparison
+import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
@@ -43,6 +46,7 @@ data class HomeUiState(
     val suggested: RoutineOverview? = null,
     val routines: List<RoutineOverview> = emptyList(),
     val last: SessionSummary? = null,
+    val body: BodySnapshot? = null,
     val week: WeekStrip = WeekStrip(emptyList(), 0, 0),
 )
 
@@ -58,6 +62,7 @@ class HomeViewModel @Inject constructor(
     routines: RoutineRepository,
     history: HistoryRepository,
     controller: SessionController,
+    body: BodyRepository,
     time: TimeSource,
 ) : ViewModel() {
     private val today = time.today()
@@ -68,7 +73,8 @@ class HomeViewModel @Inject constructor(
         history.observeSummaries(week),
         history.observeLast(),
         controller.active,
-    ) { list, weekSessions, last, active ->
+        body.observeAssessments(),
+    ) { list, weekSessions, last, active, assessments ->
         val hour = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone()).hour
         val trainedDays = HistoryCalculator.daysWithSessions(weekSessions)
         HomeUiState(
@@ -80,6 +86,7 @@ class HomeViewModel @Inject constructor(
             suggested = suggestRoutine(list),
             routines = list,
             last = last,
+            body = BodyComparison.snapshot(assessments),
             week = WeekStrip(
                 days = (0L..6L).map { week.start.plusDays(it) }.map { DayMark(it, it in trainedDays, it == today) },
                 sessions = weekSessions.size,

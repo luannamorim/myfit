@@ -47,6 +47,7 @@ import io.github.luannamorim.myfit.ui.components.SecondaryButton
 import io.github.luannamorim.myfit.ui.components.SectionHeader
 import io.github.luannamorim.myfit.ui.components.TabScreen
 import io.github.luannamorim.myfit.ui.components.TextAction
+import io.github.luannamorim.myfit.ui.feature.evolution.BodySnapshotTiles
 import io.github.luannamorim.myfit.ui.feature.history.SessionRow
 import io.github.luannamorim.myfit.ui.navigation.ActiveSessionBar
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
@@ -68,7 +69,10 @@ data class HomeActions(
 @Composable
 fun HomeScreen(actions: HomeActions, modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    HomeContent(state, actions, modifier, body = { BodyEmptyCard(actions.onOpenBody) })
+    HomeContent(state, actions, modifier, body = {
+        val snapshot = state.body
+        if (snapshot == null) BodyEmptyCard(actions.onOpenBody) else BodySnapshotTiles(snapshot, onClick = actions.onOpenBody)
+    })
 }
 
 @Composable
