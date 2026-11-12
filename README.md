@@ -9,7 +9,7 @@ A personal, offline Android app to plan workouts, run them with a reliable rest 
 ## Features
 
 - **Workouts:** create, edit, duplicate, reorder (drag) and delete exercise sequences, with sets, reps, rest, load and notes per exercise.
-- **Library:** 93 predefined exercises, including bodyweight and kettlebell moves (in the device language), accent-insensitive search, muscle-group filters and custom exercises with a photo from the gallery.
+- **Library:** 152 predefined exercises (in the device language), each with a line drawing of the start and end position. Accent-insensitive search, muscle-group filters and custom exercises with a photo from the gallery. A body map highlights the worked muscle group (also the picture of custom exercises without a photo), and *Watch how to do it* opens a video search in YouTube or the browser.
 - **Workout mode:** an immersive screen with sets, automatic rest, ±15 s, pause/resume, skip set or exercise, adjustable load and reps, and a summary before saving.
 - **Reliable timer:** times come from persisted marks (wall clock + monotonic clock + boot count), never from UI counters. An exact alarm ends the rest with sound and vibration even with the screen locked. The ongoing notification has quick actions, and an interrupted session resumes where it stopped.
 - **History:** monthly calendar with training days, per-day sessions, per-set details and weekly/monthly summaries.
@@ -35,6 +35,7 @@ A personal, offline Android app to plan workouts, run them with a reliable rest 
   <img src="docs/screenshots/evolution_measures_dark.png" width="200" alt="Measurements">
   <img src="docs/screenshots/backup_dark.png" width="200" alt="Backup">
   <img src="docs/screenshots/settings_light.png" width="200" alt="Settings (light theme)">
+  <img src="docs/screenshots/exercise_editor_dark.png" width="200" alt="Exercise with drawing and body map">
 </p>
 
 ## Install
@@ -95,4 +96,7 @@ Kotlin 2.4 · Jetpack Compose + Material 3 (adaptive) · Navigation Compose (typ
 
 ## License
 
-[MIT](LICENSE). The bundled Geist font is under the SIL Open Font License 1.1 ([`docs/licenses/GEIST_OFL.txt`](docs/licenses/GEIST_OFL.txt)).
+[MIT](LICENSE), except for bundled third-party content:
+
+- **Geist font:** SIL Open Font License 1.1 ([`docs/licenses/GEIST_OFL.txt`](docs/licenses/GEIST_OFL.txt)).
+- **Exercise illustrations** (`app/src/main/assets/exercises/`): CC BY-SA 4.0, by [Everkinetic](https://github.com/everkinetic/data) and by Bryl Lim ([Workout Guide](https://github.com/bryllim/workout-guide)); one drawing via [wger](https://wger.de) under CC BY-SA 3.0. They were cropped, scaled and converted by [`tools/exercise_art.py`](tools/exercise_art.py); see the folder's [`NOTICE.md`](app/src/main/assets/exercises/NOTICE.md) and *Settings → Image credits* in the app.

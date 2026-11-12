@@ -28,9 +28,14 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Edit sets, reps, rest and load, typing "42,5" (comma). Reorder by dragging the handle.
 - [ ] Create a custom exercise with an image from the gallery. It shows up in the list and in the workout.
 - [ ] Duplicate the workout ("(copy)" appears) and delete the copy.
+- [ ] The library shows a drawing next to every predefined exercise. Open one: start → end drawing, the body map with its group in green, and "Watch how to do it" opens a YouTube search.
+- [ ] In the exercise editor, change the muscle group: the body map updates at once. Pick a photo: it replaces the drawing; remove it: the drawing comes back.
+- [ ] A custom exercise without a photo shows the body map in the list and during the workout.
+- [ ] *Settings → Image credits* lists the illustrations and their licenses; *About* shows "Developed by luannamorim".
 
 ### 2. Execution (with the app open)
 - [ ] Start: the first time, the app asks for notification permission. Accept it.
+- [ ] The set screen shows the exercise drawing (or the body map); the play button opens the video search.
 - [ ] Complete set → the rest starts on its own. Use +15 s and −15 s.
 - [ ] At the end of the rest: vibration, sound and a green pulse; "REST COMPLETE" appears.
 - [ ] Adjust the load with +/− and complete the set: the next set inherits the load.
@@ -70,6 +75,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 
 ### 8. Update
 - [ ] Install a new version over the existing one (`adb install -r`): the data is kept.
+- [ ] Updating from 1.2: workouts and history are intact, the library gains the new exercises and the existing predefined ones show their drawings (a predefined exercise you renamed keeps no drawing).
 
 ## Known issues
 - The alarm icon appears in the status bar during the rest (`setAlarmClock`, chosen for its accuracy).

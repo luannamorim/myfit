@@ -23,7 +23,7 @@ Dependency rule: `domain` knows nothing about Android, except for the Tink libra
 | `domain/history` | `HistoryCalculator` (summaries, Mon–Sun weeks) |
 | `domain/body` | `Measure`, `BodyComparison` (differences, series, snapshot) |
 | `domain/backup` | v1 DTOs, header and encryption, zip + manifest, retention |
-| `data/db` | entities, DAOs, `MyFitDatabase` (v2), library seed |
+| `data/db` | entities, DAOs, `MyFitDatabase` (v3), library seed |
 | `data/repository` | workouts, exercises, session, history, body |
 | `data/backup` | `BackupManager`, `BackupKeyStore`, destinations (SAF/file), `FolderBackupWriter` |
 | `platform/session` | `SessionController`, `WorkoutService`, alarm, receivers, notifications |
@@ -42,7 +42,17 @@ body_assessment   body_photo
 - `startDateEpochDay` is the local day the session started: a workout that crosses midnight counts on its start day.
 - Images live in `filesDir/images/{exercises,body}/<uuid>.jpg`, downscaled to 1600 px and stripped of EXIF. The database stores only the relative path. Paths that would escape `images/` don't resolve to any file.
 - Schema exported to `app/schemas`. Any change requires a tested migration, because an installed APK already exists.
-- Database version 2 changed no tables: migration 1 → 2 (`ExerciseSeed.MIGRATION_1_2`) only adds the exercises introduced in library version 2, skipping names that already exist in either language, so user-created and deleted exercises are respected. Covered by `MigrationTest`, which builds a real version-1 database from `app/schemas/.../1.json`.
+- Database version 2 changed no tables: migration 1 → 2 (`ExerciseSeed.MIGRATION_1_2`) only adds the exercises introduced in library version 2, skipping names that already exist in either language, so user-created and deleted exercises are respected.
+- Database version 3 adds `seedKey` to `exercise` (unique) and `session_exercise` (snapshot). Migration 2 → 3 links existing library rows by name (either language; a row the user renamed stays unlinked), copies the key into session snapshots and adds the version-3 exercises. Keys are frozen in `app/src/test/resources/seed-keys.txt`.
+- `MigrationTest` builds real version-1 and version-2 databases from `app/schemas/.../1.json` and `2.json` and opens them with the current app.
+
+## Exercise pictures
+
+- **Drawings:** every library entry names a line drawing (`ExerciseSeed.art`). The files are alpha masks in `app/src/main/assets/exercises/<art>-1.webp` (start) and `-2.webp` (end, absent for static holds), tinted with the theme colour at draw time. `tools/exercise_art.py` (`uv run tools/exercise_art.py`) rebuilds them from pinned commits of Everkinetic and Workout Guide (both CC BY-SA 4.0); attribution is in the folder's `NOTICE.md` and in *Settings → Image credits*.
+- **Link:** the drawing is found through `exercise.seedKey`, never the name, so renaming a library exercise keeps it. Session snapshots carry the key too.
+- **Precedence** (`ExerciseVisual`, `ExerciseThumbnail`): the user's photo, then the drawing, then the muscle map.
+- **Muscle map** (`MuscleMap`): one fixed vector body, front and back, drawn in Compose from path data; the regions of the selected group use the accent colour. Full body lights everything; cardio and "other" light nothing.
+- **Video:** *Watch how to do it* opens a YouTube search for the exercise name with `ACTION_VIEW`; MyFit has no internet permission.
 
 ## Workout session
 
@@ -79,6 +89,8 @@ streaming AES-256-GCM-HKDF (Tink, 1 MiB segments, entire header as associated da
 - **Derivation**: the key comes from PBKDF2-HMAC-SHA256 (600k iterations, password normalized to NFKC) applied to the recovery password. The verifier is an HKDF of the key, not the key itself, and makes it possible to tell "wrong password" apart from "corrupted file".
 - **Storage**: the derived key is stored wrapped by an Android Keystore AES key that doesn't require unlocking, so the worker can run with the screen locked. If that key disappears (reinstall or cleared data), the state becomes LOCKED and the app asks for the password again.
 - **Third-party files**: weak parameters from an imported file are never adopted.
+
+Exercise and session DTOs carry an optional `seedKey`; restoring a backup made before version 3 links library rows by name inside the same transaction.
 
 **Restore** (`BackupManager.restore`):
 1. Refuses if a workout is in progress. Reads the header, gets the key (the device's, or the one derived from the typed password) and checks the verifier.

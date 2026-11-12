@@ -67,8 +67,9 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 6. MUST allow creating, editing, duplicating and deleting workouts (name, optional description, ordered list of exercises), with no limit on how many.
 7. MUST allow adding, removing and reordering exercises in a workout.
 8. Each exercise in a workout MUST have: sets, reps per set, rest between sets (s), load (kg, optional) and notes.
-9. MUST offer a library of predefined exercises (name, muscle group, push/pull/legs/other movement type) with search and filtering by group.
-10. MUST allow creating custom exercises with an optional demo image picked from the gallery.
+9. MUST offer a library of predefined exercises (name, muscle group, push/pull/legs/other movement type, a line drawing of the start and end position) with search and filtering by group.
+10. MUST allow creating custom exercises with an optional demo image picked from the gallery; a photo picked by the user takes precedence over the library drawing.
+10a. SHOULD show a body map highlighting the exercise's muscle group (live while editing it, and as the picture of exercises without a photo or drawing) and offer a video search for the exercise, opened in another app.
 
 ### Workout execution
 
@@ -114,7 +115,8 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 
 ## Non-functional requirements
 
-- **Offline-first:** every feature works without internet; the app makes no network calls.
+- **Offline-first:** every feature works without internet; the app makes no network calls (the video search is handed to another app).
+- **Third-party content:** bundled illustrations keep their CC BY-SA license, with author, source, license and changes listed in the app.
 - **Reliability:** data preserved after a device restart; database with migrations tested from the first installed version; atomic (all-or-nothing) restore.
 - **Privacy and security:** no data collection, no analytics, no media permissions (system photo picker); backups encrypted with authentication (streaming AES-256-GCM, password-derived key); Android auto backup disabled so it doesn't copy keys that don't work on another device.
 - **Performance:** 60 fps UI during workout execution; smooth history queries and charts with 5 years of data (~1,500 sessions, ~60 assessments).
@@ -157,7 +159,6 @@ Platform components: a foreground service for the workout session, an exact alar
 - Supersets, drop sets and sets with different targets per set in planning (what was actually done is logged per set).
 - Automatic calculation of 1RM, volume per muscle group and personal records.
 - Home screen widgets, Wear OS and Android 16 Live Updates.
-- Demo images in the predefined library (only exercises with an image chosen by the user have one).
 - Other languages and imperial units.
 
 ## Open questions
