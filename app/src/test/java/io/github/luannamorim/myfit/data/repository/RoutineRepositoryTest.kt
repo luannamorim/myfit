@@ -55,7 +55,7 @@ class RoutineRepositoryTest {
     fun duplicate_copiesItemsWithNewIds_andSuffixName() = runTest {
         val a = byName("remada curvada")
         val id = routines.save(Routine(name = "Costas", items = listOf(RoutineItem(exercise = a, sets = 4, reps = 8, restSeconds = 120, loadKg = 42.5))))
-        val copyId = routines.duplicate(id)
+        val copyId = routines.duplicate(id, "(cópia)")
         val original = routines.get(id)!!
         val copy = routines.get(copyId)!!
         assertEquals("Costas (cópia)", copy.name)

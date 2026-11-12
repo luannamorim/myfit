@@ -37,7 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.Durations
-import io.github.luannamorim.myfit.core.format.PtBr
+import io.github.luannamorim.myfit.core.format.appLocale
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.ui.common.lastDoneText
 import io.github.luannamorim.myfit.ui.components.EmptyState
@@ -53,7 +53,6 @@ import io.github.luannamorim.myfit.ui.navigation.ActiveSessionBar
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
-import java.time.format.TextStyle
 
 data class HomeActions(
     val onStart: (Long) -> Unit = {},
@@ -87,7 +86,7 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
     )
     TabScreen(
         title = greeting,
-        subtitle = if (state.loading) null else Dates.long(state.today).replaceFirstChar { it.titlecase(PtBr) },
+        subtitle = if (state.loading) null else Dates.long(state.today).replaceFirstChar { it.titlecase(appLocale) },
         modifier = modifier,
     ) {
         if (state.loading) return@TabScreen
@@ -205,7 +204,7 @@ private fun WeekCard(state: HomeUiState, onClick: () -> Unit) {
             state.week.days.forEach { day ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        day.date.dayOfWeek.getDisplayName(TextStyle.NARROW, PtBr).uppercase(),
+                        Dates.weekdayNarrow(day.date.dayOfWeek).uppercase(),
                         style = MyFitTheme.type.overline,
                         color = if (day.isToday) c.textPrimary else c.textTertiary,
                     )

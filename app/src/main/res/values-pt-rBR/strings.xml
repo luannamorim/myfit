@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">MyFit</string>
+
+    <!-- Navegação -->
+    <string name="nav_home">Início</string>
+    <string name="nav_routines">Treinos</string>
+    <string name="nav_history">Histórico</string>
+    <string name="nav_evolution">Evolução</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Comum -->
+    <string name="action_save">Salvar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_delete">Excluir</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_duplicate">Duplicar</string>
+    <string name="action_start">Iniciar</string>
+    <string name="action_remove">Remover</string>
+    <string name="action_discard">Descartar</string>
+    <string name="action_more">Mais opções</string>
+    <string name="action_clear">Limpar</string>
+    <string name="unit_kg">kg</string>
+
+    <!-- Grupos musculares -->
+    <string name="muscle_chest">Peito</string>
+    <string name="muscle_back">Costas</string>
+    <string name="muscle_shoulders">Ombros</string>
+    <string name="muscle_biceps">Bíceps</string>
+    <string name="muscle_triceps">Tríceps</string>
+    <string name="muscle_forearms">Antebraço</string>
+    <string name="muscle_abs">Abdômen</string>
+    <string name="muscle_quadriceps">Quadríceps</string>
+    <string name="muscle_hamstrings">Posterior</string>
+    <string name="muscle_glutes">Glúteos</string>
+    <string name="muscle_calves">Panturrilha</string>
+    <string name="muscle_full_body">Corpo inteiro</string>
+    <string name="muscle_cardio">Cardio</string>
+    <string name="muscle_other">Outros</string>
+
+    <!-- Tipos de movimento -->
+    <string name="movement_push">Empurrar</string>
+    <string name="movement_pull">Puxar</string>
+    <string name="movement_legs">Pernas</string>
+    <string name="movement_other">Outro</string>
+
+    <!-- Dias relativos -->
+    <string name="relative_never">Ainda não feito</string>
+    <string name="relative_today">Feito hoje</string>
+    <string name="relative_yesterday">Feito ontem</string>
+    <plurals name="relative_days_ago">
+        <item quantity="one">Feito há %d dia</item>
+        <item quantity="other">Feito há %d dias</item>
+        <item quantity="many">Feito há %d dias</item>
+    </plurals>
+    <plurals name="exercise_count">
+        <item quantity="one">%d exercício</item>
+        <item quantity="other">%d exercícios</item>
+        <item quantity="many">%d exercícios</item>
+    </plurals>
+
+    <!-- Treinos -->
+    <string name="routines_empty_title">Nenhum treino ainda</string>
+    <string name="routines_empty_message">Monte sua primeira sequência de exercícios para começar.</string>
+    <string name="routines_new">Novo treino</string>
+    <string name="routines_library">Biblioteca de exercícios</string>
+    <string name="routines_library_hint">Exercícios pré-definidos e personalizados</string>
+    <string name="routines_delete_title">Excluir treino?</string>
+    <string name="routines_delete_message">“%1$s” será removido. O histórico de sessões continua salvo.</string>
+
+    <!-- Editor de treino -->
+    <string name="editor_new_title">Novo treino</string>
+    <string name="editor_edit_title">Editar treino</string>
+    <string name="editor_name_label">Nome do treino</string>
+    <string name="editor_name_placeholder">Ex.: Treino Costas</string>
+    <string name="editor_name_required">Dê um nome ao treino</string>
+    <string name="editor_description_label">Descrição (opcional)</string>
+    <string name="editor_exercises">Exercícios</string>
+    <string name="editor_add_exercises">Adicionar exercícios</string>
+    <string name="editor_no_exercises">Nenhum exercício. Adicione da biblioteca.</string>
+    <string name="editor_discard_title">Descartar alterações?</string>
+    <string name="editor_discard_message">As mudanças neste treino não foram salvas.</string>
+    <string name="editor_reorder">Arrastar para reordenar</string>
+    <string name="item_summary">%1$d × %2$d · %3$s</string>
+    <string name="item_sets">Séries</string>
+    <string name="item_reps">Repetições</string>
+    <string name="item_rest">Descanso</string>
+    <string name="item_load">Carga</string>
+    <string name="item_load_hint">Sem carga</string>
+    <string name="item_notes">Observações</string>
+    <string name="item_done">Pronto</string>
+
+    <!-- Biblioteca -->
+    <string name="library_title">Biblioteca</string>
+    <string name="library_search_placeholder">Buscar exercício</string>
+    <string name="library_empty">Nenhum exercício encontrado</string>
+    <string name="library_new_exercise">Novo exercício</string>
+    <string name="library_custom_badge">Personalizado</string>
+    <string name="picker_title">Adicionar exercícios</string>
+    <plurals name="picker_confirm">
+        <item quantity="one">Adicionar %d exercício</item>
+        <item quantity="other">Adicionar %d exercícios</item>
+        <item quantity="many">Adicionar %d exercícios</item>
+    </plurals>
+    <string name="exercise_editor_new">Novo exercício</string>
+    <string name="exercise_editor_edit">Editar exercício</string>
+    <string name="exercise_name">Nome</string>
+    <string name="exercise_name_required">Dê um nome ao exercício</string>
+    <string name="exercise_group">Grupo muscular</string>
+    <string name="exercise_movement">Tipo de movimento</string>
+    <string name="exercise_notes">Observações</string>
+    <string name="exercise_image">Imagem demonstrativa</string>
+    <string name="exercise_image_pick">Escolher da galeria</string>
+    <string name="exercise_image_replace">Trocar imagem</string>
+    <string name="exercise_image_remove">Remover imagem</string>
+    <string name="exercise_image_error">Não foi possível carregar a imagem</string>
+    <string name="exercise_delete_title">Remover exercício?</string>
+    <string name="exercise_delete_message">Se ele estiver em algum treino, sai só da biblioteca e continua no treino.</string>
+    <!-- Notificações do treino -->
+    <string name="channel_session_ongoing">Treino em andamento</string>
+    <string name="channel_session_ongoing_desc">Cronômetro e ações rápidas durante o treino</string>
+    <string name="channel_rest_end">Fim do descanso</string>
+    <string name="channel_rest_end_desc">Aviso sonoro quando o descanso termina (segue o modo do celular)</string>
+    <string name="channel_rest_end_alarm">Fim do descanso (toca sempre)</string>
+    <string name="channel_rest_end_alarm_desc">Aviso que toca mesmo com o celular no silencioso ou vibrar</string>
+    <string name="notif_workout_title">Treino em andamento</string>
+    <string name="notif_paused">Pausado</string>
+    <string name="notif_resting">Descanso · a seguir: %1$s</string>
+    <string name="notif_rest_over">Descanso concluído · %1$s</string>
+    <string name="notif_current">%1$s · série %2$d de %3$d</string>
+    <string name="notif_all_done">Todas as séries concluídas</string>
+    <string name="notif_action_complete_set">Concluir série</string>
+    <string name="notif_action_skip_rest">Pular descanso</string>
+    <string name="notif_rest_end_title">Descanso concluído</string>
+    <string name="notif_rest_end_text">A seguir: %1$s</string>
+    <!-- Execução do treino -->
+    <string name="workout_set_of">Série %1$d de %2$d</string>
+    <string name="workout_complete_set">Concluir série</string>
+    <string name="workout_skip_set">Pular série</string>
+    <string name="workout_rest">Descanso</string>
+    <string name="workout_rest_over">Descanso concluído</string>
+    <string name="workout_skip_rest">Pular descanso</string>
+    <string name="workout_rest_minus">−15 s</string>
+    <string name="workout_rest_plus">+15 s</string>
+    <string name="workout_next">A seguir</string>
+    <string name="workout_next_set">%1$s · série %2$d de %3$d</string>
+    <string name="workout_all_done">Todas as séries concluídas</string>
+    <string name="workout_all_done_hint">Finalize para salvar o treino no histórico.</string>
+    <string name="workout_finish">Finalizar treino</string>
+    <string name="workout_pause">Pausar</string>
+    <string name="workout_resume">Retomar</string>
+    <string name="workout_paused">Treino pausado</string>
+    <string name="workout_minimize">Minimizar</string>
+    <string name="workout_skip_exercise">Pular exercício</string>
+    <string name="workout_exercise_rest">Descanso deste exercício</string>
+    <string name="workout_end">Encerrar treino</string>
+    <string name="workout_discard">Descartar treino</string>
+    <string name="workout_discard_title">Descartar treino?</string>
+    <string name="workout_discard_message">Esta sessão não será salva no histórico.</string>
+    <string name="workout_nothing_done_title">Nenhuma série concluída</string>
+    <string name="workout_nothing_done_message">Não há nada para salvar. Descartar este treino?</string>
+    <string name="workout_exercises">Exercícios</string>
+
+    <!-- Resumo -->
+    <string name="summary_title">Resumo do treino</string>
+    <string name="summary_duration">Duração</string>
+    <string name="summary_sets">Séries</string>
+    <string name="summary_volume">Volume</string>
+    <string name="summary_update_loads">Atualizar as cargas do treino com as de hoje</string>
+    <string name="summary_confirm">Concluir e salvar</string>
+    <string name="summary_exercise_sets" tools:ignore="PluralsCandidate">%1$d/%2$d séries</string>
+    <string name="summary_skipped">pulado</string>
+    <!-- Sessão em andamento -->
+    <string name="active_bar_title">Treino em andamento</string>
+    <string name="active_bar_resume">Retomar</string>
+    <!-- Histórico -->
+    <string name="history_prev_month">Mês anterior</string>
+    <string name="history_next_month">Próximo mês</string>
+    <string name="history_week">Semana</string>
+    <string name="history_month">Mês</string>
+    <string name="history_sessions">Treinos</string>
+    <string name="history_total_time">Tempo total</string>
+    <string name="history_frequency">Frequência</string>
+    <string name="history_frequency_value">%1$s×/sem</string>
+    <string name="history_exercises">Exercícios realizados</string>
+    <string name="history_no_sessions_day">Nenhum treino neste dia.</string>
+    <string name="history_month_sessions">Treinos do mês</string>
+    <string name="history_session_meta" tools:ignore="PluralsCandidate">%1$s · %2$s · %3$d séries</string>
+    <string name="history_exercise_times">%d×</string>
+    <string name="detail_title">Sessão</string>
+    <string name="detail_delete_title">Excluir sessão?</string>
+    <string name="detail_delete_message">Ela sai do histórico e do calendário. Isso não pode ser desfeito.</string>
+    <string name="detail_set_skipped">pulada</string>
+    <string name="detail_set_not_done">não feita</string>
+    <string name="detail_started_at">Início às %1$s</string>
+    <!-- Início -->
+    <string name="home_morning">Bom dia</string>
+    <string name="home_afternoon">Boa tarde</string>
+    <string name="home_evening">Boa noite</string>
+    <string name="home_today_done">Treino de hoje concluído</string>
+    <string name="home_next">Próximo treino</string>
+    <string name="home_start">Iniciar treino</string>
+    <string name="home_your_routines">Seus treinos</string>
+    <string name="home_see_all">Ver todos</string>
+    <string name="home_last_activity">Última atividade</string>
+    <string name="home_body">Corpo</string>
+    <string name="home_body_empty">Registre peso e medidas para acompanhar sua evolução.</string>
+    <string name="home_body_cta">Nova avaliação</string>
+    <string name="home_week">Esta semana</string>
+    <string name="home_week_summary">%1$s · %2$s</string>
+    <plurals name="home_sessions_count">
+        <item quantity="one">%d treino</item>
+        <item quantity="other">%d treinos</item>
+        <item quantity="many">%d treinos</item>
+    </plurals>
+    <string name="home_empty_title">Comece pelo seu primeiro treino</string>
+    <string name="home_empty_message">Monte uma sequência de exercícios e inicie quando chegar na academia.</string>
+    <!-- Medidas -->
+    <string name="measure_weight">Peso</string>
+    <string name="measure_body_fat">Gordura corporal</string>
+    <string name="measure_neck">Pescoço</string>
+    <string name="measure_shoulders">Ombros</string>
+    <string name="measure_chest">Peitoral</string>
+    <string name="measure_waist">Cintura</string>
+    <string name="measure_abdomen">Abdômen</string>
+    <string name="measure_hips">Quadril</string>
+    <string name="measure_arm_right">Braço direito</string>
+    <string name="measure_arm_left">Braço esquerdo</string>
+    <string name="measure_forearm_right">Antebraço direito</string>
+    <string name="measure_forearm_left">Antebraço esquerdo</string>
+    <string name="measure_thigh_right">Coxa direita</string>
+    <string name="measure_thigh_left">Coxa esquerda</string>
+    <string name="measure_calf_right">Panturrilha direita</string>
+    <string name="measure_calf_left">Panturrilha esquerda</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_percent">%</string>
+
+    <!-- Evolução -->
+    <string name="evolution_tab_measures">Medidas</string>
+    <string name="evolution_tab_charts">Gráficos</string>
+    <string name="evolution_tab_photos">Fotos</string>
+    <string name="evolution_new_assessment">Nova avaliação</string>
+    <string name="evolution_compare">Comparar</string>
+    <string name="evolution_history">Avaliações</string>
+    <string name="evolution_empty_title">Nenhuma avaliação ainda</string>
+    <string name="evolution_empty_message">Registre peso e circunferências para acompanhar a evolução do corpo.</string>
+    <plurals name="evolution_measures_count">
+        <item quantity="one">%d medida</item>
+        <item quantity="other">%d medidas</item>
+        <item quantity="many">%d medidas</item>
+    </plurals>
+    <string name="evolution_vs_previous">vs. avaliação anterior</string>
+    <string name="assessment_new">Nova avaliação</string>
+    <string name="assessment_edit">Editar avaliação</string>
+    <string name="assessment_date">Data</string>
+    <string name="assessment_group_general">Dados gerais</string>
+    <string name="assessment_group_trunk">Tronco</string>
+    <string name="assessment_group_arms">Braços</string>
+    <string name="assessment_group_legs">Pernas</string>
+    <string name="assessment_notes">Observações</string>
+    <string name="assessment_empty_error">Preencha pelo menos uma medida</string>
+    <string name="assessment_delete_title">Excluir avaliação?</string>
+    <string name="assessment_delete_message">As medidas desta data serão removidas do histórico e dos gráficos.</string>
+    <string name="assessment_last_hint">última: %1$s</string>
+    <string name="compare_title">Comparar avaliações</string>
+    <string name="compare_from">De</string>
+    <string name="compare_to">Para</string>
+    <string name="compare_indicator">Indicador</string>
+    <string name="compare_diff">Diferença</string>
+    <string name="compare_need_two">Registre pelo menos duas avaliações para comparar.</string>
+    <string name="charts_period_all">Tudo</string>
+    <string name="charts_period_year">1 ano</string>
+    <string name="charts_period_6m">6 meses</string>
+    <string name="charts_not_enough">Precisa de pelo menos duas avaliações com esta medida.</string>
+    <string name="charts_change">%1$s no período</string>
+    <string name="photos_add">Adicionar foto</string>
+    <string name="photos_empty">Fotos por data ajudam a ver a evolução que a fita métrica não mostra.</string>
+    <string name="photos_pose">Pose</string>
+    <string name="photos_compare">Comparar selecionadas</string>
+    <string name="photos_select_two">Selecione duas fotos para comparar</string>
+    <string name="photos_delete_title">Excluir foto?</string>
+    <string name="photos_delete_message">A foto será removida do aparelho.</string>
+    <string name="photo_compare_title">Comparar fotos</string>
+    <string name="pose_front">Frente</string>
+    <string name="pose_side">Lado</string>
+    <string name="pose_back">Costas</string>
+    <string name="pose_other">Outra</string>
+    <!-- Backup -->
+    <string name="channel_backup">Backup</string>
+    <string name="backup_failed_title">Backup não realizado</string>
+    <string name="backup_error_folder">Não foi possível gravar na pasta de backup. Escolha a pasta de novo.</string>
+    <string name="backup_error_password">Digite a senha de backup para continuar fazendo cópias.</string>
+    <string name="backup_error_space">Sem espaço no aparelho para gerar o backup.</string>
+    <string name="backup_error_unknown">Falha inesperada ao gerar o backup. O MyFit tenta de novo mais tarde.</string>
+    <string name="backup_title">Backup</string>
+    <string name="backup_password_section">Senha de recuperação</string>
+    <string name="backup_password_set">Definida. Necessária para restaurar em outro aparelho.</string>
+    <string name="backup_password_none">Defina uma senha para criptografar os backups.</string>
+    <string name="backup_password_locked">Digite a senha de novo para continuar fazendo backups neste aparelho.</string>
+    <string name="backup_password_define">Definir senha</string>
+    <string name="backup_password_change">Alterar senha</string>
+    <string name="backup_password_enter">Digitar senha</string>
+    <string name="backup_password_dialog_title">Senha de recuperação</string>
+    <string name="backup_password_dialog_message">Sem essa senha não há como restaurar os backups. Guarde-a num gerenciador de senhas.</string>
+    <string name="backup_password_field">Senha</string>
+    <string name="backup_password_confirm">Confirme a senha</string>
+    <string name="backup_password_too_short">Use pelo menos 8 caracteres</string>
+    <string name="backup_password_mismatch">As senhas não conferem</string>
+    <string name="backup_password_wrong">Senha incorreta</string>
+    <string name="backup_folder_section">Pasta de backup</string>
+    <string name="backup_folder_none">Nenhuma pasta escolhida</string>
+    <string name="backup_folder_choose">Escolher pasta</string>
+    <string name="backup_folder_change">Trocar pasta</string>
+    <string name="backup_folder_hint">Escolha uma pasta do celular que um app de sincronização mantenha no Google Drive. O MyFit grava ali um arquivo criptografado por dia (e após mudanças) e mantém os 7 mais recentes.</string>
+    <string name="backup_status_section">Status</string>
+    <string name="backup_last">Último backup</string>
+    <string name="backup_never">Nunca</string>
+    <string name="backup_auto">Backup automático</string>
+    <string name="backup_auto_hint">Diário e alguns minutos após mudanças importantes</string>
+    <string name="backup_now">Fazer backup agora</string>
+    <string name="backup_running">Gerando backup…</string>
+    <string name="backup_files_section">Backups na pasta</string>
+    <string name="backup_files_empty">Nenhum backup nesta pasta ainda.</string>
+    <string name="backup_file_section">Arquivo</string>
+    <string name="backup_export">Exportar backup para arquivo</string>
+    <string name="backup_import">Restaurar de um arquivo</string>
+    <string name="backup_restore_title">Restaurar backup?</string>
+    <string name="backup_restore_message">Backup de %1$s. Todos os dados atuais (treinos, histórico, medidas e fotos) serão substituídos.</string>
+    <string name="backup_restore_confirm">Restaurar</string>
+    <string name="backup_restore_password">Digite a senha usada neste backup</string>
+    <string name="backup_msg_saved">Backup salvo.</string>
+    <string name="backup_msg_exported">Backup exportado.</string>
+    <string name="backup_msg_restored">Dados restaurados.</string>
+    <string name="backup_msg_wrong_password">Senha incorreta.</string>
+    <string name="backup_msg_corrupted">O arquivo está corrompido ou não é um backup do MyFit. Nada foi alterado.</string>
+    <string name="backup_msg_unsupported">Backup feito por uma versão mais nova do MyFit. Atualize o app.</string>
+    <string name="backup_msg_space">Espaço insuficiente para restaurar.</string>
+    <string name="backup_msg_session_active">Termine ou descarte o treino em andamento antes de restaurar.</string>
+    <string name="backup_msg_no_password">Defina a senha de recuperação primeiro.</string>
+    <string name="backup_msg_folder_error">Não foi possível acessar a pasta. Escolha de novo.</string>
+    <string name="backup_msg_error">Não foi possível concluir. Tente de novo.</string>
+    <string name="backup_today_at">hoje às %1$s</string>
+    <string name="backup_date_at">%1$s às %2$s</string>
+
+    <!-- Ajustes -->
+    <string name="settings_appearance">Aparência</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_dark">Escuro</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_workout">Treino</string>
+    <string name="settings_default_rest">Descanso padrão</string>
+    <string name="settings_rest_sound">Som do fim do descanso</string>
+    <string name="settings_rest_sound_follow">Segue o modo do celular</string>
+    <string name="settings_rest_sound_always">Toca sempre</string>
+    <string name="settings_keep_screen">Manter a tela ligada no treino</string>
+    <string name="settings_update_loads">Atualizar cargas ao finalizar</string>
+    <string name="settings_update_loads_hint">Usa as cargas de hoje como planejadas no próximo treino</string>
+    <string name="settings_data">Dados</string>
+    <string name="settings_backup_hint">Pasta, senha e restauração</string>
+    <string name="settings_system">Sistema</string>
+    <string name="settings_notifications">Notificações</string>
+    <string name="settings_notifications_off">Desativadas: o fim do descanso não toca com a tela bloqueada.</string>
+    <string name="settings_notifications_on">Ativadas</string>
+    <string name="settings_open">Abrir</string>
+    <string name="settings_battery">Bateria</string>
+    <string name="settings_battery_restricted">Otimização ativa. Na Samsung, marque o MyFit como “Sem restrições” para o cronômetro e o backup não serem suspensos.</string>
+    <string name="settings_battery_ok">Sem restrições</string>
+    <string name="settings_battery_allow">Liberar</string>
+    <string name="settings_about">Sobre</string>
+    <string name="settings_version">Versão %1$s</string>
+    <string name="settings_licenses">Fonte Geist — SIL Open Font License 1.1</string>
+    <!-- Acessibilidade e outros -->
+    <string name="a11y_back">Voltar</string>
+    <string name="a11y_decrease">Diminuir %1$s</string>
+    <string name="a11y_increase">Aumentar %1$s</string>
+    <string name="calendar_has_workout">%1$s, com treino</string>
+    <string name="detail_set_done" tools:ignore="PluralsCandidate">%1$d reps%2$s</string>
+    <string name="routine_copy_suffix">(cópia)</string>
+</resources>

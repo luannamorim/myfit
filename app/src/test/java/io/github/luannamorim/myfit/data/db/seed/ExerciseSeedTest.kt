@@ -18,9 +18,17 @@ class ExerciseSeedTest {
     private fun key(s: String) = Normalizer.normalize(s, Normalizer.Form.NFD).replace(Regex("\\p{M}"), "").lowercase()
 
     @Test
-    fun seed_namesAreUnique_caseAndAccentInsensitive() {
-        val keys = ExerciseSeed.items.map { key(it.name) }
-        assertEquals(keys.size, keys.toSet().size)
+    fun seed_namesAreUnique_caseAndAccentInsensitive_inBothLanguages() {
+        listOf(ExerciseSeed.items.map { key(it.namePt) }, ExerciseSeed.items.map { key(it.nameEn) }).forEach { keys ->
+            assertEquals(keys.size, keys.toSet().size)
+        }
+    }
+
+    @Test
+    fun seed_usesDeviceLanguage() {
+        val bench = ExerciseSeed.items.first()
+        assertEquals("Supino reto com barra", bench.name(java.util.Locale.forLanguageTag("pt-BR")))
+        assertEquals("Barbell bench press", bench.name(java.util.Locale.US))
     }
 
     @Test

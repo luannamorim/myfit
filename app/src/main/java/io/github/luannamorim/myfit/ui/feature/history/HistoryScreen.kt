@@ -19,7 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.Durations
-import io.github.luannamorim.myfit.core.format.PtBr
+import io.github.luannamorim.myfit.core.format.formatOneDecimal
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.ui.components.MyFitCard
 import io.github.luannamorim.myfit.ui.components.MyFitChip
@@ -28,7 +28,6 @@ import io.github.luannamorim.myfit.ui.components.StatTile
 import io.github.luannamorim.myfit.ui.components.TabScreen
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun HistoryScreen(onOpenSession: (Long) -> Unit, modifier: Modifier = Modifier, viewModel: HistoryViewModel = hiltViewModel()) {
@@ -84,7 +83,7 @@ fun HistoryContent(
         }
         StatTile(
             stringResource(R.string.history_frequency),
-            stringResource(R.string.history_frequency_value, "%.1f".format(PtBr, s.avgPerWeek)),
+            stringResource(R.string.history_frequency_value, formatOneDecimal(s.avgPerWeek)),
             Modifier.fillMaxWidth(),
         )
         if (s.exercises.isNotEmpty()) {
@@ -107,13 +106,11 @@ fun HistoryContent(
 }
 
 private const val MAX_EXERCISES = 8
-private val TimeFormat = DateTimeFormatter.ofPattern("HH:mm")
-private val ShortDate = DateTimeFormatter.ofPattern("EEE, d MMM", PtBr)
 
 @Composable
 private fun rangeLabel(state: HistoryUiState): String = when (state.period) {
     SummaryPeriod.MONTH -> Dates.monthYear(state.month.year, state.month.monthValue)
-    SummaryPeriod.WEEK -> "${state.summaryRange.start.format(DateTimeFormatter.ofPattern("d MMM", PtBr))} – ${state.summaryRange.endInclusive.format(DateTimeFormatter.ofPattern("d MMM", PtBr))}"
+    SummaryPeriod.WEEK -> "${Dates.dayMonth(state.summaryRange.start)} – ${Dates.dayMonth(state.summaryRange.endInclusive)}"
 }
 
 @Composable
@@ -123,7 +120,7 @@ fun SessionRow(session: SessionSummary, onClick: () -> Unit, showDate: Boolean =
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(session.routineName, style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
-                val start = if (showDate) session.startDate.format(ShortDate) else session.startTime.format(TimeFormat)
+                val start = if (showDate) Dates.weekdayDayMonth(session.startDate) else Dates.time(session.startTime)
                 Text(
                     stringResource(R.string.history_session_meta, start, Durations.human(session.durationMs), session.setsDone),
                     style = MyFitTheme.type.caption,

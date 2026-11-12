@@ -48,13 +48,13 @@ private fun ThemeCatalog() {
         ).forEach { (name, color) -> Swatch(name, color) }
         Text("Display 32", style = t.display, color = c.textPrimary)
         Text("Headline 24", style = t.headline, color = c.textPrimary)
-        Text("Title — Treino Costas", style = t.title, color = c.textPrimary)
-        Text("Body — Remada curvada, 3 séries de 12 repetições.", style = t.body, color = c.textPrimary)
-        Text("Secondary — última vez há 3 dias", style = t.body, color = c.textSecondary)
+        Text("Title — Back day", style = t.title, color = c.textPrimary)
+        Text("Body — Bent-over row, 3 sets of 12 reps.", style = t.body, color = c.textPrimary)
+        Text("Secondary — last done 3 days ago", style = t.body, color = c.textSecondary)
         Text("LABEL / OVERLINE", style = t.overline, color = c.textSecondary)
         Text("01:30", style = t.numericHero, color = c.textPrimary)
-        Text("42,5 kg", style = t.numericLarge, color = c.textPrimary)
-        Text("1:02:45 · 18 séries", style = t.numeric, color = c.accent)
+        Text("42.5 kg", style = t.numericLarge, color = c.textPrimary)
+        Text("1:02:45 · 18 sets", style = t.numeric, color = c.accent)
     }
 }
 

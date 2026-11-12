@@ -70,7 +70,7 @@ class EvolutionScreenshotTest {
             AssessmentEditorUiState(
                 loading = false,
                 date = today,
-                fields = mapOf(Measure.WEIGHT to "73,2", Measure.WAIST to "79"),
+                fields = mapOf(Measure.WEIGHT to "73.2", Measure.WAIST to "79"),
                 lastValues = mapOf(Measure.WEIGHT to 72.8, Measure.CHEST to 95.0, Measure.BODY_FAT to 15.5),
                 invalid = setOf(Measure.WAIST).minus(Measure.WAIST),
             ),

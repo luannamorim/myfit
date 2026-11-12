@@ -31,7 +31,7 @@ class RoutinesViewModelTest {
         val id = db.insertRoutine("Costas", listOf(ex.id))
         val vm = RoutinesViewModel(routines, FakeTimeSource())
         vm.state.awaitUntil { it.routines.size == 1 }
-        vm.duplicate(id)
+        vm.duplicate(id, "(cópia)")
         val state = vm.state.awaitUntil { it.routines.size == 2 }
         assertEquals(listOf("Costas", "Costas (cópia)"), state.routines.map { it.name })
     }

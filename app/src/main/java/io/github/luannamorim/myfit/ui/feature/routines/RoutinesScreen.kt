@@ -55,12 +55,13 @@ fun RoutinesScreen(
     viewModel: RoutinesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val copySuffix = stringResource(R.string.routine_copy_suffix)
     RoutinesContent(
         state = state,
         onCreate = onCreate,
         onEdit = onEdit,
         onStart = onStart,
-        onDuplicate = viewModel::duplicate,
+        onDuplicate = { viewModel.duplicate(it, copySuffix) },
         onDelete = viewModel::delete,
         onOpenLibrary = onOpenLibrary,
         modifier = modifier,

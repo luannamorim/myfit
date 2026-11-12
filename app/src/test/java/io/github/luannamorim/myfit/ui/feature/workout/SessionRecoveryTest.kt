@@ -30,7 +30,7 @@ import javax.inject.Inject
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [36], qualifiers = PHONE, application = HiltTestApplication::class)
+@Config(sdk = [36], qualifiers = "pt-rBR-w411dp-h891dp-xxhdpi", application = HiltTestApplication::class)
 class SessionRecoveryTest {
     @get:Rule(order = 0) val hilt = HiltAndroidRule(this)
     @get:Rule(order = 1) val compose = createEmptyComposeRule()

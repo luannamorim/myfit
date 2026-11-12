@@ -29,11 +29,11 @@ class HistoryScreenshotTest {
 
     private val today = LocalDate.of(2026, 11, 12)
     private fun s(id: Long, day: Int, name: String, min: Long) =
-        SessionSummary(id, name, LocalDate.of(2026, 11, day), LocalTime.of(18, 30), min * 60_000, 12, listOf("Remada curvada", "Pullover"))
+        SessionSummary(id, name, LocalDate.of(2026, 11, day), LocalTime.of(18, 30), min * 60_000, 12, listOf("Bent-over row", "Pullover"))
 
     @Test
     fun history_month() = compose.snapBothThemes("history_month") {
-        val sessions = listOf(s(1, 2, "Treino Costas", 52), s(2, 4, "Peito e Tríceps", 61), s(3, 6, "Pernas", 70), s(4, 9, "Treino Costas", 48), s(5, 10, "Peito e Tríceps", 55), s(6, 12, "Pernas", 66))
+        val sessions = listOf(s(1, 2, "Back day", 52), s(2, 4, "Chest & triceps", 61), s(3, 6, "Legs", 70), s(4, 9, "Back day", 48), s(5, 10, "Chest & triceps", 55), s(6, 12, "Legs", 66))
         HistoryContent(
             state = HistoryUiState(
                 month = YearMonth.of(2026, 11),
@@ -42,7 +42,7 @@ class HistoryScreenshotTest {
                 marked = sessions.map { it.startDate }.toSet(),
                 daySessions = sessions.filter { it.startDate == today },
                 monthSessions = sessions,
-                summary = PeriodSummary(3, 169 * 60_000L, 3.0, listOf(ExerciseFrequency("Remada curvada", 2), ExerciseFrequency("Agachamento livre", 1))),
+                summary = PeriodSummary(3, 169 * 60_000L, 3.0, listOf(ExerciseFrequency("Bent-over row", 2), ExerciseFrequency("Barbell back squat", 1))),
                 summaryRange = HistoryCalculator.weekOf(today),
                 isLoading = false,
             ),
@@ -54,9 +54,9 @@ class HistoryScreenshotTest {
     fun session_detail() = compose.snapBothThemes("session_detail") {
         SessionDetailContent(
             SessionDetail(
-                s(1, 12, "Treino Costas", 52),
+                s(1, 12, "Back day", 52),
                 listOf(
-                    SessionExerciseDetail("Remada curvada", ItemStatus.DONE, List(3) { SessionSet(it.toLong(), 12, 40.0, 12, 42.5, ItemStatus.DONE) }),
+                    SessionExerciseDetail("Bent-over row", ItemStatus.DONE, List(3) { SessionSet(it.toLong(), 12, 40.0, 12, 42.5, ItemStatus.DONE) }),
                     SessionExerciseDetail(
                         "Pullover", ItemStatus.DONE,
                         listOf(SessionSet(5, 12, 20.0, 12, 20.0, ItemStatus.DONE), SessionSet(6, 12, 20.0, 10, 20.0, ItemStatus.DONE), SessionSet(7, 12, 20.0, status = ItemStatus.SKIPPED)),

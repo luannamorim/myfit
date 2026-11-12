@@ -28,14 +28,13 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.ui.theme.Geist
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
-private val AxisDate = DateTimeFormatter.ofPattern("dd/MM")
 
 /** Line chart of one indicator over time (x = epoch day, so spacing follows real dates). */
 @Composable
@@ -79,7 +78,7 @@ fun MeasureChart(points: List<Pair<LocalDate, Double>>, modifier: Modifier = Mod
                 tick = null,
                 guideline = null,
                 label = rememberAxisLabelComponent(style = labelStyle),
-                valueFormatter = remember { CartesianValueFormatter { _, value, _ -> LocalDate.ofEpochDay(value.toLong()).format(AxisDate) } },
+                valueFormatter = remember { CartesianValueFormatter { _, value, _ -> Dates.axis(LocalDate.ofEpochDay(value.toLong())) } },
                 itemPlacer = remember(labelSpacing) { HorizontalAxis.ItemPlacer.aligned(spacing = { labelSpacing }) },
             ),
         ),

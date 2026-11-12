@@ -30,8 +30,8 @@ class RoutinesViewModel @Inject constructor(
         .map { RoutinesUiState(routines = it, todayEpochDay = time.today().toEpochDay(), isLoading = false) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RoutinesUiState())
 
-    fun duplicate(id: Long) {
-        viewModelScope.launch { routines.duplicate(id) }
+    fun duplicate(id: Long, copySuffix: String) {
+        viewModelScope.launch { routines.duplicate(id, copySuffix) }
     }
 
     fun delete(id: Long) {

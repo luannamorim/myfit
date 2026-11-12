@@ -7,6 +7,8 @@ import org.junit.Test
 import java.time.LocalDate
 
 class BodyComparisonTest {
+    @get:org.junit.Rule val locale = io.github.luannamorim.myfit.testutil.LocaleRule()
+
     private val d1 = LocalDate.of(2026, 1, 10)
     private val d2 = LocalDate.of(2026, 4, 10)
     private val first = BodyAssessment(1, d1, mapOf(Measure.WEIGHT to 71.0, Measure.CHEST to 92.0, Measure.WAIST to 78.0, Measure.ARM_RIGHT to 29.0))

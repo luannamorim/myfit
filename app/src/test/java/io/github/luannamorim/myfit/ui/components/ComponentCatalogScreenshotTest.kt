@@ -74,32 +74,32 @@ private fun BrandCatalog() {
 private fun ComponentCatalog() {
     val c = MyFitTheme.colors
     Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SectionHeader("Treinos", action = { TextAction("Ver todos", onClick = {}) })
+        SectionHeader("Workouts", action = { TextAction("See all", onClick = {}) })
         MyFitCard(onClick = {}) {
-            Text("Treino Costas", style = MyFitTheme.type.title, color = c.textPrimary)
-            Text("6 exercícios · feito há 3 dias", style = MyFitTheme.type.caption, color = c.textSecondary)
+            Text("Back day", style = MyFitTheme.type.title, color = c.textPrimary)
+            Text("6 exercises · done 3 days ago", style = MyFitTheme.type.caption, color = c.textSecondary)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatTile("Peso", "73,2", Modifier.weight(1f), unit = "kg", delta = "+2,2 kg", deltaPositive = true)
-            StatTile("Cintura", "79", Modifier.weight(1f), unit = "cm", delta = "+1 cm", deltaPositive = false)
+            StatTile("Weight", "73.2", Modifier.weight(1f), unit = "kg", delta = "+2.2 kg", deltaPositive = true)
+            StatTile("Waist", "79", Modifier.weight(1f), unit = "cm", delta = "+1 cm", deltaPositive = false)
         }
-        PrimaryButton("Iniciar treino", onClick = {}, icon = Icons.Rounded.PlayArrow, modifier = Modifier.fillMaxWidth())
+        PrimaryButton("Start workout", onClick = {}, icon = Icons.Rounded.PlayArrow, modifier = Modifier.fillMaxWidth())
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            SecondaryButton("Pular série", onClick = {})
-            PrimaryButton("Desativado", onClick = {}, enabled = false)
+            SecondaryButton("Skip set", onClick = {})
+            PrimaryButton("Disabled", onClick = {}, enabled = false)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            NumberStepper(value = "12", label = "Repetições", onDecrement = {}, onIncrement = {}, modifier = Modifier.weight(1f))
-            NumberStepper(value = "42,5", label = "Carga", unit = "kg", onDecrement = {}, onIncrement = {}, modifier = Modifier.weight(1f))
+            NumberStepper(value = "12", label = "Reps", onDecrement = {}, onIncrement = {}, modifier = Modifier.weight(1f))
+            NumberStepper(value = "42.5", label = "Load", unit = "kg", onDecrement = {}, onIncrement = {}, modifier = Modifier.weight(1f))
         }
         FilterChipRow(
-            options = listOf("Peito", "Costas", "Ombros", "Bíceps", "Pernas"),
-            selected = setOf("Costas"),
+            options = listOf("Chest", "Back", "Shoulders", "Biceps", "Legs"),
+            selected = setOf("Back"),
             label = { it },
             onToggle = {},
         )
-        RestRing(progress = 0.62f, remainingText = "0:56", caption = "Descanso", modifier = Modifier.padding(start = 60.dp))
-        EmptyState("Nenhum treino ainda", "Crie seu primeiro treino para começar.", action = { PrimaryButton("Novo treino", onClick = {}) })
+        RestRing(progress = 0.62f, remainingText = "0:56", caption = "Rest", modifier = Modifier.padding(start = 60.dp))
+        EmptyState("No workouts yet", "Create your first workout to get started.", action = { PrimaryButton("New workout", onClick = {}) })
     }
 }
 

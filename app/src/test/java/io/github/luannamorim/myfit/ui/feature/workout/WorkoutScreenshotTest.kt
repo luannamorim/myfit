@@ -27,11 +27,11 @@ class WorkoutScreenshotTest {
         loading = false,
         hasSession = true,
         sessionId = 1,
-        routineName = "Treino Costas",
+        routineName = "Back day",
         elapsedMs = 23 * 60_000L + 14_000,
         exerciseIndex = 1,
-        exerciseName = "Remada unilateral",
-        exerciseNotes = "Cotovelo junto ao corpo",
+        exerciseName = "One-arm dumbbell row",
+        exerciseNotes = "Keep the elbow close to the body",
         setNumber = 2,
         setCount = 3,
         plannedReps = 10,
@@ -40,10 +40,10 @@ class WorkoutScreenshotTest {
         loadKg = 22.5,
         exerciseRestSeconds = 60,
         exercises = listOf(
-            ExerciseChip("Remada curvada", ItemStatus.DONE, false, 3, 3),
-            ExerciseChip("Remada unilateral", ItemStatus.PENDING, true, 1, 3),
+            ExerciseChip("Bent-over row", ItemStatus.DONE, false, 3, 3),
+            ExerciseChip("One-arm dumbbell row", ItemStatus.PENDING, true, 1, 3),
             ExerciseChip("Pullover", ItemStatus.PENDING, false, 0, 3),
-            ExerciseChip("Puxada frontal", ItemStatus.SKIPPED, false, 0, 3),
+            ExerciseChip("Lat pulldown", ItemStatus.SKIPPED, false, 0, 3),
         ),
     )
 
@@ -61,7 +61,7 @@ class WorkoutScreenshotTest {
 
     @Test fun workout_set() = snap("workout_set", base.copy(restOver = true))
 
-    @Test fun workout_rest() = snap("workout_rest", base.copy(rest = RestUi(52_000, 0.58f, "Remada unilateral", 2, 3)))
+    @Test fun workout_rest() = snap("workout_rest", base.copy(rest = RestUi(52_000, 0.58f, "One-arm dumbbell row", 2, 3)))
 
     @Test fun workout_paused() = snap("workout_paused", base.copy(isPaused = true))
 
@@ -73,16 +73,16 @@ class WorkoutScreenshotTest {
             SessionSummaryUiState(
                 loading = false,
                 hasSession = true,
-                routineName = "Treino Costas",
+                routineName = "Back day",
                 durationMs = 52 * 60_000L + 10_000,
                 setsDone = 11,
                 setsTotal = 12,
                 volumeKg = 4_870.0,
                 exercises = listOf(
-                    SummaryExercise("Remada curvada", 3, 3, false, 42.5),
-                    SummaryExercise("Remada unilateral", 3, 3, false, 22.5),
+                    SummaryExercise("Bent-over row", 3, 3, false, 42.5),
+                    SummaryExercise("One-arm dumbbell row", 3, 3, false, 22.5),
                     SummaryExercise("Pullover", 3, 3, false, 20.0),
-                    SummaryExercise("Puxada frontal", 2, 3, false, 50.0),
+                    SummaryExercise("Lat pulldown", 2, 3, false, 50.0),
                 ),
                 updateLoads = true,
             ),

@@ -34,9 +34,9 @@ class AccessibilityScreenshotTest {
     @get:Rule val compose = createComposeRule()
 
     private val workout = WorkoutUiState(
-        loading = false, hasSession = true, routineName = "Treino Costas", elapsedMs = 1_394_000, exerciseName = "Remada unilateral com halter",
+        loading = false, hasSession = true, routineName = "Back day", elapsedMs = 1_394_000, exerciseName = "Single-arm dumbbell row with pause",
         setNumber = 2, setCount = 3, reps = 10, loadKg = 22.5,
-        exercises = listOf(ExerciseChip("Remada curvada", ItemStatus.DONE, false, 3, 3), ExerciseChip("Remada unilateral", ItemStatus.PENDING, true, 1, 3)),
+        exercises = listOf(ExerciseChip("Bent-over row", ItemStatus.DONE, false, 3, 3), ExerciseChip("One-arm dumbbell row", ItemStatus.PENDING, true, 1, 3)),
     )
 
     @Test
@@ -49,7 +49,7 @@ class AccessibilityScreenshotTest {
     @Test
     @Config(qualifiers = "w360dp-h740dp-xhdpi", fontScale = 1.5f)
     fun rest_largeFont_smallPhone() {
-        compose.setContent { MyFitTheme { WorkoutContent(workout.copy(rest = RestUi(75_000, 0.8f, "Remada unilateral", 2, 3)), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) } }
+        compose.setContent { MyFitTheme { WorkoutContent(workout.copy(rest = RestUi(75_000, 0.8f, "One-arm dumbbell row", 2, 3)), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) } }
         compose.onRoot().captureRoboImage("$SCREENSHOT_DIR/a11y_rest_font150.png")
     }
 
@@ -63,8 +63,8 @@ class AccessibilityScreenshotTest {
                 HomeContent(
                     HomeUiState(
                         loading = false, greeting = Greeting.AFTERNOON, today = today,
-                        suggested = RoutineOverview(1, "Pernas", null, 5, today.toEpochDay() - 5),
-                        routines = listOf(RoutineOverview(1, "Pernas", null, 5, today.toEpochDay() - 5), RoutineOverview(2, "Costas", null, 6, today.toEpochDay() - 2)),
+                        suggested = RoutineOverview(1, "Legs", null, 5, today.toEpochDay() - 5),
+                        routines = listOf(RoutineOverview(1, "Legs", null, 5, today.toEpochDay() - 5), RoutineOverview(2, "Back day", null, 6, today.toEpochDay() - 2)),
                         week = WeekStrip((0L..6L).map { range.start.plusDays(it) }.map { DayMark(it, it.dayOfMonth % 2 == 0, it == today) }, 3, 9_000_000),
                     ),
                     HomeActions(),

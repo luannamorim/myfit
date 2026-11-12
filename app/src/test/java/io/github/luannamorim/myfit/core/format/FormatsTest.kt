@@ -5,6 +5,8 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class FormatsTest {
+    @get:org.junit.Rule val locale = io.github.luannamorim.myfit.testutil.LocaleRule()
+
     @Test
     fun decimalInput_parse() {
         assertEquals(42.5, DecimalInput.parse("42,5")!!, 0.0)
@@ -29,6 +31,26 @@ class FormatsTest {
     fun thousands() {
         assertEquals("4.870", formatThousands(4870.0))
         assertEquals("12", formatThousands(12.0))
+    }
+
+    @Test
+    fun english_usesDotAndEnglishDates() {
+        java.util.Locale.setDefault(java.util.Locale.US)
+        assertEquals("42.5", DecimalInput.format(42.5))
+        assertEquals(42.5, DecimalInput.parse("42,5")!!, 0.0) // input still accepts both
+        assertEquals("4,870", formatThousands(4870.0))
+        val date = java.time.LocalDate.of(2026, 11, 12)
+        assertEquals("Thursday, November 12", Dates.long(date))
+        assertEquals("Nov 12, 2026", Dates.medium(date))
+        assertEquals("November 2026", Dates.monthYear(2026, 11))
+    }
+
+    @Test
+    fun portuguese_dates() {
+        val date = java.time.LocalDate.of(2026, 11, 12)
+        assertEquals("quinta-feira, 12 de novembro", Dates.long(date))
+        assertEquals("Novembro 2026", Dates.monthYear(2026, 11))
+        assertEquals("12/11", Dates.axis(date))
     }
 
     @Test

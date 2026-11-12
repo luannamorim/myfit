@@ -36,7 +36,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
-import io.github.luannamorim.myfit.core.format.PtBr
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
@@ -44,7 +43,6 @@ import io.github.luannamorim.myfit.ui.theme.Spacing
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.TextStyle
 
 /** Monday-first month grid. Trained days get an accent dot; swipe or arrows change month. */
 @Composable
@@ -82,7 +80,7 @@ fun MonthCalendar(
         Row(Modifier.fillMaxWidth().padding(vertical = Spacing.s)) {
             DayOfWeek.entries.forEach { dow ->
                 Text(
-                    dow.getDisplayName(TextStyle.SHORT, PtBr).take(3).replace(".", "").uppercase(),
+                    Dates.weekdayShort(dow).uppercase(),
                     style = MyFitTheme.type.overline,
                     color = c.textTertiary,
                     modifier = Modifier.weight(1f),
@@ -123,7 +121,7 @@ private fun DayCell(
     modifier: Modifier = Modifier,
 ) {
     val c = MyFitTheme.colors
-    val description = Dates.long(date) + if (hasSession) ", com treino" else ""
+    val description = if (hasSession) stringResource(R.string.calendar_has_workout, Dates.long(date)) else Dates.long(date)
     Box(
         modifier
             .aspectRatio(1f)

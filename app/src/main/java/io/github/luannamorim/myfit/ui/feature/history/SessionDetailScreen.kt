@@ -42,7 +42,6 @@ import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.StatTile
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun SessionDetailScreen(onBack: () -> Unit, viewModel: SessionDetailViewModel = hiltViewModel()) {
@@ -79,7 +78,7 @@ fun SessionDetailContent(detail: SessionDetail?, onBack: () -> Unit, onDelete: (
             ) {
                 val s = detail.summary
                 Text(Dates.long(s.startDate), style = MyFitTheme.type.title, color = c.textPrimary)
-                Text(stringResource(R.string.detail_started_at, s.startTime.format(DateTimeFormatter.ofPattern("HH:mm"))), style = MyFitTheme.type.body, color = c.textSecondary)
+                Text(stringResource(R.string.detail_started_at, Dates.time(s.startTime)), style = MyFitTheme.type.body, color = c.textSecondary)
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
                     StatTile(stringResource(R.string.summary_duration), Durations.clock(s.durationMs), Modifier.weight(1f))
                     StatTile(stringResource(R.string.summary_sets), s.setsDone.toString(), Modifier.weight(1f))
@@ -93,7 +92,7 @@ fun SessionDetailContent(detail: SessionDetail?, onBack: () -> Unit, onDelete: (
                                 when (set.status) {
                                     ItemStatus.DONE -> {
                                         val load = set.actualLoadKg?.let { " × ${DecimalInput.format(it)} kg" }.orEmpty()
-                                        Text("${set.actualReps ?: 0} reps$load", style = MyFitTheme.type.numeric, color = c.textPrimary)
+                                        Text(stringResource(R.string.detail_set_done, set.actualReps ?: 0, load), style = MyFitTheme.type.numeric, color = c.textPrimary)
                                     }
                                     ItemStatus.SKIPPED -> Text(stringResource(R.string.detail_set_skipped), style = MyFitTheme.type.body, color = c.textTertiary)
                                     ItemStatus.PENDING -> Text(stringResource(R.string.detail_set_not_done), style = MyFitTheme.type.body, color = c.textTertiary)

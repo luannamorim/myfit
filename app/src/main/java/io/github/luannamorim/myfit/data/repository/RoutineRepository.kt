@@ -68,10 +68,10 @@ class RoutineRepository @Inject constructor(
         return id
     }
 
-    /** Copies the routine and its items as "<name> (cópia)". */
-    suspend fun duplicate(id: Long): Long {
+    /** Copies the routine and its items as "<name> <copySuffix>" (e.g. "(copy)"). */
+    suspend fun duplicate(id: Long, copySuffix: String): Long {
         val source = checkNotNull(get(id)) { "routine $id not found" }
-        return save(source.copy(id = 0, name = "${source.name} (cópia)", items = source.items.map { it.copy(id = 0) }))
+        return save(source.copy(id = 0, name = "${source.name} $copySuffix", items = source.items.map { it.copy(id = 0) }))
     }
 
     suspend fun delete(id: Long) {

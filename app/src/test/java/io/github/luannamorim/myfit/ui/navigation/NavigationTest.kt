@@ -26,7 +26,7 @@ import org.robolectric.annotation.GraphicsMode
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [36], qualifiers = PHONE, application = HiltTestApplication::class)
+@Config(sdk = [36], qualifiers = "pt-rBR-w411dp-h891dp-xxhdpi", application = HiltTestApplication::class)
 class NavigationTest {
 
     @get:Rule(order = 0)
@@ -56,8 +56,9 @@ class NavigationTest {
 
     @Test
     @Config(qualifiers = "w840dp-h1200dp-xhdpi")
-    fun expandedWidth_usesNavigationRail_screenshot() {
-        compose.onNodeWithText("Ajustes").assertIsDisplayed()
+    fun expandedWidth_usesNavigationRail_inEnglish_screenshot() {
+        compose.onNodeWithText("Settings").assertIsDisplayed()
+        compose.onNode(isHeading() and (hasText("Good morning") or hasText("Good afternoon") or hasText("Good evening"))).assertIsDisplayed()
         compose.onRoot().captureRoboImage("$SCREENSHOT_DIR/nav_expanded_dark.png")
     }
 }

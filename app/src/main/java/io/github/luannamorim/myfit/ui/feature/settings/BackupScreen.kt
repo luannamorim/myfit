@@ -63,7 +63,6 @@ import io.github.luannamorim.myfit.ui.theme.Spacing
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun BackupScreen(onBack: () -> Unit, viewModel: BackupViewModel = hiltViewModel()) {
@@ -330,12 +329,11 @@ private fun PasswordDialog(
 }
 
 private const val MIN_PASSWORD = 8
-private val TimeFormat = DateTimeFormatter.ofPattern("HH:mm")
 
 @Composable
 private fun dateTimeText(ms: Long): String {
     val dt = Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault())
-    val time = dt.toLocalTime().format(TimeFormat)
+    val time = Dates.time(dt.toLocalTime())
     return if (dt.toLocalDate() == LocalDate.now()) stringResource(R.string.backup_today_at, time)
     else stringResource(R.string.backup_date_at, Dates.medium(dt.toLocalDate()), time)
 }
@@ -344,7 +342,7 @@ private fun dateTimeText(ms: Long): String {
 private fun lastBackupText(ms: Long?): String = if (ms == null) stringResource(R.string.backup_never) else dateTimeText(ms)
 
 private fun sizeText(bytes: Long): String = when {
-    bytes >= 1_048_576 -> "%.1f MB".format(io.github.luannamorim.myfit.core.format.PtBr, bytes / 1_048_576.0)
+    bytes >= 1_048_576 -> "${io.github.luannamorim.myfit.core.format.formatOneDecimal(bytes / 1_048_576.0)} MB"
     else -> "${(bytes / 1024).coerceAtLeast(1)} KB"
 }
 

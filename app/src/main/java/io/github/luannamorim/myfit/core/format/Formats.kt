@@ -2,12 +2,20 @@ package io.github.luannamorim.myfit.core.format
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.Locale
 
 val PtBr: Locale = Locale.forLanguageTag("pt-BR")
 
-/** Parses/format decimals the Brazilian way ("42,5"), also accepting "42.5". */
+/** Locale used for formatting: the device's current one. */
+val appLocale: Locale get() = Locale.getDefault()
+
+private val isPortuguese: Boolean get() = appLocale.language == "pt"
+
+private fun decimalSeparator(): Char = java.text.DecimalFormatSymbols.getInstance(appLocale).decimalSeparator
+
+/** Parses decimals with comma or dot ("42,5" or "42.5"); formats with the locale's separator. */
 object DecimalInput {
     private val pattern = Regex("""^\d{1,4}([.,]\d{0,2})?$""")
 
@@ -21,7 +29,7 @@ object DecimalInput {
         if (value == null) return ""
         val rounded = Math.round(value * 100) / 100.0
         return if (rounded % 1.0 == 0.0) rounded.toLong().toString()
-        else rounded.toString().trimEnd('0').trimEnd('.').replace('.', ',')
+        else rounded.toString().trimEnd('0').trimEnd('.').replace('.', decimalSeparator())
     }
 }
 
@@ -63,24 +71,38 @@ object Durations {
 }
 
 object Dates {
-    private val dayMonth = DateTimeFormatter.ofPattern("d 'de' MMMM", PtBr)
-    private val dayMonthYear = DateTimeFormatter.ofPattern("d 'de' MMM 'de' yyyy", PtBr)
-    private val short = DateTimeFormatter.ofPattern("dd/MM/yyyy", PtBr)
+    private fun pattern(pt: String, en: String) = DateTimeFormatter.ofPattern(if (isPortuguese) pt else en, appLocale)
 
-    /** "quinta-feira, 12 de novembro" */
-    fun long(date: LocalDate): String =
-        "${date.dayOfWeek.getDisplayName(TextStyle.FULL, PtBr)}, ${date.format(dayMonth)}"
+    /** "quinta-feira, 12 de novembro" / "Thursday, November 12" */
+    fun long(date: LocalDate): String = date.format(pattern("EEEE, d 'de' MMMM", "EEEE, MMMM d"))
 
-    /** "12 de nov. de 2026" */
-    fun medium(date: LocalDate): String = date.format(dayMonthYear)
+    /** "12 de nov. de 2026" / "Nov 12, 2026" */
+    fun medium(date: LocalDate): String = date.format(pattern("d 'de' MMM 'de' yyyy", "MMM d, yyyy"))
 
-    fun short(date: LocalDate): String = date.format(short)
+    /** "12/11/2026" / "11/12/26" */
+    fun short(date: LocalDate): String = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(appLocale))
 
-    /** "Novembro 2026" */
+    /** "12 nov." / "Nov 12" */
+    fun dayMonth(date: LocalDate): String = date.format(pattern("d MMM", "MMM d"))
+
+    /** "qui., 12 nov." / "Thu, Nov 12" */
+    fun weekdayDayMonth(date: LocalDate): String = date.format(pattern("EEE, d MMM", "EEE, MMM d"))
+
+    /** Time of day in the locale's style: "18:30" / "6:30 PM". */
+    fun time(time: java.time.LocalTime): String = time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(appLocale))
+
+    /** Chart axis: "12/11" / "11/12" */
+    fun axis(date: LocalDate): String = date.format(pattern("dd/MM", "MM/dd"))
+
+    /** "Novembro 2026" / "November 2026" */
     fun monthYear(year: Int, month: Int): String {
-        val name = java.time.Month.of(month).getDisplayName(TextStyle.FULL_STANDALONE, PtBr)
-        return "${name.replaceFirstChar { it.titlecase(PtBr) }} $year"
+        val name = java.time.Month.of(month).getDisplayName(TextStyle.FULL_STANDALONE, appLocale)
+        return "${name.replaceFirstChar { it.titlecase(appLocale) }} $year"
     }
+
+    fun weekdayShort(day: java.time.DayOfWeek): String = day.getDisplayName(TextStyle.SHORT, appLocale).take(3).replace(".", "")
+
+    fun weekdayNarrow(day: java.time.DayOfWeek): String = day.getDisplayName(TextStyle.NARROW, appLocale)
 }
 
 /** Signed difference with unit, using a true minus sign: "+2 kg", "−1,5 cm", "0 cm". */
@@ -94,8 +116,11 @@ fun formatSigned(value: Double, unit: String): String {
     return "$sign$abs $unit".trim()
 }
 
-/** Whole number with Brazilian thousands separator: 4870.0 -> "4.870". */
-fun formatThousands(value: Double): String = String.format(PtBr, "%,.0f", value)
+/** Whole number with the locale's thousands separator: 4870.0 -> "4.870" (pt) / "4,870" (en). */
+fun formatThousands(value: Double): String = String.format(appLocale, "%,.0f", value)
 
 /** Weight with unit: "42,5 kg". */
 fun formatKg(value: Double?): String = if (value == null) "—" else "${DecimalInput.format(value)} kg"
+
+/** One decimal with the locale's separator: 3.0 -> "3,0" (pt) / "3.0" (en). */
+fun formatOneDecimal(value: Double): String = String.format(appLocale, "%.1f", value)

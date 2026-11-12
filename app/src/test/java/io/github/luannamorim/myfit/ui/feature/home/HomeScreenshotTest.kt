@@ -30,9 +30,9 @@ class HomeScreenshotTest {
     @Test
     fun home_data() = compose.snapBothThemes("home_data") {
         val routines = listOf(
-            RoutineOverview(1, "Treino Costas", null, 6, today.toEpochDay() - 3),
-            RoutineOverview(2, "Peito e Tríceps", null, 7, today.toEpochDay() - 1),
-            RoutineOverview(3, "Pernas", null, 5, today.toEpochDay() - 5),
+            RoutineOverview(1, "Back day", null, 6, today.toEpochDay() - 3),
+            RoutineOverview(2, "Chest & triceps", null, 7, today.toEpochDay() - 1),
+            RoutineOverview(3, "Legs", null, 5, today.toEpochDay() - 5),
         )
         HomeContent(
             HomeUiState(
@@ -41,7 +41,7 @@ class HomeScreenshotTest {
                 today = today,
                 suggested = routines[2],
                 routines = routines,
-                last = SessionSummary(9, "Peito e Tríceps", today.minusDays(1), LocalTime.of(19, 5), 61 * 60_000L, 14, listOf("Supino")),
+                last = SessionSummary(9, "Chest & triceps", today.minusDays(1), LocalTime.of(19, 5), 61 * 60_000L, 14, listOf("Bench press")),
                 week = week(setOf(today.minusDays(3), today.minusDays(1)), 2, 113 * 60_000L),
             ),
             HomeActions(),

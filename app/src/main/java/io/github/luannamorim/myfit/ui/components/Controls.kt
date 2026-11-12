@@ -20,7 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import io.github.luannamorim.myfit.R
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
@@ -52,8 +54,8 @@ fun NumberStepper(
     onValueClick: (() -> Unit)? = null,
     unit: String? = null,
     valueStyle: TextStyle = MyFitTheme.type.numericLarge,
-    decrementDescription: String = "Diminuir $label",
-    incrementDescription: String = "Aumentar $label",
+    decrementDescription: String = stringResource(R.string.a11y_decrease, label),
+    incrementDescription: String = stringResource(R.string.a11y_increase, label),
 ) {
     val c = MyFitTheme.colors
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {

@@ -32,10 +32,10 @@ class RoutinesScreenshotTest {
         RoutinesContent(
             RoutinesUiState(
                 routines = listOf(
-                    RoutineOverview(1, "Treino Costas", null, 6, today - 3),
-                    RoutineOverview(2, "Treino Peito e Tríceps", null, 7, today - 1),
-                    RoutineOverview(3, "Pernas", null, 5, today),
-                    RoutineOverview(4, "Novo treino", null, 0, null),
+                    RoutineOverview(1, "Back day", null, 6, today - 3),
+                    RoutineOverview(2, "Chest & triceps", null, 7, today - 1),
+                    RoutineOverview(3, "Legs", null, 5, today),
+                    RoutineOverview(4, "New workout", null, 0, null),
                 ),
                 todayEpochDay = today,
                 isLoading = false,
@@ -51,11 +51,11 @@ class RoutinesScreenshotTest {
             state = RoutineEditorUiState(
                 isLoading = false,
                 isNew = false,
-                name = "Treino Costas",
-                description = "Foco em espessura",
+                name = "Back day",
+                description = "Focus on thickness",
                 items = listOf(
-                    DraftItem(1, ex(1, "Remada curvada"), 3, 12, 90, 40.0, null),
-                    DraftItem(2, ex(2, "Remada unilateral"), 3, 10, 60, 22.5, null),
+                    DraftItem(1, ex(1, "Bent-over row"), 3, 12, 90, 40.0, null),
+                    DraftItem(2, ex(2, "One-arm dumbbell row"), 3, 10, 60, 22.5, null),
                     DraftItem(3, ex(3, "Pullover"), 3, 12, 60, null, null),
                 ),
             ),
