@@ -69,13 +69,16 @@ class ImageStore @Inject constructor(
         }
     }
 
-    /** Deletes image files not present in [referenced] (relative paths). Returns how many were removed. */
-    suspend fun deleteOrphans(referenced: Set<String>): Int = withContext(io) {
+    /**
+     * Deletes image files not present in [referenced] (relative paths). Files modified after
+     * [olderThanMs] are kept (an editor may hold a freshly picked, not yet saved image).
+     */
+    suspend fun deleteOrphans(referenced: Set<String>, olderThanMs: Long = Long.MAX_VALUE): Int = withContext(io) {
         val base = File(root, IMAGES_DIR)
         if (!base.exists()) return@withContext 0
         base.walkTopDown().filter { it.isFile }.count { f ->
             val relative = f.relativeTo(root).invariantSeparatorsPath
-            if (relative !in referenced) f.delete() else false
+            if (relative !in referenced && f.lastModified() <= olderThanMs) f.delete() else false
         }
     }
 

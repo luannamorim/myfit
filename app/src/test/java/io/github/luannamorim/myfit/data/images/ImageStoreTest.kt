@@ -70,6 +70,7 @@ class ImageStoreTest {
     fun deleteOrphans_removesOnlyUnreferenced() = runTest {
         val keep = store.import(sourceImage(100, 100), ImageKind.BODY)
         val orphan = store.import(sourceImage(100, 100), ImageKind.EXERCISE)
+        assertEquals(0, store.deleteOrphans(setOf(keep), olderThanMs = 0)) // too recent: kept
         assertEquals(1, store.deleteOrphans(setOf(keep)))
         assertTrue(store.file(keep).exists())
         assertFalse(store.file(orphan).exists())

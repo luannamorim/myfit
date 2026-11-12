@@ -8,6 +8,7 @@ import dagger.hilt.android.HiltAndroidApp
 import io.github.luannamorim.myfit.data.backup.BackupManager
 import io.github.luannamorim.myfit.di.ApplicationScope
 import io.github.luannamorim.myfit.platform.backup.BackupScheduler
+import io.github.luannamorim.myfit.platform.backup.ImageCleanupWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,6 +31,7 @@ class MyFitApp : Application(), Configuration.Provider {
         appScope.launch {
             backupManager.get().recoverInterruptedRestore()
             backupScheduler.get().ensurePeriodic()
+            ImageCleanupWorker.schedule(this@MyFitApp)
         }
     }
 }

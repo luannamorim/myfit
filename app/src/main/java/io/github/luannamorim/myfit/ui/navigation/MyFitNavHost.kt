@@ -12,6 +12,9 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -133,7 +136,15 @@ fun MyFitNavHost(
         },
     ) {
         Column(Modifier.fillMaxSize()) {
-            NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.weight(1f)) {
+            NavHost(
+                navController = navController,
+                startDestination = HomeRoute,
+                modifier = Modifier.weight(1f),
+                enterTransition = { fadeIn(tween(TRANSITION_MS)) },
+                exitTransition = { fadeOut(tween(TRANSITION_MS)) },
+                popEnterTransition = { fadeIn(tween(TRANSITION_MS)) },
+                popExitTransition = { fadeOut(tween(TRANSITION_MS)) },
+            ) {
                 composable<HomeRoute> {
                     HomeScreen(
                         actions = HomeActions(
@@ -242,6 +253,8 @@ fun MyFitNavHost(
         }
     }
 }
+
+private const val TRANSITION_MS = 200
 
 private fun NavDestination?.isOn(top: TopLevelDestination): Boolean =
     this?.hierarchy?.any { it.hasRoute(top.routeClass) } == true
