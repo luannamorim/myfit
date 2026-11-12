@@ -8,6 +8,7 @@ import io.github.luannamorim.myfit.data.images.ImageKind
 import io.github.luannamorim.myfit.data.images.ImageStore
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.domain.backup.BackupError
+import io.github.luannamorim.myfit.domain.backup.KeyDerivation
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.testutil.SessionEnv
 import io.github.luannamorim.myfit.testutil.TEST_ITERATIONS
@@ -116,13 +117,15 @@ class BackupManagerTest {
     }
 
     @Test
-    fun restore_otherPassword_requiresPassword_thenAdoptsKey() = runBlocking {
-        val backup = backupBytes()
+    fun restore_otherPassword_requiresPassword_thenStoresThatPassword() = runBlocking {
+        val backup = backupBytes() // weak test KDF parameters
         keyStore.setPassword("nova senha".toCharArray(), TEST_ITERATIONS) // e.g. a new phone with another setup
         assertEquals(RestoreResult.PasswordRequired, manager.restore(ByteArrayInputStream(backup), null))
         assertTrue(manager.restore(ByteArrayInputStream(backup), "minha senha".toCharArray()) is RestoreResult.Success)
-        // The backup's key is now this device's key: the same file restores without asking again.
-        assertTrue(manager.restore(ByteArrayInputStream(backup), null) is RestoreResult.Success)
+        // Weak parameters from a file are never adopted: the password is re-derived with the defaults.
+        val stored = keyStore.key()!!
+        assertEquals(KeyDerivation.DEFAULT_ITERATIONS, stored.iterations)
+        assertTrue(keyStore.unlock("minha senha".toCharArray()))
     }
 
     @Test

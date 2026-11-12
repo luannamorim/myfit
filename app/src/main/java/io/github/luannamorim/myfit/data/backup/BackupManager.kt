@@ -145,8 +145,15 @@ class BackupManager @Inject constructor(
         val missing = contents.manifest.entries.filter { BackupArchive.isSafeImagePath(it.path) && !images.file(it.path).isFile }
         if (missing.isNotEmpty()) throw BackupError.Corrupted("missing images after restore: ${missing.size}")
 
-        // The key that opened this backup becomes this device's backup key.
-        keyStore.adopt(StoredKey(key, header.salt, header.iterations))
+        // The password that opened this backup becomes this device's backup password. A file's KDF
+        // parameters are only adopted when they are at least as strong as ours; otherwise re-derive.
+        if (password != null) {
+            if (header.iterations >= KeyDerivation.DEFAULT_ITERATIONS) {
+                keyStore.adopt(StoredKey(key, header.salt, header.iterations))
+            } else {
+                keyStore.setPassword(password)
+            }
+        }
         return RestoreResult.Success(restored.counts())
     }
 
