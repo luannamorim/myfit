@@ -3,6 +3,8 @@ package io.github.luannamorim.myfit.data.db.seed
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import io.github.luannamorim.myfit.core.format.SearchText
 import androidx.sqlite.db.SupportSQLiteDatabase
 import java.util.Locale
 import io.github.luannamorim.myfit.domain.model.MovementType
@@ -25,7 +27,14 @@ import io.github.luannamorim.myfit.domain.model.MuscleGroup.QUADRICEPS
 import io.github.luannamorim.myfit.domain.model.MuscleGroup.SHOULDERS
 import io.github.luannamorim.myfit.domain.model.MuscleGroup.TRICEPS
 
-data class SeedExercise(val namePt: String, val nameEn: String, val muscleGroup: MuscleGroup, val movementType: MovementType) {
+data class SeedExercise(
+    val namePt: String,
+    val nameEn: String,
+    val muscleGroup: MuscleGroup,
+    val movementType: MovementType,
+    /** Library version that introduced it (existing installs get it through a migration). */
+    val since: Int = 1,
+) {
     /** Name in the device language at first launch (Portuguese for pt-*, English otherwise). */
     fun name(locale: Locale = Locale.getDefault()): String = if (locale.language == "pt") namePt else nameEn
 }
@@ -127,29 +136,65 @@ object ExerciseSeed {
         SeedExercise("Remo ergômetro", "Rowing machine", CARDIO, OTHER),
         SeedExercise("Pular corda", "Jump rope", CARDIO, OTHER),
         SeedExercise("Escada", "Stair climber", CARDIO, OTHER),
+        // Version 2: bodyweight and kettlebell additions.
+        SeedExercise("Agachamento goblet", "Goblet squat", QUADRICEPS, LEGS, since = 2),
+        SeedExercise("Afundo reverso com kettlebell", "Kettlebell reverse lunge", QUADRICEPS, LEGS, since = 2),
+        SeedExercise("Levantamento terra romeno unilateral", "Single-leg Romanian deadlift", HAMSTRINGS, LEGS, since = 2),
+        SeedExercise("Levantamento terra romeno com kettlebell", "Kettlebell Romanian deadlift", HAMSTRINGS, LEGS, since = 2),
+        SeedExercise("Panturrilha em pé unilateral", "Single-leg standing calf raise", CALVES, LEGS, since = 2),
+        SeedExercise("Remada unilateral com kettlebell", "Single-arm kettlebell row", BACK, PULL, since = 2),
+        SeedExercise("Desenvolvimento unilateral com kettlebell", "Single-arm kettlebell shoulder press", SHOULDERS, PUSH, since = 2),
+        SeedExercise("Supino no chão unilateral com kettlebell", "Single-arm kettlebell floor press", CHEST, PUSH, since = 2),
+        SeedExercise("Flexão pike", "Pike push-up", SHOULDERS, PUSH, since = 2),
+        SeedExercise("Rosca bíceps", "Biceps curl", BICEPS, PULL, since = 2),
+        SeedExercise("Abdominal reverso", "Reverse crunch", ABS, OTHER, since = 2),
+        SeedExercise("Prancha lateral", "Side plank", ABS, OTHER, since = 2),
     )
 
-    /** Room callback that inserts [items] when the database file is first created. */
+    /** Latest library version (the database version that last added exercises). */
+    const val VERSION = 2
+
+    /**
+     * Inserts [candidates] whose name (in either language, ignoring case and accents) is not in the
+     * table yet, so user-created exercises with the same name are never duplicated. Returns how many.
+     */
+    fun insertMissing(db: SupportSQLiteDatabase, candidates: List<SeedExercise>, locale: Locale, nowMs: Long): Int {
+        val existing = mutableSetOf<String>()
+        db.query("SELECT name FROM exercise").use { c -> while (c.moveToNext()) existing += SearchText.normalize(c.getString(0)) }
+        var inserted = 0
+        candidates.forEach { item ->
+            if (SearchText.normalize(item.namePt) in existing || SearchText.normalize(item.nameEn) in existing) return@forEach
+            val values = ContentValues().apply {
+                put("name", item.name(locale))
+                put("muscleGroup", item.muscleGroup.name)
+                put("movementType", item.movementType.name)
+                put("isCustom", 0)
+                put("archived", 0)
+                put("createdAtMs", nowMs)
+            }
+            db.insert("exercise", SQLiteDatabase.CONFLICT_ABORT, values)
+            existing += SearchText.normalize(item.name(locale))
+            inserted++
+        }
+        return inserted
+    }
+
+    /** 1 → 2: adds the version-2 exercises to existing installs (schema unchanged). */
+    val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            insertMissing(db, items.filter { it.since == 2 }, Locale.getDefault(), System.currentTimeMillis())
+        }
+    }
+
+    /** Room callback that inserts the whole library when the database file is first created. */
     class Callback(
         private val nowMs: () -> Long = System::currentTimeMillis,
         private val locale: () -> Locale = Locale::getDefault,
     ) : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
-            val now = nowMs()
-            val language = locale()
             db.beginTransaction()
             try {
-                items.forEach { item ->
-                    val values = ContentValues().apply {
-                        put("name", item.name(language))
-                        put("muscleGroup", item.muscleGroup.name)
-                        put("movementType", item.movementType.name)
-                        put("isCustom", 0)
-                        put("archived", 0)
-                        put("createdAtMs", now)
-                    }
-                    db.insert("exercise", SQLiteDatabase.CONFLICT_ABORT, values)
-                }
+                insertMissing(db, items, locale(), nowMs())
                 db.setTransactionSuccessful()
             } finally {
                 db.endTransaction()

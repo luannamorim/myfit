@@ -23,7 +23,7 @@ Dependency rule: `domain` knows nothing about Android, except for the Tink libra
 | `domain/history` | `HistoryCalculator` (summaries, Mon–Sun weeks) |
 | `domain/body` | `Measure`, `BodyComparison` (differences, series, snapshot) |
 | `domain/backup` | v1 DTOs, header and encryption, zip + manifest, retention |
-| `data/db` | entities, DAOs, `MyFitDatabase` (v1), library seed |
+| `data/db` | entities, DAOs, `MyFitDatabase` (v2), library seed |
 | `data/repository` | workouts, exercises, session, history, body |
 | `data/backup` | `BackupManager`, `BackupKeyStore`, destinations (SAF/file), `FolderBackupWriter` |
 | `platform/session` | `SessionController`, `WorkoutService`, alarm, receivers, notifications |
@@ -42,6 +42,7 @@ body_assessment   body_photo
 - `startDateEpochDay` is the local day the session started: a workout that crosses midnight counts on its start day.
 - Images live in `filesDir/images/{exercises,body}/<uuid>.jpg`, downscaled to 1600 px and stripped of EXIF. The database stores only the relative path. Paths that would escape `images/` don't resolve to any file.
 - Schema exported to `app/schemas`. Any change requires a tested migration, because an installed APK already exists.
+- Database version 2 changed no tables: migration 1 → 2 (`ExerciseSeed.MIGRATION_1_2`) only adds the exercises introduced in library version 2, skipping names that already exist in either language, so user-created and deleted exercises are respected. Covered by `MigrationTest`, which builds a real version-1 database from `app/schemas/.../1.json`.
 
 ## Workout session
 

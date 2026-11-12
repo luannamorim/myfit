@@ -65,7 +65,7 @@ class RoutineRepositoryTest {
 
     @Test
     fun librarySearch_ignoresAccentsAndCase() = runTest {
-        assertEquals("Prancha", exercises.observeLibrary("PRANCHA").first().single().name)
+        assertEquals(listOf("Prancha", "Prancha lateral"), exercises.observeLibrary("PRANCHA").first().map { it.name })
         assertEquals(listOf("Abdominal oblíquo"), exercises.observeLibrary("abdominal obliquo").first().map { it.name })
         val elevacao = exercises.observeLibrary("elevacao pelvica").first().map { it.name }
         assertEquals(listOf("Elevação pélvica"), elevacao)

@@ -19,6 +19,7 @@ object DatabaseModule {
     fun provideDatabase(@ApplicationContext context: Context): MyFitDatabase =
         Room.databaseBuilder(context, MyFitDatabase::class.java, MyFitDatabase.NAME)
             .addCallback(ExerciseSeed.Callback())
+            .addMigrations(ExerciseSeed.MIGRATION_1_2)
             .build()
 
     @Provides fun provideExerciseDao(db: MyFitDatabase) = db.exerciseDao()

@@ -9,7 +9,7 @@ A personal, offline Android app to plan workouts, run them with a reliable rest 
 ## Features
 
 - **Workouts:** create, edit, duplicate, reorder (drag) and delete exercise sequences, with sets, reps, rest, load and notes per exercise.
-- **Library:** 81 predefined exercises (in the device language), accent-insensitive search, muscle-group filters and custom exercises with a photo from the gallery.
+- **Library:** 93 predefined exercises, including bodyweight and kettlebell moves (in the device language), accent-insensitive search, muscle-group filters and custom exercises with a photo from the gallery.
 - **Workout mode:** an immersive screen with sets, automatic rest, ±15 s, pause/resume, skip set or exercise, adjustable load and reps, and a summary before saving.
 - **Reliable timer:** times come from persisted marks (wall clock + monotonic clock + boot count), never from UI counters. An exact alarm ends the rest with sound and vibration even with the screen locked. The ongoing notification has quick actions, and an interrupted session resumes where it stopped.
 - **History:** monthly calendar with training days, per-day sessions, per-set details and weekly/monthly summaries.
