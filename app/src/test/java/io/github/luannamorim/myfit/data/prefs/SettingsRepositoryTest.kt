@@ -23,6 +23,8 @@ class SettingsRepositoryTest {
         val current = repo().current()
         assertEquals(AppSettings(), current)
         assertEquals(ThemeMode.DARK, current.themeMode)
+        // The rest end must be heard at the gym, where phones are often on vibrate.
+        assertEquals(RestSound.ALWAYS, current.restSound)
     }
 
     @Test

@@ -110,11 +110,13 @@ class SessionPlatformTest {
         val handler = RestEndHandler(repo, testSettings(), notifications, time)
 
         handler.onRestAlarm() // too early: stale alarm, nothing posted
-        assertTrue(notificationShadow.allNotifications.none { it.channelId == SessionNotifications.CHANNEL_REST_END })
+        assertTrue(notificationShadow.allNotifications.none { it.channelId in REST_END_CHANNELS })
 
         time.advance(90_000)
         handler.onRestAlarm()
-        val restEnd = notificationShadow.allNotifications.single { it.channelId == SessionNotifications.CHANNEL_REST_END }
+        // Default settings ring on the alarm channel, so the alert is heard with the phone on vibrate.
+        val restEnd = notificationShadow.allNotifications.single { it.channelId in REST_END_CHANNELS }
+        assertEquals(SessionNotifications.CHANNEL_REST_END_ALARM, restEnd.channelId)
         assertEquals("Descanso concluído", shadowOf(restEnd).contentTitle)
         assertEquals("A seguir: Remada curvada · série 2 de 3", shadowOf(restEnd).contentText)
     }
@@ -125,6 +127,14 @@ class SessionPlatformTest {
         controller.completeSet(12, 40.0)
         notifications.postRestEnd(repo.getActive()!!, RestSound.ALWAYS)
         assertTrue(notificationShadow.allNotifications.any { it.channelId == SessionNotifications.CHANNEL_REST_END_ALARM })
+    }
+
+    @Test
+    fun restEnd_followRinger_usesNotificationChannel() = runBlocking {
+        startWorkout()
+        controller.completeSet(12, 40.0)
+        notifications.postRestEnd(repo.getActive()!!, RestSound.FOLLOW_RINGER)
+        assertTrue(notificationShadow.allNotifications.any { it.channelId == SessionNotifications.CHANNEL_REST_END })
     }
 
     @Test
@@ -182,3 +192,5 @@ class SessionPlatformTest {
         assertFalse(starter.running)
     }
 }
+
+private val REST_END_CHANNELS = setOf(SessionNotifications.CHANNEL_REST_END, SessionNotifications.CHANNEL_REST_END_ALARM)
