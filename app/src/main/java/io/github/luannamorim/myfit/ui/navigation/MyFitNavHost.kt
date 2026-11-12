@@ -45,6 +45,7 @@ import io.github.luannamorim.myfit.ui.feature.library.ExerciseEditorScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseLibraryScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.luannamorim.myfit.ui.feature.settings.BackupScreen
 import io.github.luannamorim.myfit.ui.feature.settings.SettingsScreen
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
@@ -55,6 +56,7 @@ fun MyFitNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     openWorkoutRequest: Int = 0,
+    openBackupRequest: Int = 0,
     appViewModel: AppViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(appViewModel) {
@@ -70,6 +72,9 @@ fun MyFitNavHost(
         onStopOrDispose { }
     }
     val activeSession by appViewModel.activeSession.collectAsStateWithLifecycle()
+    LaunchedEffect(openBackupRequest) {
+        if (openBackupRequest > 0) navController.navigate(BackupRoute) { launchSingleTop = true }
+    }
     // Notification tap / launcher intent asking to show the workout.
     LaunchedEffect(openWorkoutRequest) {
         if (openWorkoutRequest > 0) {
@@ -165,7 +170,13 @@ fun MyFitNavHost(
                 composable<AssessmentEditorRoute> { AssessmentEditorScreen(onClose = { navController.popBackStack() }) }
                 composable<AssessmentCompareRoute> { AssessmentCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<PhotoCompareRoute> { PhotoCompareScreen(onBack = { navController.popBackStack() }) }
-                composable<SettingsRoute> { SettingsScreen() }
+                composable<SettingsRoute> {
+                    SettingsScreen(
+                        onOpenBackup = { navController.navigate(BackupRoute) },
+                        onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
+                    )
+                }
+                composable<BackupRoute> { BackupScreen(onBack = { navController.popBackStack() }) }
 
                 composable<RoutineEditorRoute> { entry ->
                     val picked by entry.savedStateHandle

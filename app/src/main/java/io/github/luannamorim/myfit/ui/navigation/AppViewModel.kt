@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.data.repository.ActiveSessionExistsException
 import io.github.luannamorim.myfit.data.repository.EmptyRoutineException
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
+import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.session.ActiveSession
 import io.github.luannamorim.myfit.platform.session.SessionController
 import kotlinx.coroutines.channels.Channel
@@ -24,7 +26,11 @@ sealed interface AppEvent {
 @HiltViewModel
 class AppViewModel @Inject constructor(
     private val controller: SessionController,
+    settings: SettingsRepository,
 ) : ViewModel() {
+
+    val settings: StateFlow<AppSettings?> = settings.settings
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val activeSession: StateFlow<ActiveSession?> = controller.active
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
