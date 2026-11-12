@@ -11,7 +11,7 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
-import io.github.luannamorim.myfit.ui.theme.ThemeMode
+import io.github.luannamorim.myfit.domain.model.ThemeMode
 
 const val SCREENSHOT_DIR = "build/outputs/roborazzi"
 

@@ -8,8 +8,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-
-enum class ThemeMode { DARK, LIGHT, SYSTEM }
+import io.github.luannamorim.myfit.domain.model.ThemeMode
 
 object MyFitTheme {
     val colors: MyFitColors
