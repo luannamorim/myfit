@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import io.github.luannamorim.myfit.data.db.dao.BackupDao
 import io.github.luannamorim.myfit.data.db.dao.BodyDao
 import io.github.luannamorim.myfit.data.db.dao.ExerciseDao
 import io.github.luannamorim.myfit.data.db.dao.RoutineDao
@@ -34,6 +35,7 @@ abstract class MyFitDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun sessionDao(): SessionDao
     abstract fun bodyDao(): BodyDao
+    abstract fun backupDao(): BackupDao
 
     companion object {
         const val VERSION = 1
