@@ -9,6 +9,7 @@ import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.domain.activity.GpsFix
 import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.testutil.inMemoryDb
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +77,18 @@ class LiveActivityControllerTest {
         assertEquals(time.today(), saved.date)
         assertNull(c.live.value)
         assertFalse(starter.running)
+    }
+
+    @Test
+    fun finish_keepsWhatTheDoneStepAsked() = runBlocking {
+        val c = controller()
+        c.start(Sport.YOGA, null, gps = false)
+        time.advance(45 * 60_000)
+        val id = c.finish(Intensity.LOW, "alongamento leve", "images/sessions/y.jpg")!!
+        val saved = activities.get(id)!!
+        assertEquals(Intensity.LOW, saved.intensity)
+        assertEquals("alongamento leve", saved.notes)
+        assertEquals("images/sessions/y.jpg", saved.imagePath)
     }
 
     @Test

@@ -30,7 +30,8 @@ data class LiveActivityUiState(
     val gps: Boolean = false,
     val gpsStatus: GpsStatus = GpsStatus.OFF,
     val distanceMeters: Double = 0.0,
-    val finishedId: Long? = null,
+    /** "Finish" was tapped: the timer is paused and the "activity done" step should open. */
+    val reviewRequested: Boolean = false,
 )
 
 /** The sport being timed: clock, GPS distance, pause/resume and finish. */
@@ -39,7 +40,7 @@ class LiveActivityViewModel @Inject constructor(
     private val controller: LiveActivityController,
     private val time: TimeSource,
 ) : ViewModel() {
-    private val finished = MutableStateFlow<Long?>(null)
+    private val review = MutableStateFlow(false)
     private val ticker = flow {
         while (true) {
             emit(time.now())
@@ -51,9 +52,9 @@ class LiveActivityViewModel @Inject constructor(
         emitAll(controller.live)
     }
 
-    val state: StateFlow<LiveActivityUiState> = combine(live, controller.gps, ticker, finished) { a, gps, now, done ->
+    val state: StateFlow<LiveActivityUiState> = combine(live, controller.gps, ticker, review) { a, gps, now, reviewing ->
         if (a == null) {
-            LiveActivityUiState(loading = false, running = false, finishedId = done)
+            LiveActivityUiState(loading = false, running = false)
         } else {
             LiveActivityUiState(
                 loading = false,
@@ -65,7 +66,7 @@ class LiveActivityViewModel @Inject constructor(
                 gps = a.gps,
                 gpsStatus = gps,
                 distanceMeters = a.distanceMeters,
-                finishedId = done,
+                reviewRequested = reviewing,
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LiveActivityUiState())
@@ -74,8 +75,16 @@ class LiveActivityViewModel @Inject constructor(
         viewModelScope.launch { controller.togglePause() }
     }
 
+    /** Pauses the clock and asks for the "activity done" step; it is saved only from there. */
     fun finish() {
-        viewModelScope.launch { finished.value = controller.finish() }
+        viewModelScope.launch {
+            controller.pause()
+            review.value = true
+        }
+    }
+
+    fun reviewShown() {
+        review.value = false
     }
 
     fun discard() {

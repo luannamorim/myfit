@@ -55,13 +55,16 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
-fun LiveActivityScreen(onClose: () -> Unit, onFinished: (Long) -> Unit, viewModel: LiveActivityViewModel = hiltViewModel()) {
+fun LiveActivityScreen(onClose: () -> Unit, onReview: () -> Unit, viewModel: LiveActivityViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(state.finishedId, state.loading, state.running) {
-        val id = state.finishedId
-        when {
-            id != null -> onFinished(id)
-            !state.loading && !state.running -> onClose()
+    LaunchedEffect(state.loading, state.running) {
+        // Saved from the "activity done" step, or discarded: nothing left to time.
+        if (!state.loading && !state.running) onClose()
+    }
+    LaunchedEffect(state.reviewRequested) {
+        if (state.reviewRequested) {
+            viewModel.reviewShown()
+            onReview()
         }
     }
     LiveActivityContent(state, onBack = onClose, onTogglePause = viewModel::togglePause, onFinish = viewModel::finish, onDiscard = viewModel::discard)

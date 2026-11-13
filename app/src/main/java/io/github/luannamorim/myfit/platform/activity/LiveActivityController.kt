@@ -8,6 +8,7 @@ import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.GpsFix
 import io.github.luannamorim.myfit.domain.activity.LiveActivity
 import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.model.Intensity
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,8 +85,11 @@ class LiveActivityController @Inject constructor(
         _gps.value = status
     }
 
-    /** Logs the activity (time and GPS distance) and stops timing. Returns the new activity's id. */
-    suspend fun finish(): Long? {
+    /**
+     * Logs the activity (time and GPS distance, plus what the "activity done" step asked) and
+     * stops timing. Returns the new activity's id.
+     */
+    suspend fun finish(intensity: Intensity? = null, notes: String? = null, imagePath: String? = null): Long? {
         val done = mutex.withLock {
             loaded.await()
             val current = _live.value ?: return null
@@ -95,12 +99,26 @@ class LiveActivityController @Inject constructor(
         }
         service.stop()
         _gps.value = GpsStatus.OFF
-        val now = time.now()
-        val minutes = ceil(done.elapsedMs(now) / 60_000.0).toInt().coerceAtLeast(1)
-        val km = if (done.gps && done.distanceMeters >= 10) (done.distanceMeters / 10).roundToLong() / 100.0 else null
+        val minutes = minutes(done)
+        val km = km(done)
         val date = Instant.ofEpochMilli(done.startedAt.wallMs).atZone(time.zone()).toLocalDate()
-        return activities.save(Activity(sport = done.sport, name = done.name, date = date, durationMinutes = minutes, distanceKm = km))
+        return activities.save(
+            Activity(
+                sport = done.sport, name = done.name, date = date, durationMinutes = minutes, distanceKm = km,
+                intensity = intensity, notes = notes, imagePath = imagePath,
+            ),
+        )
     }
+
+    /** Whole minutes timed so far (rounded up, at least 1): what [finish] will log. */
+    fun minutes(activity: LiveActivity): Int = ceil(activity.elapsedMs(time.now()) / 60_000.0).toInt().coerceAtLeast(1)
+
+    /** GPS distance in km with two decimals, or null without GPS (or under 10 m). */
+    fun km(activity: LiveActivity): Double? =
+        if (activity.gps && activity.distanceMeters >= 10) (activity.distanceMeters / 10).roundToLong() / 100.0 else null
+
+    /** Local date the activity started on. */
+    fun startDate(activity: LiveActivity) = Instant.ofEpochMilli(activity.startedAt.wallMs).atZone(time.zone()).toLocalDate()
 
     suspend fun discard() {
         mutex.withLock {

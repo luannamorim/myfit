@@ -79,10 +79,15 @@ import io.github.luannamorim.myfit.ui.theme.Spacing
 import java.time.LocalDate
 
 @Composable
-fun ActivityEditorScreen(onClose: () -> Unit, onStarted: () -> Unit = {}, viewModel: ActivityEditorViewModel = hiltViewModel()) {
+fun ActivityEditorScreen(
+    onClose: () -> Unit,
+    onStarted: () -> Unit = {},
+    onDone: () -> Unit = onClose,
+    viewModel: ActivityEditorViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    LaunchedEffect(state.done) { if (state.done) onClose() }
+    LaunchedEffect(state.done) { if (state.done) onDone() }
     LaunchedEffect(state.started) { if (state.started) onStarted() }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         if (uri != null) viewModel.setPhoto(uri)

@@ -32,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import io.github.luannamorim.myfit.ui.feature.activity.ActivityEditorScreen
 import io.github.luannamorim.myfit.ui.feature.activity.LiveActivityScreen
 import io.github.luannamorim.myfit.ui.feature.evolution.AssessmentCompareScreen
@@ -196,9 +197,14 @@ fun MyFitNavHost(
                     )
                 }
                 composable<AssessmentEditorRoute> { AssessmentEditorScreen(onClose = { navController.popBackStack() }) }
-                composable<ActivityEditorRoute> {
+                composable<ActivityEditorRoute> { entry ->
+                    val liveReview = entry.toRoute<ActivityEditorRoute>().let { it.review && it.activityId == 0L }
                     ActivityEditorScreen(
                         onClose = { navController.popBackStack() },
+                        // After saving a timed activity, leave its (finished) timer screen too.
+                        onDone = {
+                            if (liveReview) navController.popBackStack<LiveActivityRoute>(inclusive = true) else navController.popBackStack()
+                        },
                         onStarted = {
                             navController.navigate(LiveActivityRoute) {
                                 popUpTo<ActivityEditorRoute> { inclusive = true }
@@ -210,11 +216,8 @@ fun MyFitNavHost(
                 composable<LiveActivityRoute> {
                     LiveActivityScreen(
                         onClose = { navController.popBackStack() },
-                        onFinished = { id ->
-                            navController.navigate(ActivityEditorRoute(activityId = id, review = true)) {
-                                popUpTo<LiveActivityRoute> { inclusive = true }
-                            }
-                        },
+                        // Back from the "activity done" step returns here, paused.
+                        onReview = { navController.navigate(ActivityEditorRoute(review = true)) { launchSingleTop = true } },
                     )
                 }
                 composable<AssessmentCompareRoute> { AssessmentCompareScreen(onBack = { navController.popBackStack() }) }

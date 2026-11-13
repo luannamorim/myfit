@@ -62,7 +62,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] The session row shows the intensity; the session detail shows the photo, and intensity and photo can be changed or removed there.
 - [ ] "+ Activity" on a past day: log swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name. They appear on that day, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it.
 - [ ] Home: "Start activity" opens the same screen; the week counts the activity days and their time.
-- [ ] **Live:** pick Running → *Start timer* → allow notifications and location. Walk outdoors for a few minutes with the screen locked: the notification counts up and shows the km. Pause/resume from the notification. *Finish*: the activity is saved with the time and distance and "Activity done" asks for intensity, notes and photo.
+- [ ] **Live:** pick Running → *Start timer* → allow notifications and location. Walk outdoors for a few minutes with the screen locked: the notification counts up and shows the km. Pause/resume from the notification. *Finish* pauses the timer and opens "Activity done" (time, distance, intensity, notes, photo); nothing is saved yet: back returns to the paused timer, *Save* logs it and closes it for good.
 - [ ] Open a logged activity from History: the sport is fixed (no sport chips); date, time, distance, intensity and photo can be changed.
 - [ ] Start one, close the app from recents and reopen: Home shows "… in progress" with the right time.
 - [ ] Indoor cycling or swimming: no GPS option, only the time.
@@ -71,7 +71,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Log two assessments on different dates (edit the date at the top). Weight with a decimal comma.
 - [ ] Compare the two: signed differences (+/−).
 - [ ] Charts: weight and waist appear; change the metrics and the period. "All" shows every measure you have logged; tapping it again clears the selection.
-- [ ] Photos: add two (front), one with an older date picked with *Date*. Tap one: it opens full screen; swipe to the other, pinch and double-tap to zoom, ✕ or back to close. Press and hold one to select, tap the other → "Compare selected"; delete one.
+- [ ] Photos: add two (front), one with an older date picked with *Date*. Tap one: it opens full screen; swipe to the other, pinch and double-tap to zoom, ✕ or back to close. Press and hold one to select, tap the other → "Compare selected"; in the comparison, tap a photo to see it full screen and swipe to the other; delete one.
 - [ ] Workout or activity photo: tapping it opens it full screen.
 - [ ] Home and Measurements show weight and body fat (no waist) with their change.
 

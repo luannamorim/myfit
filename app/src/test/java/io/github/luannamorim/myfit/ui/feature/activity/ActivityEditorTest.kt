@@ -31,6 +31,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -67,20 +68,29 @@ class ActivityEditorTest {
         ActivityEditorViewModel(SavedStateHandle(route = route), activities, images, time, live)
 
     @Test
-    fun reviewAfterTimer_asksIntensityAndPhoto_keepingWhatWasMeasured() = runBlocking {
-        val id = activities.save(Activity(sport = Sport.CYCLING, date = time.today(), durationMinutes = 52, distanceKm = 18.4))
-        val vm = editor(ActivityEditorRoute(activityId = id, review = true))
+    fun doneStepAfterTimer_savesOnlyOnSave_withIntensityAndNotes() = runBlocking {
+        live.start(Sport.CYCLING, null, gps = false)
+        time.advance(51 * 60_000L + 20_000)
+        live.pause() // what "Finish" does before opening this step
+
+        val vm = editor(ActivityEditorRoute(review = true))
         val loaded = vm.state.awaitUntil { !it.loading }
         assertTrue(loaded.review)
+        assertEquals(Sport.CYCLING, loaded.sport)
+        assertEquals("52", loaded.duration) // what the timer measured
+        // Nothing logged yet: going back here returns to the paused timer.
+        assertTrue(activities.observe(time.today()..time.today()).first().isEmpty())
+        assertNotNull(live.current())
+
         vm.setIntensity(Intensity.HIGH)
         vm.setNotes("subida forte")
         assertTrue(vm.save())
         vm.state.awaitUntil { it.done }
-        val saved = activities.get(id)!!
+        val saved = activities.observe(time.today()..time.today()).first().single()
         assertEquals(Intensity.HIGH, saved.intensity)
         assertEquals("subida forte", saved.notes)
         assertEquals(52, saved.durationMinutes)
-        assertEquals(18.4, saved.distanceKm!!, 0.0)
+        assertNull(live.current()) // finished for good
     }
 
     @Test

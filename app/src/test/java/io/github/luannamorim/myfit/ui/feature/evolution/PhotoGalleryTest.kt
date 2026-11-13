@@ -67,6 +67,13 @@ class PhotoGalleryTest {
     }
 
     @Test
+    fun compare_tapOpensThePairFullScreen() {
+        compose.setContent { MyFitTheme { PhotoCompareContent(PhotoCompareUiState(photos[1], photos[0]), onBack = {}) } }
+        compose.onNodeWithContentDescription("Frente").performClick() // the right-hand photo
+        compose.onNodeWithText("2 / 2").assertExists()
+    }
+
+    @Test
     fun pressAndHold_selects_andThenTapsToggle() {
         val toggled = mutableListOf<Long>()
         show(toggled)

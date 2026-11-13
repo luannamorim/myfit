@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.ui.feature.evolution
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,8 @@ import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.formatSigned
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodyPhoto
+import io.github.luannamorim.myfit.ui.common.PhotoViewer
+import io.github.luannamorim.myfit.ui.common.ViewerPage
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.common.localImageModel
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
@@ -129,25 +132,32 @@ fun PhotoCompareScreen(onBack: () -> Unit, viewModel: PhotoCompareViewModel = hi
 @Composable
 fun PhotoCompareContent(state: PhotoCompareUiState, onBack: () -> Unit) {
     val c = MyFitTheme.colors
+    val photos = listOfNotNull(state.first, state.second)
+    var viewing by remember { mutableStateOf<Int?>(null) }
     Scaffold(containerColor = c.background, topBar = { MyFitTopBar(stringResource(R.string.photo_compare_title), onBack = onBack) }) { padding ->
         Row(
             Modifier.fillMaxSize().padding(padding).padding(Spacing.m),
             horizontalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
-            listOfNotNull(state.first, state.second).forEach { PhotoPanel(it, Modifier.weight(1f)) }
+            photos.forEachIndexed { index, photo -> PhotoPanel(photo, Modifier.weight(1f), onOpen = { viewing = index }) }
         }
+    }
+    // Tap a side to see it full screen; swipe to the other one of the pair.
+    viewing?.let { index ->
+        val pages = photos.map { ViewerPage(it.imagePath, Dates.medium(it.date) + " · " + stringResource(it.pose.labelRes)) }
+        PhotoViewer(pages, initialPage = index, onDismiss = { viewing = null })
     }
 }
 
 @Composable
-private fun PhotoPanel(photo: BodyPhoto, modifier: Modifier) {
+private fun PhotoPanel(photo: BodyPhoto, modifier: Modifier, onOpen: () -> Unit) {
     val c = MyFitTheme.colors
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
         AsyncImage(
             model = localImageModel(photo.imagePath),
             contentDescription = stringResource(photo.pose.labelRes),
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f).clip(MyFitShapes.medium).background(c.surfaceRaised),
+            modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f).clip(MyFitShapes.medium).background(c.surfaceRaised).clickable(onClick = onOpen),
         )
         Text(Dates.medium(photo.date), style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
         Text(stringResource(photo.pose.labelRes), style = MyFitTheme.type.caption, color = c.textSecondary)

@@ -64,12 +64,15 @@ class ActivityEditorViewModel @Inject constructor(
     private val live: LiveActivityController,
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<ActivityEditorRoute>()
+
+    /** The "activity done" step of a timed activity: nothing is saved until [save]. */
+    private val liveReview = route.review && route.activityId == 0L
     private val today = time.today()
     private val _state = MutableStateFlow(
         ActivityEditorUiState(
             date = route.dateEpochDay?.let(LocalDate::ofEpochDay)?.coerceAtMost(today) ?: today,
             today = today,
-            review = route.review && route.activityId != 0L,
+            review = route.review,
         ),
     )
     val state: StateFlow<ActivityEditorUiState> = _state.asStateFlow()
@@ -79,6 +82,10 @@ class ActivityEditorViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            if (liveReview) {
+                loadLive()
+                return@launch
+            }
             val existing = route.activityId.takeIf { it != 0L }?.let { activities.get(it) }
             savedImagePath = existing?.imagePath
             _state.update { s ->
@@ -99,6 +106,26 @@ class ActivityEditorViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    /** Shows what the timer measured (it stays paused while this step is open). */
+    private suspend fun loadLive() {
+        val running = live.current()
+        if (running == null) {
+            _state.update { it.copy(loading = false, done = true) }
+            return
+        }
+        _state.update {
+            it.copy(
+                loading = false,
+                isNew = false,
+                sport = running.sport,
+                name = running.name.orEmpty(),
+                date = live.startDate(running),
+                duration = live.minutes(running).toString(),
+                distance = formatDistance(running.sport, live.km(running)),
+            )
         }
     }
 
@@ -155,6 +182,14 @@ class ActivityEditorViewModel @Inject constructor(
     /** Validates and saves. Returns false (with errors flagged) when something is missing. */
     fun save(): Boolean {
         val s = _state.value
+        if (liveReview) {
+            // Only now the activity is logged, with what this step asked for.
+            viewModelScope.launch {
+                live.finish(s.intensity, s.notes.trim().takeIf { it.isNotEmpty() }, s.imagePath)
+                _state.update { it.copy(done = true) }
+            }
+            return true
+        }
         val minutes = s.duration.toIntOrNull()?.takeIf { it in 1..MAX_MINUTES }
         val nameMissing = s.sport == Sport.OTHER && s.name.isBlank()
         val distanceKm = parseDistance(s.sport, s.distance)
