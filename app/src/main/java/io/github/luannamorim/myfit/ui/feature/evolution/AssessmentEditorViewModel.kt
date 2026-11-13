@@ -8,9 +8,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
+import io.github.luannamorim.myfit.domain.body.BodyMetrics
 import io.github.luannamorim.myfit.domain.body.Measure
+import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.ui.navigation.AssessmentEditorRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,35 +36,47 @@ data class AssessmentEditorUiState(
     val invalid: Set<Measure> = emptySet(),
     val emptyError: Boolean = false,
     val done: Boolean = false,
+    /** Calculated from the typed weight and height (or the height of another assessment). */
+    val bmi: Double? = null,
+    /** Navy estimate while body fat isn't typed; null without sex, height or circumferences. */
+    val estimatedBodyFat: Double? = null,
 )
 
 @HiltViewModel
 class AssessmentEditorViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val body: BodyRepository,
+    private val settings: SettingsRepository,
     time: TimeSource,
 ) : ViewModel() {
     private val id: Long? = savedStateHandle.toRoute<AssessmentEditorRoute>().assessmentId
     private val _state = MutableStateFlow(AssessmentEditorUiState(isNew = id == null, date = time.today()))
     val state: StateFlow<AssessmentEditorUiState> = _state.asStateFlow()
 
+    /** The other assessments (for the height a draft without one borrows) and the sex, read once. */
+    private var others: List<BodyAssessment> = emptyList()
+    private var sex: Sex? = null
+
     init {
         viewModelScope.launch {
             val existing = id?.let { body.get(it) }
-            val last = body.observeAssessments().first().firstOrNull { it.id != id }
+            others = body.observeAssessments().first().filter { it.id != id }
+            sex = settings.current().sex
             _state.update { s ->
                 s.copy(
                     loading = false,
                     date = existing?.date ?: s.date,
                     fields = existing?.values?.mapValues { DecimalInput.format(it.value) }.orEmpty(),
                     notes = existing?.notes.orEmpty(),
-                    lastValues = last?.values.orEmpty(),
-                )
+                    // Height is typed rarely: its hint is the last height recorded, wherever it was.
+                    lastValues = others.firstOrNull()?.values.orEmpty() +
+                        listOfNotNull(others.firstNotNullOfOrNull { it.values[Measure.HEIGHT] }?.let { Measure.HEIGHT to it }),
+                ).withMetrics()
             }
         }
     }
 
-    fun setDate(date: LocalDate) = _state.update { it.copy(date = date) }
+    fun setDate(date: LocalDate) = _state.update { it.copy(date = date).withMetrics() }
 
     fun setField(measure: Measure, text: String) = _state.update { s ->
         val invalid = text.isNotBlank() && DecimalInput.parse(text) == null
@@ -69,6 +84,23 @@ class AssessmentEditorViewModel @Inject constructor(
             fields = s.fields + (measure to text),
             invalid = if (invalid) s.invalid + measure else s.invalid - measure,
             emptyError = false,
+        ).withMetrics()
+    }
+
+    /**
+     * Valid typed values. A height under 3 with decimals was typed in meters ("1,78") and becomes cm;
+     * a bare "1" is the first digit of "178", not one meter.
+     */
+    private fun AssessmentEditorUiState.values(): Map<Measure, Double> =
+        fields.mapNotNull { (m, text) ->
+            DecimalInput.parse(text)?.let { m to if (m == Measure.HEIGHT && it < 3 && it % 1.0 != 0.0) it * 100 else it }
+        }.toMap()
+
+    private fun AssessmentEditorUiState.withMetrics(): AssessmentEditorUiState {
+        val draft = BodyMetrics.derive(others + BodyAssessment(id = -1, date = date, values = values()), sex).last()
+        return copy(
+            bmi = draft.values[Measure.BMI],
+            estimatedBodyFat = draft.values[Measure.BODY_FAT]?.takeIf { Measure.BODY_FAT in draft.estimated },
         )
     }
 
@@ -78,7 +110,11 @@ class AssessmentEditorViewModel @Inject constructor(
     fun save(): Boolean {
         val s = _state.value
         if (s.invalid.isNotEmpty()) return false
-        val values = s.fields.mapNotNull { (m, text) -> DecimalInput.parse(text)?.let { m to it } }.toMap()
+        val values = s.values()
+        if (values[Measure.HEIGHT]?.let { it !in BodyMetrics.PLAUSIBLE_HEIGHT_CM } == true) {
+            _state.update { it.copy(invalid = it.invalid + Measure.HEIGHT) }
+            return false
+        }
         if (values.isEmpty()) {
             _state.update { it.copy(emptyError = true) }
             return false

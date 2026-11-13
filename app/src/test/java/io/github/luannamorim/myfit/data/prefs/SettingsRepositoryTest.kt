@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.data.prefs
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
@@ -8,6 +9,7 @@ import io.github.luannamorim.myfit.domain.model.ThemeMode
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -47,6 +49,23 @@ class SettingsRepositoryTest {
         val target = repo(File(tmp.root, "b.preferences_pb"))
         target.importJson(json)
         assertEquals(source.current(), target.current())
+    }
+
+    @Test
+    fun sex_setAndCleared_andTravelsInExports() = runTest {
+        val r = repo()
+        r.update { it.copy(sex = Sex.FEMALE) }
+        assertEquals(Sex.FEMALE, r.current().sex)
+        r.update { it.copy(sex = Sex.MALE) }
+        assertTrue(r.exportJson().contains("\"sex\":\"MALE\""))
+        r.update { it.copy(sex = null) }
+        assertNull(r.current().sex)
+
+        // Settings exported before the field existed: no sex.
+        val old = repo(File(tmp.root, "old.preferences_pb"))
+        old.importJson("""{"themeMode":"LIGHT"}""")
+        assertNull(old.current().sex)
+        assertEquals(ThemeMode.LIGHT, old.current().themeMode)
     }
 
     private val reminders = listOf(

@@ -5,12 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.activity.LiveActivity
 import io.github.luannamorim.myfit.domain.body.BodyComparison
+import io.github.luannamorim.myfit.domain.body.BodyMetrics
 import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
@@ -21,6 +23,8 @@ import io.github.luannamorim.myfit.platform.session.SessionController
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import java.time.LocalDate
@@ -71,6 +75,7 @@ class HomeViewModel @Inject constructor(
     controller: SessionController,
     liveActivity: LiveActivityController,
     body: BodyRepository,
+    settings: SettingsRepository,
     time: TimeSource,
 ) : ViewModel() {
     private val today = time.today()
@@ -81,7 +86,7 @@ class HomeViewModel @Inject constructor(
         combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
         history.observeLast(),
         combine(controller.active, liveActivity.live) { a, l -> a to l },
-        body.observeAssessments(),
+        combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex -> BodyMetrics.derive(raw, sex) },
     ) { list, (weekSessions, weekActivities), last, (active, live), assessments ->
         val hour = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone()).hour
         val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)

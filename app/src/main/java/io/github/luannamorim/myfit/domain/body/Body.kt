@@ -2,12 +2,21 @@ package io.github.luannamorim.myfit.domain.body
 
 import java.time.LocalDate
 
-enum class MeasureUnit { KG, PERCENT, CM }
+/** NONE: shown as a bare number (BMI). */
+enum class MeasureUnit { KG, PERCENT, CM, NONE }
 
-/** Indicators of a body assessment, in display order. */
-enum class Measure(val unit: MeasureUnit) {
+/** Used only to estimate body fat (US Navy formulas differ by sex). */
+enum class Sex { MALE, FEMALE }
+
+/**
+ * Indicators of a body assessment, in display order. [derived] ones are never typed or stored:
+ * the app calculates them (see [BodyMetrics]).
+ */
+enum class Measure(val unit: MeasureUnit, val derived: Boolean = false) {
     WEIGHT(MeasureUnit.KG),
+    HEIGHT(MeasureUnit.CM),
     BODY_FAT(MeasureUnit.PERCENT),
+    BMI(MeasureUnit.NONE, derived = true),
     NECK(MeasureUnit.CM),
     SHOULDERS(MeasureUnit.CM),
     CHEST(MeasureUnit.CM),
@@ -29,9 +38,15 @@ data class BodyAssessment(
     val date: LocalDate,
     val values: Map<Measure, Double> = emptyMap(),
     val notes: String? = null,
-)
+    /** Measures in [values] the app calculated instead of the user typing them (BMI, an estimated body fat). */
+    val estimated: Set<Measure> = emptySet(),
+) {
+    /** How many values the user typed. */
+    val measuredCount: Int get() = values.keys.count { it !in estimated }
+}
 
-data class MeasureDiff(val measure: Measure, val from: Double?, val to: Double?, val diff: Double?)
+/** [estimated]: either side is an estimate (BMI, always calculated, isn't flagged). */
+data class MeasureDiff(val measure: Measure, val from: Double?, val to: Double?, val diff: Double?, val estimated: Boolean = false)
 
 /** Latest assessment with its change versus the previous one, for the dashboard. */
 data class BodySnapshot(
@@ -49,22 +64,23 @@ object BodyComparison {
     fun compare(from: BodyAssessment, to: BodyAssessment): List<MeasureDiff> = Measure.entries.map { m ->
         val a = from.values[m]
         val b = to.values[m]
-        MeasureDiff(m, a, b, if (a != null && b != null) round2(b - a) else null)
+        MeasureDiff(m, a, b, if (a != null && b != null) round2(b - a) else null, isEstimate(m, from, to))
     }
 
     /** Values of [measure] over time, oldest first, skipping assessments without it. */
     fun series(items: List<BodyAssessment>, measure: Measure): List<Pair<LocalDate, Double>> =
         items.sortedWith(compareBy({ it.date }, { it.id })).mapNotNull { a -> a.values[measure]?.let { a.date to it } }
 
-    /** Snapshot of the two most recent assessments; highlights are weight and body fat when present (Home and Progress). */
-    fun snapshot(items: List<BodyAssessment>, highlight: List<Measure> = listOf(Measure.WEIGHT, Measure.BODY_FAT)): BodySnapshot? {
+    /** Snapshot of the two most recent assessments; highlights are weight, body fat and BMI when present (Home and Progress). */
+    fun snapshot(items: List<BodyAssessment>, highlight: List<Measure> = listOf(Measure.WEIGHT, Measure.BODY_FAT, Measure.BMI)): BodySnapshot? {
         val sorted = items.sortedWith(compareByDescending<BodyAssessment> { it.date }.thenByDescending { it.id })
         val latest = sorted.firstOrNull() ?: return null
         val previous = sorted.getOrNull(1)
         val diffs = highlight.filter { latest.values[it] != null }.map { m ->
             val prev = previous?.values?.get(m)
             val now = latest.values[m]
-            MeasureDiff(m, prev, now, if (prev != null && now != null) round2(now - prev) else null)
+            // The tile shows the latest value: it's an estimate only if that one is.
+            MeasureDiff(m, prev, now, if (prev != null && now != null) round2(now - prev) else null, isEstimate(m, latest, null))
         }
         val trends = diffs.associate { d -> d.measure to series(items, d.measure).takeLast(TREND_POINTS) }
         return BodySnapshot(latest, previous, diffs, trends)
@@ -72,6 +88,9 @@ object BodyComparison {
 
     /** How many recent assessments the dashboard trend line shows. */
     const val TREND_POINTS = 12
+
+    private fun isEstimate(m: Measure, a: BodyAssessment?, b: BodyAssessment?) =
+        !m.derived && (m in a?.estimated.orEmpty() || m in b?.estimated.orEmpty())
 
     private fun round2(v: Double) = Math.round(v * 100) / 100.0
 }

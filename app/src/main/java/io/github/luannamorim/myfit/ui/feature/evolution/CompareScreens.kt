@@ -81,7 +81,7 @@ fun AssessmentCompareContent(state: CompareUiState, onFrom: (Long) -> Unit, onTo
                 HorizontalDivider(color = c.outline)
                 state.rows.forEach { row ->
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(row.measure.labelRes), style = MyFitTheme.type.body, color = c.textPrimary, modifier = Modifier.weight(1.6f))
+                        Text(measureLabel(row.measure, row.estimated), style = MyFitTheme.type.body, color = c.textPrimary, modifier = Modifier.weight(1.6f))
                         ValueCell(row.from?.let { DecimalInput.format(it) } ?: "—", Modifier.weight(1f))
                         ValueCell(row.to?.let { DecimalInput.format(it) } ?: "—", Modifier.weight(1f))
                         ValueCell(row.diff?.let { formatSigned(it, unitLabel(row.measure)) } ?: "—", Modifier.weight(1f), strong = true)

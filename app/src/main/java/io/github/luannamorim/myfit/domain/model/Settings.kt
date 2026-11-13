@@ -1,5 +1,6 @@
 package io.github.luannamorim.myfit.domain.model
 
+import io.github.luannamorim.myfit.domain.body.Sex
 import kotlinx.serialization.Serializable
 
 enum class ThemeMode { DARK, LIGHT, SYSTEM }
@@ -21,6 +22,8 @@ data class AppSettings(
     val updateRoutineLoadsOnFinish: Boolean = true,
     val autoBackup: Boolean = true,
     val reminders: List<Reminder> = emptyList(),
+    /** Only for the body-fat estimate; null = not set (no estimate). */
+    val sex: Sex? = null,
 ) {
     companion object {
         const val MIN_REST_SECONDS = 15

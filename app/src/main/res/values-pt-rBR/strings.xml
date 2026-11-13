@@ -301,7 +301,10 @@
     <string name="home_empty_message">Monte uma sequência de exercícios e inicie quando chegar na academia.</string>
     <!-- Medidas -->
     <string name="measure_weight">Peso</string>
+    <string name="measure_height">Altura</string>
     <string name="measure_body_fat">Gordura corporal</string>
+    <string name="measure_bmi">IMC</string>
+    <string name="measure_estimated">%1$s (estimada)</string>
     <string name="measure_neck">Pescoço</string>
     <string name="measure_shoulders">Ombros</string>
     <string name="measure_chest">Peitoral</string>
@@ -346,6 +349,8 @@
     <string name="assessment_delete_title">Excluir avaliação?</string>
     <string name="assessment_delete_message">As medidas desta data serão removidas do histórico e dos gráficos.</string>
     <string name="assessment_last_hint">última: %1$s</string>
+    <string name="assessment_bmi">IMC %1$s</string>
+    <string name="assessment_fat_estimated">gordura estimada %1$s</string>
     <string name="compare_title">Comparar avaliações</string>
     <string name="compare_from">De</string>
     <string name="compare_to">Para</string>
@@ -361,6 +366,7 @@
     <string name="body_trend_since">%1$s desde %2$s</string>
     <string name="charts_pick_measure">Escolha uma ou mais medidas acima.</string>
     <string name="charts_no_data">Sem dados dessas medidas no período.</string>
+    <string name="charts_includes_estimates">Inclui valores estimados.</string>
     <string name="photos_date">Data</string>
     <string name="photos_add">Adicionar foto</string>
     <string name="photos_empty">Fotos por data ajudam a ver a evolução que a fita métrica não mostra.</string>
@@ -432,6 +438,12 @@
     <string name="backup_date_at">%1$s às %2$s</string>
 
     <!-- Ajustes -->
+    <string name="settings_profile">Perfil</string>
+    <string name="settings_sex">Sexo</string>
+    <string name="settings_sex_unset">Não informado</string>
+    <string name="settings_sex_male">Masculino</string>
+    <string name="settings_sex_female">Feminino</string>
+    <string name="settings_sex_hint">Usado para estimar a gordura corporal.</string>
     <string name="settings_appearance">Aparência</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_dark">Escuro</string>

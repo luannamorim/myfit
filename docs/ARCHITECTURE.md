@@ -22,9 +22,9 @@ Dependency rule: `domain` knows nothing about Android, except for the Tink libra
 | `domain/session` | `SessionEngine`, `ActiveSession` |
 | `domain/history` | `HistoryCalculator` (summaries with workouts and activities, Mon–Sun weeks) |
 | `domain/activity` | `Sport`, `Activity` (other sports logged after the fact) |
-| `domain/body` | `Measure`, `BodyComparison` (differences, series, snapshot) |
+| `domain/body` | `Measure`, `BodyComparison` (differences, series, snapshot), `BodyMetrics` (BMI and the Navy body-fat estimate) |
 | `domain/backup` | v1 DTOs, header and encryption, zip + manifest, retention |
-| `data/db` | entities, DAOs, `MyFitDatabase` (v4), `Migrations`, library seed |
+| `data/db` | entities, DAOs, `MyFitDatabase` (v6), `Migrations`, library seed |
 | `data/repository` | workouts, exercises, session, history, activities, body |
 | `data/backup` | `BackupManager`, `BackupKeyStore`, destinations (SAF/file), `FolderBackupWriter` |
 | `platform/session` | `SessionController`, `WorkoutService`, alarm, receivers, notifications |
@@ -49,6 +49,8 @@ body_assessment   body_photo   activity
 - Database version 3 adds `seedKey` to `exercise` (unique) and `session_exercise` (snapshot). Migration 2 → 3 links existing library rows by name (either language; a row the user renamed stays unlinked), copies the key into session snapshots and adds the version-3 exercises. Keys are frozen in `app/src/test/resources/seed-keys.txt`.
 - Database version 4 adds `intensity` and `imagePath` to `workout_session` and the `activity` table (sport, optional name for "free", date, minutes, distance in km, intensity, notes, photo). Migration 3 → 4 (`Migrations.MIGRATION_3_4`) only adds them; existing sessions get no intensity.
 - Database version 5 adds `measure` (REPS or TIME) to `exercise` and to the `session_exercise` snapshot. For timed exercises the `reps` columns hold seconds (targets and what was done), so sessions, the engine and backups need no other change. Migration 4 → 5 makes the library planks and cardio timed and gives their workout targets below 15 a time default (30 s, or 10 min for cardio); past sessions keep what was recorded.
+- Database version 6 adds `heightCm` to `body_assessment`. Migration 5 → 6 only adds the column; existing assessments have no height.
+- BMI and an estimated body fat are never stored: `BodyMetrics.derive` adds them when Progress, Home, Compare and the assessment editor read the assessments. BMI uses the assessment's height, else the latest one recorded before it, else the first one after it; heights outside 100–250 cm are ignored. When body fat wasn't typed and Sex is set in Settings, the US Navy formula (neck and abdomen for men, with waist as a fallback; neck, waist and hips for women) estimates it; results outside 2–60 % are dropped. Estimated values are flagged (`BodyAssessment.estimated`) and labeled "(est.)".
 - `MigrationTest` builds real version-1, 2 and 3 databases from `app/schemas/.../<n>.json` and opens them with the current app (`Migrations.ALL`).
 
 ## Other sports
@@ -115,7 +117,7 @@ streaming AES-256-GCM-HKDF (Tink, 1 MiB segments, entire header as associated da
 - **Storage**: the derived key is stored wrapped by an Android Keystore AES key that doesn't require unlocking, so the worker can run with the screen locked. If that key disappears (reinstall or cleared data), the state becomes LOCKED and the app asks for the password again.
 - **Third-party files**: weak parameters from an imported file are never adopted.
 
-Exercise and session DTOs carry an optional `seedKey`; restoring a backup made before version 3 links library rows by name inside the same transaction. Session DTOs carry optional `intensity` and `imagePath`, and `activities` is a new optional list. Its count goes into the manifest only when there are activities, so backups made by earlier versions still pass the exact count check.
+Exercise and session DTOs carry an optional `seedKey`; restoring a backup made before version 3 links library rows by name inside the same transaction. Session DTOs carry optional `intensity` and `imagePath`, assessment DTOs an optional `heightCm`, and `activities` is a new optional list. The settings JSON carries an optional `sex`. Its count goes into the manifest only when there are activities, so backups made by earlier versions still pass the exact count check.
 
 **Restore** (`BackupManager.restore`):
 1. Refuses if a workout is in progress. Reads the header, gets the key (the device's, or the one derived from the typed password) and checks the verifier.

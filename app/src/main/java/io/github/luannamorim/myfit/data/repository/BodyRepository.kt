@@ -67,6 +67,7 @@ private fun BodyPhotoEntity.toDomain() = BodyPhoto(id, LocalDate.ofEpochDay(date
 internal fun BodyAssessmentEntity.toDomain(): BodyAssessment {
     val values = buildMap {
         weightKg?.let { put(Measure.WEIGHT, it) }
+        heightCm?.let { put(Measure.HEIGHT, it) }
         bodyFatPct?.let { put(Measure.BODY_FAT, it) }
         neckCm?.let { put(Measure.NECK, it) }
         shouldersCm?.let { put(Measure.SHOULDERS, it) }
@@ -90,7 +91,9 @@ private fun BodyAssessment.toEntity(createdAt: Long, updatedAt: Long) = BodyAsse
     id = id,
     dateEpochDay = date.toEpochDay(),
     weightKg = values[Measure.WEIGHT],
-    bodyFatPct = values[Measure.BODY_FAT],
+    heightCm = values[Measure.HEIGHT],
+    // Only what the user typed is stored; BMI has no column and an estimate is recalculated.
+    bodyFatPct = values[Measure.BODY_FAT]?.takeIf { Measure.BODY_FAT !in estimated },
     neckCm = values[Measure.NECK],
     shouldersCm = values[Measure.SHOULDERS],
     chestCm = values[Measure.CHEST],

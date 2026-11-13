@@ -112,10 +112,12 @@ object SnapshotMapper {
     private fun BodyAssessmentEntity.toDto() = AssessmentDto(
         id, dateEpochDay, weightKg, bodyFatPct, neckCm, shouldersCm, chestCm, waistCm, abdomenCm, hipsCm,
         armRightCm, armLeftCm, forearmRightCm, forearmLeftCm, thighRightCm, thighLeftCm, calfRightCm, calfLeftCm, notes, createdAtMs, updatedAtMs,
+        heightCm = heightCm,
     )
     private fun AssessmentDto.toEntity() = BodyAssessmentEntity(
         id, dateEpochDay, weightKg, bodyFatPct, neckCm, shouldersCm, chestCm, waistCm, abdomenCm, hipsCm,
         armRightCm, armLeftCm, forearmRightCm, forearmLeftCm, thighRightCm, thighLeftCm, calfRightCm, calfLeftCm, notes, createdAtMs, updatedAtMs,
+        heightCm = heightCm,
     )
 
     private fun BodyPhotoEntity.toDto() = PhotoDto(id, dateEpochDay, imagePath, pose.name, createdAtMs)

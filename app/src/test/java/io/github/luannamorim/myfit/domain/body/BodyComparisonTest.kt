@@ -2,7 +2,9 @@ package io.github.luannamorim.myfit.domain.body
 
 import io.github.luannamorim.myfit.core.format.formatSigned
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 
@@ -50,6 +52,41 @@ class BodyComparisonTest {
         assertEquals(2.0, snap.highlights[0].diff!!, 0.0)
         assertNull(snap.highlights[1].diff)
         assertNull(BodyComparison.snapshot(emptyList()))
+    }
+
+    @Test
+    fun snapshot_highlightsBmi_andMarksEstimates() {
+        val derived = BodyMetrics.derive(
+            listOf(
+                first.copy(values = first.values + (Measure.HEIGHT to 178.0)),
+                current.copy(values = current.values - Measure.BODY_FAT + mapOf(Measure.NECK to 38.0, Measure.ABDOMEN to 85.0)),
+            ),
+            Sex.MALE,
+        )
+        val snap = BodyComparison.snapshot(derived)!!
+        assertEquals(listOf(Measure.WEIGHT, Measure.BODY_FAT, Measure.BMI), snap.highlights.map { it.measure })
+        assertEquals(listOf(false, true, false), snap.highlights.map { it.estimated }) // BMI is always calculated: not flagged
+
+        val fat = BodyComparison.compare(derived[0], derived[1]).single { it.measure == Measure.BODY_FAT }
+        assertTrue(fat.estimated)
+        assertFalse(BodyComparison.compare(first, current).single { it.measure == Measure.BODY_FAT }.estimated)
+    }
+
+    @Test
+    fun snapshot_typedLatest_isNotMarkedEstimated() {
+        // Previous body fat estimated, latest typed (e.g. a bioimpedance scale): the tile shows a measurement.
+        val derived = BodyMetrics.derive(
+            listOf(
+                first.copy(values = first.values + mapOf(Measure.HEIGHT to 178.0, Measure.NECK to 38.0, Measure.ABDOMEN to 85.0)),
+                current,
+            ),
+            Sex.MALE,
+        )
+        assertTrue(Measure.BODY_FAT in derived[0].estimated)
+        val fat = BodyComparison.snapshot(derived)!!.highlights.single { it.measure == Measure.BODY_FAT }
+        assertEquals(15.5, fat.to!!, 0.0)
+        assertFalse(fat.estimated)
+        assertTrue(BodyComparison.compare(derived[0], derived[1]).single { it.measure == Measure.BODY_FAT }.estimated) // Compare: either side
     }
 
     @Test

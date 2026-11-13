@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Durations
+import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
@@ -104,7 +105,19 @@ fun SettingsContent(
     val c = MyFitTheme.colors
     val s = state.settings
     TabScreen(title = stringResource(R.string.nav_settings), modifier = modifier) {
-        SectionHeader(stringResource(R.string.settings_appearance))
+        SectionHeader(stringResource(R.string.settings_profile))
+        MyFitCard(Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.settings_sex), style = MyFitTheme.type.caption, color = c.textSecondary)
+            Spacer(Modifier.height(Spacing.s))
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                listOf(null to R.string.settings_sex_unset, Sex.MALE to R.string.settings_sex_male, Sex.FEMALE to R.string.settings_sex_female)
+                    .forEach { (sex, label) -> MyFitChip(stringResource(label), selected = s.sex == sex, onClick = { onUpdate { it.copy(sex = sex) } }) }
+            }
+            Spacer(Modifier.height(Spacing.s))
+            Text(stringResource(R.string.settings_sex_hint), style = MyFitTheme.type.caption, color = c.textTertiary)
+        }
+
+        SectionHeader(stringResource(R.string.settings_appearance), Modifier.padding(top = Spacing.s))
         MyFitCard(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.settings_theme), style = MyFitTheme.type.caption, color = c.textSecondary)
             Spacer(Modifier.height(Spacing.s))

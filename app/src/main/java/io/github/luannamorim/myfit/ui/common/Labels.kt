@@ -5,8 +5,8 @@ import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.MeasureUnit
 import io.github.luannamorim.myfit.domain.model.MovementType
-import io.github.luannamorim.myfit.domain.model.PhotoPose
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
+import io.github.luannamorim.myfit.domain.model.PhotoPose
 
 @get:StringRes
 val MuscleGroup.labelRes: Int
@@ -40,7 +40,9 @@ val MovementType.labelRes: Int
 val Measure.labelRes: Int
     get() = when (this) {
         Measure.WEIGHT -> R.string.measure_weight
+        Measure.HEIGHT -> R.string.measure_height
         Measure.BODY_FAT -> R.string.measure_body_fat
+        Measure.BMI -> R.string.measure_bmi
         Measure.NECK -> R.string.measure_neck
         Measure.SHOULDERS -> R.string.measure_shoulders
         Measure.CHEST -> R.string.measure_chest
@@ -63,6 +65,7 @@ val MeasureUnit.labelRes: Int
         MeasureUnit.KG -> R.string.unit_kg
         MeasureUnit.PERCENT -> R.string.unit_percent
         MeasureUnit.CM -> R.string.unit_cm
+        MeasureUnit.NONE -> R.string.unit_none
     }
 
 @get:StringRes

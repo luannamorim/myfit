@@ -159,7 +159,12 @@ fun unitLabel(measure: Measure): String = stringResource(measure.unit.labelRes)
 
 @Composable
 fun formatMeasure(measure: Measure, value: Double?): String =
-    if (value == null) "—" else "${DecimalInput.format(value)} ${unitLabel(measure)}"
+    if (value == null) "—" else "${DecimalInput.format(value)} ${unitLabel(measure)}".trim()
+
+/** Measure name, marked when the value is the app's estimate. */
+@Composable
+fun measureLabel(measure: Measure, estimated: Boolean = false): String =
+    stringResource(measure.labelRes).let { if (estimated) stringResource(R.string.measure_estimated, it) else it }
 
 @Composable
 private fun MeasuresSection(state: EvolutionUiState, actions: EvolutionActions) {
@@ -186,7 +191,7 @@ private fun MeasuresSection(state: EvolutionUiState, actions: EvolutionActions) 
     state.assessments.forEach { AssessmentRow(it, onClick = { actions.onOpenAssessment(it.id) }) }
 }
 
-/** Latest weight and body fat with change vs the previous assessment (neutral color: no judgment). */
+/** Latest weight, body fat and BMI with change vs the previous assessment (neutral color: no judgment). */
 @Composable
 fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
     val c = MyFitTheme.colors
@@ -197,18 +202,20 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
             color = c.textSecondary,
         )
         val clickable = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
-        snapshot.highlights.chunked(2).forEach { row ->
+        // Weight leads on its own row; the others go in pairs.
+        val (weight, others) = snapshot.highlights.partition { it.measure == Measure.WEIGHT }
+        (weight.map { listOf(it) } + others.chunked(2)).forEach { row ->
             val single = row.singleOrNull()
             if (single != null) {
-                // Alone in its row (e.g. weight without body fat): full width, with the recent trend beside it.
+                // Alone in its row: full width, with the recent trend beside it.
                 TrendTile(single, snapshot.trends[single.measure].orEmpty(), Modifier.fillMaxWidth().then(clickable))
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
                     row.forEach { diff ->
                         StatTile(
-                            label = stringResource(diff.measure.labelRes),
+                            label = measureLabel(diff.measure, diff.estimated),
                             value = DecimalInput.format(diff.to),
-                            unit = unitLabel(diff.measure),
+                            unit = unitLabel(diff.measure).ifEmpty { null },
                             delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
                             deltaPositive = null,
                             modifier = Modifier.weight(1f).then(clickable),
@@ -228,11 +235,11 @@ private fun TrendTile(diff: MeasureDiff, trend: List<Pair<LocalDate, Double>>, m
     MyFitCard(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(stringResource(diff.measure.labelRes), style = MyFitTheme.type.caption, color = c.textSecondary)
+                Text(measureLabel(diff.measure, diff.estimated), style = MyFitTheme.type.caption, color = c.textSecondary)
                 Spacer(Modifier.height(Spacing.s))
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(DecimalInput.format(diff.to), style = MyFitTheme.type.numericLarge.copy(fontSize = 44.sp, lineHeight = 48.sp), color = c.textPrimary)
-                    Text(" $unit", style = MyFitTheme.type.label, color = c.textSecondary, modifier = Modifier.padding(bottom = 6.dp))
+                    if (unit.isNotEmpty()) Text(" $unit", style = MyFitTheme.type.label, color = c.textSecondary, modifier = Modifier.padding(bottom = 6.dp))
                 }
                 diff.diff?.let {
                     Spacer(Modifier.height(Spacing.xs))
@@ -264,7 +271,7 @@ private fun AssessmentRow(assessment: BodyAssessment, onClick: () -> Unit) {
                 Text(Dates.medium(assessment.date), style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
                 val weight = assessment.values[Measure.WEIGHT]?.let { "${DecimalInput.format(it)} kg · " }.orEmpty()
                 Text(
-                    weight + pluralStringResource(R.plurals.evolution_measures_count, assessment.values.size, assessment.values.size),
+                    weight + pluralStringResource(R.plurals.evolution_measures_count, assessment.measuredCount, assessment.measuredCount),
                     style = MyFitTheme.type.caption,
                     color = c.textSecondary,
                 )
@@ -287,7 +294,7 @@ private fun ChartsSection(
         return
     }
     FilterChipRow(
-        options = Measure.entries,
+        options = CHART_MEASURES,
         selected = state.selectedMeasures,
         label = { stringResource(it.labelRes) },
         onToggle = onToggleMeasure,
@@ -322,6 +329,10 @@ private fun ChartsSection(
                 MeasureChart(chart.points)
             } else {
                 Text(stringResource(R.string.charts_not_enough), style = MyFitTheme.type.caption, color = c.textTertiary)
+            }
+            if (chart.hasEstimates) {
+                Spacer(Modifier.height(Spacing.s))
+                Text(stringResource(R.string.charts_includes_estimates), style = MyFitTheme.type.caption, color = c.textTertiary)
             }
         }
     }

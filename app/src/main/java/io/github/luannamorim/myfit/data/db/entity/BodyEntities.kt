@@ -28,6 +28,8 @@ data class BodyAssessmentEntity(
     val notes: String? = null,
     val createdAtMs: Long,
     val updatedAtMs: Long,
+    /** v6. Last column, like the ALTER TABLE that added it. */
+    val heightCm: Double? = null,
 )
 
 @Entity(tableName = "body_photo", indices = [Index("dateEpochDay")])

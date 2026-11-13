@@ -46,7 +46,7 @@ import io.github.luannamorim.myfit.ui.theme.Spacing
 import java.time.LocalDate
 
 private val Groups: List<Pair<Int, List<Measure>>> = listOf(
-    R.string.assessment_group_general to listOf(Measure.WEIGHT, Measure.BODY_FAT),
+    R.string.assessment_group_general to listOf(Measure.WEIGHT, Measure.HEIGHT, Measure.BODY_FAT),
     R.string.assessment_group_trunk to listOf(Measure.NECK, Measure.SHOULDERS, Measure.CHEST, Measure.WAIST, Measure.ABDOMEN, Measure.HIPS),
     R.string.assessment_group_arms to listOf(Measure.ARM_RIGHT, Measure.ARM_LEFT, Measure.FOREARM_RIGHT, Measure.FOREARM_LEFT),
     R.string.assessment_group_legs to listOf(Measure.THIGH_RIGHT, Measure.THIGH_LEFT, Measure.CALF_RIGHT, Measure.CALF_LEFT),
@@ -57,6 +57,17 @@ fun AssessmentEditorScreen(onClose: () -> Unit, viewModel: AssessmentEditorViewM
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.done) { if (state.done) onClose() }
     AssessmentEditorContent(state, viewModel::setDate, viewModel::setField, viewModel::setNotes, { viewModel.save() }, viewModel::delete, onClose)
+}
+
+/** What the app calculates from the fields above: BMI and, without a typed body fat, its estimate. */
+@Composable
+private fun CalculatedLine(state: AssessmentEditorUiState) {
+    val parts = listOfNotNull(
+        state.bmi?.let { stringResource(R.string.assessment_bmi, DecimalInput.format(it)) },
+        state.estimatedBodyFat?.let { stringResource(R.string.assessment_fat_estimated, formatMeasure(Measure.BODY_FAT, it)) },
+    )
+    if (parts.isEmpty()) return
+    Text(parts.joinToString(" · "), style = MyFitTheme.type.body, color = MyFitTheme.colors.textSecondary)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,6 +125,7 @@ fun AssessmentEditorContent(
                             if (pair.size == 1) Box(Modifier.weight(1f))
                         }
                     }
+                    if (title == R.string.assessment_group_general) CalculatedLine(state)
                 }
                 MyFitTextField(
                     value = state.notes,

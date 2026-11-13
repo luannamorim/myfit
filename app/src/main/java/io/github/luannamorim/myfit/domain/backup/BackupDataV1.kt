@@ -88,6 +88,8 @@ data class AssessmentDto(
     val armRightCm: Double? = null, val armLeftCm: Double? = null, val forearmRightCm: Double? = null, val forearmLeftCm: Double? = null,
     val thighRightCm: Double? = null, val thighLeftCm: Double? = null, val calfRightCm: Double? = null, val calfLeftCm: Double? = null,
     val notes: String? = null, val createdAtMs: Long, val updatedAtMs: Long,
+    /** Since DB v6; older backups don't have it. */
+    val heightCm: Double? = null,
 )
 
 @Serializable

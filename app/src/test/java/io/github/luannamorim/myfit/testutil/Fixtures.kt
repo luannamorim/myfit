@@ -17,7 +17,7 @@ suspend fun SessionEnv.populateEverything(imagePaths: List<String> = emptyList()
     time.advance(1_200_000)
     repo.finish(s, time.now(), updateRoutineLoads = true, intensity = Intensity.HIGH, imagePath = sessionImage)
     startWorkout(1)
-    db.bodyDao().insertAssessment(BodyAssessmentEntity(dateEpochDay = 20_400, weightKg = 73.2, waistCm = 79.0, notes = "manhã", createdAtMs = 1, updatedAtMs = 2))
+    db.bodyDao().insertAssessment(BodyAssessmentEntity(dateEpochDay = 20_400, weightKg = 73.2, heightCm = 178.0, waistCm = 79.0, notes = "manhã", createdAtMs = 1, updatedAtMs = 2))
     imagePaths.forEach { db.bodyDao().insertPhoto(BodyPhotoEntity(dateEpochDay = 20_400, imagePath = it, pose = PhotoPose.FRONT, createdAtMs = 3)) }
     db.activityDao().insert(
         ActivityEntity(

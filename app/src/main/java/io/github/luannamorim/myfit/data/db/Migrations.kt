@@ -44,8 +44,15 @@ object Migrations {
         }
     }
 
+    /** v6: assessments record height (for BMI and the body-fat estimate). */
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE body_assessment ADD COLUMN heightCm REAL")
+        }
+    }
+
     /** Targets below this are taken as repetitions when an exercise becomes timed. */
     private const val REPS_LIKE_BELOW = 15
 
-    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4, MIGRATION_4_5)
+    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 }

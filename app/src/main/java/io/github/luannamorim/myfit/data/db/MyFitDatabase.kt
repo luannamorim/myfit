@@ -42,7 +42,7 @@ abstract class MyFitDatabase : RoomDatabase() {
     abstract fun activityDao(): ActivityDao
 
     companion object {
-        const val VERSION = 5
+        const val VERSION = 6
         const val NAME = "myfit.db"
     }
 }

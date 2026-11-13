@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodyComparison
+import io.github.luannamorim.myfit.domain.body.BodyMetrics
 import io.github.luannamorim.myfit.domain.body.BodyPhoto
 import io.github.luannamorim.myfit.domain.body.MeasureDiff
 import io.github.luannamorim.myfit.ui.navigation.PhotoCompareRoute
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,11 +35,15 @@ data class CompareUiState(
 )
 
 @HiltViewModel
-class CompareViewModel @Inject constructor(body: BodyRepository) : ViewModel() {
+class CompareViewModel @Inject constructor(body: BodyRepository, settings: SettingsRepository) : ViewModel() {
     private val fromId = MutableStateFlow<Long?>(null)
     private val toId = MutableStateFlow<Long?>(null)
 
-    val state: StateFlow<CompareUiState> = combine(body.observeAssessments(), fromId, toId) { items, f, t ->
+    private val assessments = combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
+        BodyMetrics.derive(raw, sex)
+    }
+
+    val state: StateFlow<CompareUiState> = combine(assessments, fromId, toId) { items, f, t ->
         val ordered = items.sortedWith(compareBy({ it.date }, { it.id }))
         // Defaults: first and latest assessment.
         val from = ordered.firstOrNull { it.id == f } ?: ordered.firstOrNull()

@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.data.backup
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.domain.backup.AssessmentDto
 import io.github.luannamorim.myfit.domain.backup.BackupArchive
 import io.github.luannamorim.myfit.domain.backup.BackupDataV1
 import io.github.luannamorim.myfit.testutil.SessionEnv
@@ -9,6 +10,7 @@ import io.github.luannamorim.myfit.testutil.populateEverything
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +30,7 @@ class SnapshotMapperTest {
         assertTrue(exported.counts().values.all { it > 0 })
         assertEquals(1, exported.counts()["activities"])
         assertEquals("HIGH", exported.sessions.first { it.status == "FINISHED" }.intensity)
+        assertEquals(178.0, exported.assessments.single().heightCm!!, 0.0)
 
         val other = inMemoryDb(seed = true) // different content that must be fully replaced
         SnapshotMapper.replaceAll(other, exported)
@@ -51,6 +54,14 @@ class SnapshotMapperTest {
         assertEquals(exported, BackupArchive.json.decodeFromString(BackupDataV1.serializer(), text))
         val withExtra = text.replaceFirst("{", """{"futureField":42,""")
         assertEquals(exported, BackupArchive.json.decodeFromString(BackupDataV1.serializer(), withExtra))
+    }
+
+    @Test
+    fun assessmentOfBackupsMadeBeforeHeight_hasNoHeight() {
+        val old = """{"id":1,"dateEpochDay":20400,"weightKg":73.2,"createdAtMs":1,"updatedAtMs":2}"""
+        val dto = BackupArchive.json.decodeFromString(AssessmentDto.serializer(), old)
+        assertNull(dto.heightCm)
+        assertEquals(73.2, dto.weightKg!!, 0.0)
     }
 
     @Test

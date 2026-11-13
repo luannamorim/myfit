@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
@@ -32,6 +33,7 @@ class SettingsRepository @Inject constructor(
         val updateLoads = booleanPreferencesKey("update_routine_loads_on_finish")
         val autoBackup = booleanPreferencesKey("auto_backup")
         val reminders = stringPreferencesKey("reminders")
+        val sex = stringPreferencesKey("sex")
     }
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -54,6 +56,7 @@ class SettingsRepository @Inject constructor(
             prefs[Keys.updateLoads] = next.updateRoutineLoadsOnFinish
             prefs[Keys.autoBackup] = next.autoBackup
             prefs[Keys.reminders] = json.encodeToString(remindersSerializer, next.reminders)
+            next.sex?.let { prefs[Keys.sex] = it.name } ?: prefs.remove(Keys.sex)
         }
     }
 
@@ -75,6 +78,7 @@ class SettingsRepository @Inject constructor(
             updateRoutineLoadsOnFinish = this[Keys.updateLoads] ?: defaults.updateRoutineLoadsOnFinish,
             autoBackup = this[Keys.autoBackup] ?: defaults.autoBackup,
             reminders = this[Keys.reminders]?.let { runCatching { json.decodeFromString(remindersSerializer, it) }.getOrNull() } ?: defaults.reminders,
+            sex = this[Keys.sex]?.let { enumValueOrNull<Sex>(it) },
         )
     }
 }

@@ -18,7 +18,7 @@ import io.github.luannamorim.myfit.platform.activity.LiveActivityController
 import io.github.luannamorim.myfit.testutil.MainDispatcherRule
 import io.github.luannamorim.myfit.testutil.SessionEnv
 import io.github.luannamorim.myfit.testutil.awaitUntil
-import java.io.File
+import io.github.luannamorim.myfit.testutil.testSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,6 +33,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
@@ -90,6 +91,7 @@ class HomeViewModelTest {
                 scope,
             ),
             BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { }),
+            testSettings(),
             env.time,
         )
         val state = vm.state.awaitUntil { !it.loading && it.todaySessions.isNotEmpty() && it.active != null }

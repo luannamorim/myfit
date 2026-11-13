@@ -17,6 +17,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -208,6 +209,23 @@ class MigrationTest {
         assertEquals(30, reps[plankItem])
         assertEquals(900, reps[treadmillItem])
         assertEquals(10, reps[benchItem])
+        assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
+        room.close()
+    }
+
+    @Test
+    fun migrate5To6_keepsAssessments_withNoHeight() = runBlocking {
+        createVersion(5, "migration-v5-test.db") { db ->
+            db.insert(
+                "body_assessment",
+                null,
+                ContentValues().apply { put("dateEpochDay", 20_400); put("weightKg", 72.0); put("createdAtMs", 0); put("updatedAtMs", 0) },
+            )
+        }
+        val room = open("migration-v5-test.db")
+        val assessment = room.bodyDao().getAllAssessments().single()
+        assertEquals(72.0, assessment.weightKg!!, 0.0)
+        assertNull(assessment.heightCm)
         assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
         room.close()
     }

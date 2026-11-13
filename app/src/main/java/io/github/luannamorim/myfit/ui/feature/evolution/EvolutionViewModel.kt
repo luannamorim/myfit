@@ -8,9 +8,11 @@ import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
 import io.github.luannamorim.myfit.data.images.ImageKind
 import io.github.luannamorim.myfit.data.images.ImageStore
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodyComparison
+import io.github.luannamorim.myfit.domain.body.BodyMetrics
 import io.github.luannamorim.myfit.domain.body.BodyPhoto
 import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.body.Measure
@@ -19,6 +21,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -28,7 +32,8 @@ import javax.inject.Inject
 enum class EvolutionSection { MEASURES, CHARTS, PHOTOS }
 enum class ChartPeriod { ALL, YEAR, SIX_MONTHS }
 
-data class ChartUi(val measure: Measure, val points: List<Pair<LocalDate, Double>>, val change: Double?)
+/** [hasEstimates]: some points are estimates (body fat the user didn't type). */
+data class ChartUi(val measure: Measure, val points: List<Pair<LocalDate, Double>>, val change: Double?, val hasEstimates: Boolean = false)
 
 data class EvolutionUiState(
     val loading: Boolean = true,
@@ -47,7 +52,11 @@ data class EvolutionUiState(
     val photoError: Boolean = false,
 )
 
-val DEFAULT_CHART_MEASURES = setOf(Measure.WEIGHT, Measure.WAIST, Measure.ARM_RIGHT)
+/** Measures that can have a chart: height barely changes, so it has none. */
+val CHART_MEASURES: List<Measure> = Measure.entries - Measure.HEIGHT
+
+/** Charts open with every measure selected; [buildCharts] skips the ones never recorded. */
+val DEFAULT_CHART_MEASURES: Set<Measure> = CHART_MEASURES.toSet()
 
 /**
  * Builds one chart per selected measure, restricted to the period. Measures never recorded in the
@@ -59,10 +68,12 @@ fun buildCharts(items: List<BodyAssessment>, measures: Set<Measure>, period: Cha
         ChartPeriod.YEAR -> today.minusYears(1)
         ChartPeriod.SIX_MONTHS -> today.minusMonths(6)
     }
-    return Measure.entries.filter { it in measures }.mapNotNull { m ->
-        val points = BodyComparison.series(items, m).filter { !it.first.isBefore(from) }
+    val inPeriod = items.filter { !it.date.isBefore(from) }
+    return CHART_MEASURES.filter { it in measures }.mapNotNull { m ->
+        val points = BodyComparison.series(inPeriod, m)
         if (points.isEmpty()) return@mapNotNull null
-        ChartUi(m, points, if (points.size >= 2) points.last().second - points.first().second else null)
+        val hasEstimates = !m.derived && inPeriod.any { m in it.estimated }
+        ChartUi(m, points, if (points.size >= 2) points.last().second - points.first().second else null, hasEstimates)
     }
 }
 
@@ -70,12 +81,19 @@ fun buildCharts(items: List<BodyAssessment>, measures: Set<Measure>, period: Cha
 class EvolutionViewModel @Inject constructor(
     private val body: BodyRepository,
     private val images: ImageStore,
+    settings: SettingsRepository,
     time: TimeSource,
 ) : ViewModel() {
     private val today = time.today()
     private val ui = MutableStateFlow(EvolutionUiState(today = today, photoDate = today))
 
-    val state: StateFlow<EvolutionUiState> = combine(ui, body.observeAssessments(), body.observePhotos()) { s, items, photos ->
+    val state: StateFlow<EvolutionUiState> = combine(
+        ui,
+        body.observeAssessments(),
+        body.observePhotos(),
+        settings.settings.map { it.sex }.distinctUntilChanged(),
+    ) { s, raw, photos, sex ->
+        val items = BodyMetrics.derive(raw, sex)
         s.copy(
             loading = false,
             assessments = items,
@@ -95,7 +113,7 @@ class EvolutionViewModel @Inject constructor(
 
     /** Selects every measure, or clears the selection when all are already selected. */
     fun toggleAllMeasures() = ui.update {
-        it.copy(selectedMeasures = if (it.selectedMeasures.containsAll(Measure.entries)) emptySet() else Measure.entries.toSet())
+        it.copy(selectedMeasures = if (it.selectedMeasures.containsAll(CHART_MEASURES)) emptySet() else CHART_MEASURES.toSet())
     }
 
     fun setPeriod(period: ChartPeriod) = ui.update { it.copy(period = period) }

@@ -70,10 +70,12 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 ### 6. Progress
 - [ ] Log two assessments on different dates (edit the date at the top). Weight with a decimal comma.
 - [ ] Compare the two: signed differences (+/−).
-- [ ] Charts: weight and waist appear; change the metrics and the period. "All" shows every measure you have logged; tapping it again clears the selection.
+- [ ] Charts open with every measure selected (no Height chip); change the metrics and the period. Tapping "All" clears the selection; tapping it again selects everything.
 - [ ] Photos: add two (front), one with an older date picked with *Date*. Tap one: it opens full screen; swipe to the other, pinch and double-tap to zoom, ✕ or back to close. Press and hold one to select, tap the other → "Compare selected"; in the comparison, tap a photo to see it full screen and swipe to the other; delete one.
 - [ ] Workout or activity photo: tapping it opens it full screen.
-- [ ] Home and Measurements show weight and body fat (no waist) with their change.
+- [ ] Home and Measurements show weight on its own card, then body fat and BMI side by side (no waist), with their change.
+- [ ] Height: type it once ("178", or "1,78" in meters, saved as 178 cm). BMI shows on that assessment and on older weigh-ins without a height.
+- [ ] Body-fat estimate: *Settings → Profile → Sex*. An assessment with neck and abdomen (women: neck, waist and hips) and no typed body fat shows "Body fat (est.)"; the editor shows the BMI and estimate line while typing. A typed body fat replaces the estimate. With Sex "Not set", only BMI appears.
 
 ### 6a. Reminders
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.
