@@ -48,6 +48,7 @@ body_assessment   body_photo   activity
 - Database version 2 changed no tables: migration 1 → 2 (`ExerciseSeed.MIGRATION_1_2`) only adds the exercises introduced in library version 2, skipping names that already exist in either language, so user-created and deleted exercises are respected.
 - Database version 3 adds `seedKey` to `exercise` (unique) and `session_exercise` (snapshot). Migration 2 → 3 links existing library rows by name (either language; a row the user renamed stays unlinked), copies the key into session snapshots and adds the version-3 exercises. Keys are frozen in `app/src/test/resources/seed-keys.txt`.
 - Database version 4 adds `intensity` and `imagePath` to `workout_session` and the `activity` table (sport, optional name for "free", date, minutes, distance in km, intensity, notes, photo). Migration 3 → 4 (`Migrations.MIGRATION_3_4`) only adds them; existing sessions get no intensity.
+- Database version 5 adds `measure` (REPS or TIME) to `exercise` and to the `session_exercise` snapshot. For timed exercises the `reps` columns hold seconds (targets and what was done), so sessions, the engine and backups need no other change. Migration 4 → 5 makes the library planks and cardio timed and gives their workout targets below 15 a time default (30 s, or 10 min for cardio); past sessions keep what was recorded.
 - `MigrationTest` builds real version-1, 2 and 3 databases from `app/schemas/.../<n>.json` and opens them with the current app (`Migrations.ALL`).
 
 ## Other sports
@@ -90,6 +91,11 @@ body_assessment   body_photo   activity
 - **Rest end alarm**: uses `AlarmManager.setAlarmClock`, the only exact alarm immune to Doze and One UI optimizations, plus a second one 3 s earlier for the countdown. `RestEndHandler` ignores stale alarms; the countdown alarm beeps at 3, 2 and 1 s left (re-reading the session each second), and the end alarm posts a silent heads-up notification with vibration and plays MyFit's own "go" sound.
 - **Sounds** (`RestSoundPlayer`, SoundPool): `res/raw/rest_tick.wav` and `rest_go.wav`, synthesized by `tools/rest_sounds.py` (no third-party audio). They play on the alarm stream by default (heard on vibrate or silent) or on the notification stream with *Follow phone mode*. The notification channel is `rest_end_v2`; the 1.4 channels, which played the phone's sound, are deleted.
 - **Recovery**: if the process dies, the session remains in the database. When the app returns to the foreground, it calls `resync()`, which re-arms the alarm and the service, and shows the "Resume" bar.
+
+## Timed sets
+
+- `TimedSets` sets the defaults and the ± steps (5 s under a minute, 15 s under five, 1 min above); `Durations.setTime` formats "45 s", "1:30 min", "10 min".
+- In the workout, *Start* holds a timed set: `WorkoutViewModel` keeps the start mark in memory (not persisted: if the app dies mid-hold the set just isn't done), plays the countdown beeps and the "go" sound through `RestSoundPlayer`, keeps counting past the target, and *Done* completes the set with the seconds actually held. The summary's volume leaves timed exercises out.
 
 ## Backup
 

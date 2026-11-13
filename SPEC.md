@@ -66,16 +66,16 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 
 6. MUST allow creating, editing, duplicating and deleting workouts (name, optional description, ordered list of exercises), with no limit on how many.
 7. MUST allow adding, removing and reordering exercises in a workout.
-8. Each exercise in a workout MUST have: sets, reps per set, rest between sets (s), load (kg, optional) and notes.
+8. Each exercise in a workout MUST have: sets, reps per set (or time per set for exercises measured in time, such as planks and cardio), rest between sets (s), load (kg, optional) and notes.
 9. MUST offer a library of predefined exercises (name, muscle group, push/pull/legs/other movement type, a line drawing of the start and end position) with search and filtering by group.
-10. MUST allow creating custom exercises with an optional demo image picked from the gallery; a photo picked by the user takes precedence over the library drawing.
+10. MUST allow creating custom exercises with an optional demo image picked from the gallery and whether each set counts repetitions or time; a photo picked by the user takes precedence over the library drawing.
 10a. SHOULD show a body map highlighting the exercise's muscle group (live while editing it, and as the picture of exercises without a photo or drawing) and offer a video search for the exercise, opened in another app.
 
 ### Workout execution
 
 11. MUST start a session from a workout and show: workout name, current exercise, image (if any), current set/total, planned reps, load, rest timer and total time.
 12. MUST follow the flow: complete set (1 tap) → automatic rest → visual and audible alert when it ends → next set → next exercise → finish.
-13. MUST allow pausing/resuming, skipping a set, skipping an exercise, adjusting the set's load and reps, changing the rest (including ±15 s during the rest) and ending early.
+13. MUST allow pausing/resuming, skipping a set, skipping an exercise, adjusting the set's load and reps (or time), changing the rest (including ±15 s during the rest) and ending early. Timed sets SHOULD offer a countdown that records the time actually held.
 14. MUST keep timers correct with the app in the background, the screen locked, the process killed by the system or after a device restart. Time MUST be derived from persisted timestamps, never from UI counters.
 15. MUST signal the end of rest with the app's own sound and vibration even with the app closed (by default at alarm volume, so it plays even with the phone on vibrate), SHOULD beep in the last 3 seconds of rest (can be turned off), and show an ongoing workout notification with the timer and quick actions.
 16. MUST persist every session step immediately and offer exact resumption when the app is reopened.

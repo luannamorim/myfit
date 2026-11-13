@@ -38,6 +38,7 @@ import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.Durations
 import io.github.luannamorim.myfit.domain.history.SessionDetail
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
@@ -120,7 +121,12 @@ fun SessionDetailContent(
                                 when (set.status) {
                                     ItemStatus.DONE -> {
                                         val load = set.actualLoadKg?.let { " × ${DecimalInput.format(it)} kg" }.orEmpty()
-                                        Text(stringResource(R.string.detail_set_done, set.actualReps ?: 0, load), style = MyFitTheme.type.numeric, color = c.textPrimary)
+                                        val text = if (ex.measure == ExerciseMeasure.TIME) {
+                                            Durations.setTime(set.actualReps ?: 0) + load
+                                        } else {
+                                            stringResource(R.string.detail_set_done, set.actualReps ?: 0, load)
+                                        }
+                                        Text(text, style = MyFitTheme.type.numeric, color = c.textPrimary)
                                     }
                                     ItemStatus.SKIPPED -> Text(stringResource(R.string.detail_set_skipped), style = MyFitTheme.type.body, color = c.textTertiary)
                                     ItemStatus.PENDING -> Text(stringResource(R.string.detail_set_not_done), style = MyFitTheme.type.body, color = c.textTertiary)

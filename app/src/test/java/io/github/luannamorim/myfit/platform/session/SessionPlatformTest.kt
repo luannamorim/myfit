@@ -13,6 +13,7 @@ import io.github.luannamorim.myfit.data.repository.SessionRepository
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.testutil.FakeServiceStarter
+import io.github.luannamorim.myfit.testutil.FakeSounds
 import io.github.luannamorim.myfit.testutil.inMemoryDb
 import io.github.luannamorim.myfit.testutil.insertExercise
 import io.github.luannamorim.myfit.testutil.insertRoutine
@@ -49,13 +50,6 @@ class SessionPlatformTest {
     private fun alarm(action: String = RestAlarmReceiver.ACTION_REST_END) =
         alarmShadow.scheduledAlarms.singleOrNull { shadowOf(it.operation).savedIntent.action == action }
     private val sounds = FakeSounds()
-
-    private class FakeSounds : RestSoundPlayer {
-        val played = mutableListOf<Pair<RestCue, RestSound>>()
-        override suspend fun play(cue: RestCue, mode: RestSound) {
-            played += cue to mode
-        }
-    }
     private val notificationShadow get() = shadowOf(context.getSystemService(NotificationManager::class.java))
 
     @Before

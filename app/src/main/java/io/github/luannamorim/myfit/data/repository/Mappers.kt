@@ -18,6 +18,7 @@ fun ExerciseEntity.toDomain() = Exercise(
     notes = notes,
     isCustom = isCustom,
     seedKey = seedKey,
+    measure = measure,
 )
 
 fun RoutineItemWithExercise.toDomain() = RoutineItem(

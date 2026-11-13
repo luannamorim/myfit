@@ -1,11 +1,13 @@
 package io.github.luannamorim.myfit.data.db.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import io.github.luannamorim.myfit.core.time.Mark
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.MovementType
@@ -63,6 +65,7 @@ data class SessionExerciseEntity(
     val notes: String? = null,
     val status: ItemStatus = ItemStatus.PENDING,
     val seedKey: String? = null,
+    @ColumnInfo(defaultValue = "REPS") val measure: ExerciseMeasure = ExerciseMeasure.REPS,
 )
 
 @Entity(

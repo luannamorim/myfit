@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Durations
 import io.github.luannamorim.myfit.core.format.formatKg
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitCard
@@ -167,7 +168,11 @@ fun RoutineEditorContent(
                                 Text(item.exercise.name, style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
                                 val load = item.loadKg?.let { " · " + formatKg(it) }.orEmpty()
                                 Text(
-                                    stringResource(R.string.item_summary, item.sets, item.reps, Durations.rest(item.restSeconds)) + load,
+                                    if (item.exercise.measure == ExerciseMeasure.TIME) {
+                                        stringResource(R.string.item_summary_time, item.sets, Durations.setTime(item.reps), Durations.rest(item.restSeconds)) + load
+                                    } else {
+                                        stringResource(R.string.item_summary, item.sets, item.reps, Durations.rest(item.restSeconds)) + load
+                                    },
                                     style = MyFitTheme.type.caption,
                                     color = c.textSecondary,
                                 )

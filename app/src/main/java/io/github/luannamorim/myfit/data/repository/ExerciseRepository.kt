@@ -51,6 +51,7 @@ class ExerciseRepository @Inject constructor(
                     notes = exercise.notes?.trim()?.ifEmpty { null },
                     isCustom = true,
                     createdAtMs = time.now().wallMs,
+                    measure = exercise.measure,
                 ),
             )
         } else {
@@ -62,6 +63,7 @@ class ExerciseRepository @Inject constructor(
                     movementType = exercise.movementType,
                     imagePath = exercise.imagePath,
                     notes = exercise.notes?.trim()?.ifEmpty { null },
+                    measure = exercise.measure,
                 ),
             )
             exercise.id

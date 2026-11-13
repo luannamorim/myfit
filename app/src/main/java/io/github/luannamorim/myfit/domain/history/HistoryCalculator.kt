@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.domain.history
 
 import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.session.SessionSet
@@ -41,7 +42,13 @@ data class PeriodSummary(
     val sports: List<SportFrequency> = emptyList(),
 )
 
-data class SessionExerciseDetail(val name: String, val status: ItemStatus, val sets: List<SessionSet>)
+data class SessionExerciseDetail(
+    val name: String,
+    val status: ItemStatus,
+    val sets: List<SessionSet>,
+    /** For timed exercises the sets' reps are seconds. */
+    val measure: ExerciseMeasure = ExerciseMeasure.REPS,
+)
 
 data class SessionDetail(val summary: SessionSummary, val exercises: List<SessionExerciseDetail>)
 

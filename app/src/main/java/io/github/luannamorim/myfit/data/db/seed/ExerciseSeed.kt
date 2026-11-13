@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import io.github.luannamorim.myfit.core.format.SearchText
 import androidx.sqlite.db.SupportSQLiteDatabase
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import java.util.Locale
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MovementType.LEGS
@@ -36,6 +37,8 @@ data class SeedExercise(
     val since: Int = 1,
     /** Drawing slug: `assets/exercises/<art>-1.webp` (start) and, when it moves, `-2.webp` (end). */
     val art: String? = null,
+    /** Timed exercises (holds, cardio) count seconds instead of reps. */
+    val measure: ExerciseMeasure = ExerciseMeasure.REPS,
     /** Stable identity stored in `exercise.seedKey`; never change it once released. */
     val key: String = keyOf(nameEn),
 ) {
@@ -104,7 +107,7 @@ object ExerciseSeed {
         SeedExercise("Rosca de punho", "Wrist curl", FOREARMS, PULL, art = "wg-wrist-curl"),
         SeedExercise("Rosca inversa", "Reverse curl", FOREARMS, PULL, art = "biceps-curl-reverse-with-dumbbells"),
         // Abdômen
-        SeedExercise("Prancha", "Plank", ABS, OTHER, art = "wg-plank"),
+        SeedExercise("Prancha", "Plank", ABS, OTHER, art = "wg-plank", measure = ExerciseMeasure.TIME),
         SeedExercise("Abdominal supra", "Crunch", ABS, OTHER, art = "crunches"),
         SeedExercise("Elevação de pernas", "Leg raise", ABS, OTHER, art = "flat-bench-leg-raises"),
         SeedExercise("Abdominal oblíquo", "Oblique crunch", ABS, OTHER, art = "cross-body-crunch"),
@@ -139,12 +142,12 @@ object ExerciseSeed {
         SeedExercise("Kettlebell swing", "Kettlebell swing", FULL_BODY, OTHER, art = "wg-kettlebell-swing"),
         SeedExercise("Caminhada do fazendeiro", "Farmer's walk", FULL_BODY, OTHER, art = "wg-farmer-carry"),
         // Cardio
-        SeedExercise("Esteira", "Treadmill", CARDIO, OTHER, art = "wg-running"),
-        SeedExercise("Bicicleta ergométrica", "Stationary bike", CARDIO, OTHER, art = "wg-cycling"),
-        SeedExercise("Elíptico", "Elliptical", CARDIO, OTHER, art = "wg-elliptical"),
-        SeedExercise("Remo ergômetro", "Rowing machine", CARDIO, OTHER, art = "wg-rowing"),
-        SeedExercise("Pular corda", "Jump rope", CARDIO, OTHER, art = "wg-jump-rope"),
-        SeedExercise("Escada", "Stair climber", CARDIO, OTHER, art = "wg-stair-climber"),
+        SeedExercise("Esteira", "Treadmill", CARDIO, OTHER, art = "wg-running", measure = ExerciseMeasure.TIME),
+        SeedExercise("Bicicleta ergométrica", "Stationary bike", CARDIO, OTHER, art = "wg-cycling", measure = ExerciseMeasure.TIME),
+        SeedExercise("Elíptico", "Elliptical", CARDIO, OTHER, art = "wg-elliptical", measure = ExerciseMeasure.TIME),
+        SeedExercise("Remo ergômetro", "Rowing machine", CARDIO, OTHER, art = "wg-rowing", measure = ExerciseMeasure.TIME),
+        SeedExercise("Pular corda", "Jump rope", CARDIO, OTHER, art = "wg-jump-rope", measure = ExerciseMeasure.TIME),
+        SeedExercise("Escada", "Stair climber", CARDIO, OTHER, art = "wg-stair-climber", measure = ExerciseMeasure.TIME),
         // Version 2: bodyweight and kettlebell additions.
         SeedExercise("Agachamento goblet", "Goblet squat", QUADRICEPS, LEGS, since = 2, art = "wg-goblet-squat"),
         SeedExercise("Afundo reverso com kettlebell", "Kettlebell reverse lunge", QUADRICEPS, LEGS, since = 2, art = "rear-lunges-with-dumbbell"),
@@ -157,7 +160,7 @@ object ExerciseSeed {
         SeedExercise("Flexão pike", "Pike push-up", SHOULDERS, PUSH, since = 2, art = "wg-pike-push-up"),
         SeedExercise("Rosca bíceps", "Biceps curl", BICEPS, PULL, since = 2, art = "biceps-curl-with-dumbbell"),
         SeedExercise("Abdominal reverso", "Reverse crunch", ABS, OTHER, since = 2, art = "bent-knee-hip-raise"),
-        SeedExercise("Prancha lateral", "Side plank", ABS, OTHER, since = 2, art = "side-plank"),
+        SeedExercise("Prancha lateral", "Side plank", ABS, OTHER, since = 2, art = "side-plank", measure = ExerciseMeasure.TIME),
         // Version 3: exercises that come with an Everkinetic drawing.
         SeedExercise("Supino reto no Smith", "Smith machine bench press", CHEST, PUSH, since = 3, art = "smith-machine-bench-press"),
         SeedExercise("Supino inclinado no Smith", "Smith machine incline press", CHEST, PUSH, since = 3, art = "smith-machine-incline-bench-press"),
@@ -239,6 +242,8 @@ object ExerciseSeed {
         locale: Locale,
         nowMs: Long,
         withKeys: Boolean = true,
+        /** False before schema v5, when the `measure` column doesn't exist yet. */
+        withMeasure: Boolean = true,
     ): Int {
         val existing = mutableSetOf<String>()
         db.query("SELECT name FROM exercise").use { c -> while (c.moveToNext()) existing += SearchText.normalize(c.getString(0)) }
@@ -254,6 +259,7 @@ object ExerciseSeed {
                 put("archived", 0)
                 put("createdAtMs", nowMs)
                 if (withKeys && usedKeys.add(item.key)) put("seedKey", item.key)
+                if (withMeasure) put("measure", item.measure.name)
             }
             db.insert("exercise", SQLiteDatabase.CONFLICT_ABORT, values)
             existing += SearchText.normalize(item.name(locale))
@@ -299,7 +305,7 @@ object ExerciseSeed {
     /** 1 → 2: adds the version-2 exercises to existing installs (schema unchanged). */
     val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
-            insertMissing(db, items.filter { it.since == 2 }, Locale.getDefault(), System.currentTimeMillis(), withKeys = false)
+            insertMissing(db, items.filter { it.since == 2 }, Locale.getDefault(), System.currentTimeMillis(), withKeys = false, withMeasure = false)
         }
     }
 
@@ -313,7 +319,7 @@ object ExerciseSeed {
             db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_exercise_seedKey ON exercise (seedKey)")
             db.execSQL("ALTER TABLE session_exercise ADD COLUMN seedKey TEXT")
             linkKeys(db)
-            insertMissing(db, items.filter { it.since == 3 }, Locale.getDefault(), System.currentTimeMillis())
+            insertMissing(db, items.filter { it.since == 3 }, Locale.getDefault(), System.currentTimeMillis(), withMeasure = false)
         }
     }
 

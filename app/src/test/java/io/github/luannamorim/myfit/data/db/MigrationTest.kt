@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.Intensity
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -168,12 +169,60 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate4To5_makesHoldsAndCardioTimed_withTimeTargetsWhereRepsWereSet() = runBlocking {
+        var plankItem = 0L
+        var treadmillItem = 0L
+        var benchItem = 0L
+        createVersion(4, "migration-v4-test.db") { db ->
+            val ids = ExerciseSeed.items.associate { item ->
+                item.key to db.insert(
+                    "exercise",
+                    null,
+                    ContentValues().apply {
+                        put("name", item.namePt); put("muscleGroup", item.muscleGroup.name); put("movementType", item.movementType.name)
+                        put("isCustom", 0); put("archived", 0); put("createdAtMs", 0); put("seedKey", item.key)
+                    },
+                )
+            }
+            val routine = db.insert("routine", null, ContentValues().apply { put("name", "Core"); put("position", 0); put("createdAtMs", 0); put("updatedAtMs", 0) })
+            fun item(exercise: Long, reps: Int, position: Int) = db.insert(
+                "routine_exercise",
+                null,
+                ContentValues().apply {
+                    put("routineId", routine); put("exerciseId", exercise); put("position", position)
+                    put("sets", 3); put("reps", reps); put("restSeconds", 60)
+                },
+            )
+            plankItem = item(ids.getValue("plank"), 12, 0) // reps-like: becomes 30 s
+            treadmillItem = item(ids.getValue("treadmill"), 900, 1) // already seconds: kept
+            benchItem = item(ids.getValue("barbell-bench-press"), 10, 2)
+        }
+
+        val room = open("migration-v4-test.db")
+        val byKey = room.exerciseDao().getAll().associateBy { it.seedKey }
+        assertEquals(ExerciseMeasure.TIME, byKey.getValue("plank").measure)
+        assertEquals(ExerciseMeasure.TIME, byKey.getValue("side-plank").measure)
+        assertEquals(ExerciseMeasure.TIME, byKey.getValue("treadmill").measure)
+        assertEquals(ExerciseMeasure.REPS, byKey.getValue("barbell-bench-press").measure)
+        val reps = room.routineDao().getAllItems().associate { it.id to it.reps }
+        assertEquals(30, reps[plankItem])
+        assertEquals(900, reps[treadmillItem])
+        assertEquals(10, reps[benchItem])
+        assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
+        room.close()
+    }
+
+    @Test
     fun freshInstall_getsWholeLibrary_once_withKeys() = runBlocking {
         context.deleteDatabase("fresh-test.db")
         val room = open("fresh-test.db")
         val all = room.exerciseDao().getAll()
         assertEquals(ExerciseSeed.items.size, all.size)
         assertEquals(ExerciseSeed.items.map { it.key }.toSet(), all.mapNotNull { it.seedKey }.toSet())
+        assertEquals(
+            ExerciseSeed.items.filter { it.measure == ExerciseMeasure.TIME }.map { it.key }.toSet(),
+            all.filter { it.measure == ExerciseMeasure.TIME }.mapNotNull { it.seedKey }.toSet(),
+        )
         room.close()
     }
 }

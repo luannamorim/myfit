@@ -34,6 +34,13 @@ object DecimalInput {
 }
 
 object Durations {
+    /** A timed set: "45 s" under a minute, "1:30 min", or "10 min" for whole minutes. */
+    fun setTime(seconds: Int): String = when {
+        seconds < 60 -> "$seconds s"
+        seconds % 60 == 0 -> "${seconds / 60} min"
+        else -> "%d:%02d min".format(java.util.Locale.ROOT, seconds / 60, seconds % 60)
+    }
+
     /** "1:02:45" or "12:05" — clock style used for timers. */
     fun clock(ms: Long): String {
         val totalSeconds = (ms.coerceAtLeast(0) + 500) / 1000

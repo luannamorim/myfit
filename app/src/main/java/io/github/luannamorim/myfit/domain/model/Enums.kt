@@ -7,6 +7,9 @@ enum class MuscleGroup {
 
 enum class MovementType { PUSH, PULL, LEGS, OTHER }
 
+/** What a set of the exercise counts: repetitions, or seconds held/done (plank, cardio). */
+enum class ExerciseMeasure { REPS, TIME }
+
 enum class SessionStatus { ACTIVE, FINISHED }
 
 enum class ItemStatus { PENDING, DONE, SKIPPED }

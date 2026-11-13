@@ -37,6 +37,8 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Start: the first time, the app asks for notification permission. Accept it.
 - [ ] The set screen shows the exercise drawing (or the body map); the play button opens the video search.
 - [ ] Complete set → the rest starts on its own. Use +15 s and −15 s.
+- [ ] A workout with a plank (or side plank): the set shows a time (e.g. 30 s) with ±. *Start* → the ring counts down, beeps in the last 3 seconds and plays the sound at the target; hold a few seconds more and tap *Done*: History shows the time actually held (e.g. 34 s). Cardio exercises show minutes.
+- [ ] Updating from 1.5: planks and cardio in your workouts now show a time; check the targets.
 - [ ] At the end of the rest: vibration, sound and a green pulse; "REST COMPLETE" appears.
 - [ ] Adjust the load with +/− and complete the set: the next set inherits the load.
 - [ ] Pause (the total time stops) and resume. Skip set and skip exercise; tap the skipped exercise in the top strip to go back to it.
@@ -59,7 +61,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Toggle Week/Month in the summaries. Workouts, total time and frequency match what was done.
 - [ ] The session row shows the intensity; the session detail shows the photo, and intensity and photo can be changed or removed there.
 - [ ] "+ Activity" on a past day: log swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name. They appear on that day, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it.
-- [ ] Home: "New activity" opens the same screen; the week counts the activity days and their time.
+- [ ] Home: "Start activity" opens the same screen; the week counts the activity days and their time.
 - [ ] **Live:** pick Running → *Start timer* → allow notifications and location. Walk outdoors for a few minutes with the screen locked: the notification counts up and shows the km. Pause/resume from the notification. *Finish*: the activity is saved with the time and distance and "Activity done" asks for intensity, notes and photo.
 - [ ] Open a logged activity from History: the sport is fixed (no sport chips); date, time, distance, intensity and photo can be changed.
 - [ ] Start one, close the app from recents and reopen: Home shows "… in progress" with the right time.

@@ -69,6 +69,8 @@
     <string name="item_summary">%1$d × %2$d · %3$s</string>
     <string name="item_sets">Sets</string>
     <string name="item_reps">Reps</string>
+    <string name="item_time">Time per set</string>
+    <string name="item_summary_time">%1$d × %2$s · %3$s</string>
     <string name="item_rest">Rest</string>
     <string name="item_load">Load</string>
     <string name="item_load_hint">No load</string>
@@ -90,6 +92,9 @@
     <string name="exercise_name_required">Give the exercise a name</string>
     <string name="exercise_group">Muscle group</string>
     <string name="exercise_movement">Movement type</string>
+    <string name="exercise_measure">Each set counts</string>
+    <string name="exercise_measure_reps">Repetitions</string>
+    <string name="exercise_measure_time">Time</string>
     <string name="exercise_notes">Notes</string>
     <string name="exercise_image">Demo image</string>
     <string name="exercise_image_pick">Choose from gallery</string>
@@ -121,6 +126,10 @@
     <string name="workout_set_of">Set %1$d of %2$d</string>
     <string name="workout_complete_set">Complete set</string>
     <string name="workout_skip_set">Skip set</string>
+    <string name="workout_hold_start">Start</string>
+    <string name="workout_hold_done">Done</string>
+    <string name="workout_hold_running">Target %1$s</string>
+    <string name="workout_hold_extra">Target %1$s reached · keep going</string>
     <string name="workout_rest">Rest</string>
     <string name="workout_rest_over">Rest complete</string>
     <string name="workout_skip_rest">Skip rest</string>
@@ -177,7 +186,7 @@
     <string name="sport_pilates">Pilates</string>
     <string name="sport_stretching">Stretching</string>
     <string name="sport_other">Other</string>
-    <string name="activity_log">New activity</string>
+    <string name="activity_log">Start activity</string>
     <string name="activity_title_new">New activity</string>
     <string name="activity_title_edit">Activity</string>
     <string name="activity_title_done">Activity done</string>

@@ -1,9 +1,14 @@
 package io.github.luannamorim.myfit.ui.feature.workout
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
+import io.github.luannamorim.myfit.domain.model.MuscleGroup
+import io.github.luannamorim.myfit.testutil.FakeSounds
 import io.github.luannamorim.myfit.testutil.MainDispatcherRule
 import io.github.luannamorim.myfit.testutil.SessionEnv
 import io.github.luannamorim.myfit.testutil.awaitUntil
+import io.github.luannamorim.myfit.testutil.insertExercise
+import io.github.luannamorim.myfit.testutil.insertRoutine
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -22,7 +27,30 @@ class WorkoutViewModelTest {
 
     @After fun tearDown() = env.close()
 
-    private fun vm() = WorkoutViewModel(env.controller, env.time, env.settings)
+    private val sounds = FakeSounds()
+    private fun vm() = WorkoutViewModel(env.controller, env.time, env.settings, sounds)
+
+    @Test
+    fun timedSet_stepsBySeconds_andHoldRecordsTheTimeActuallyHeld() = runBlocking {
+        val plank = env.db.insertExercise("Prancha", MuscleGroup.ABS, measure = ExerciseMeasure.TIME)
+        val routine = env.db.insertRoutine("Core", listOf(plank)) // 3 × "12" → 12 s
+        env.controller.start(routine)
+        val vm = vm()
+        val start = vm.state.awaitUntil { it.hasSession }
+        assertTrue(start.timed)
+        assertEquals(12, start.reps)
+        vm.changeReps(1)
+        assertEquals(15, vm.state.awaitUntil { it.reps == 15 }.reps) // 5 s steps under a minute
+        vm.startHold()
+        vm.state.awaitUntil { it.hold != null }
+        env.time.advance(18_400) // held past the 15 s target
+        vm.tick()
+        assertTrue(vm.state.awaitUntil { it.hold?.reachedTarget == true }.hold!!.reachedTarget)
+        vm.finishHold()
+        vm.state.awaitUntil { it.hold == null && it.setNumber == 2 }
+        val done = env.repo.getActive()!!.exercises.single().sets.first()
+        assertEquals(18, done.actualReps) // seconds held
+    }
 
     @Test
     fun restCountdown_derivesFromMarks_notTicks() = runBlocking {

@@ -25,6 +25,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.Durations
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
+import io.github.luannamorim.myfit.domain.model.TimedSets
 import io.github.luannamorim.myfit.ui.components.MyFitTextField
 import io.github.luannamorim.myfit.ui.components.NumberStepper
 import io.github.luannamorim.myfit.ui.components.PrimaryButton
@@ -66,13 +68,23 @@ fun RoutineItemSheet(
                     onIncrement = { onChange { it.copy(sets = it.sets + 1) } },
                     modifier = Modifier.weight(1f),
                 )
-                NumberStepper(
-                    value = item.reps.toString(),
-                    label = stringResource(R.string.item_reps),
-                    onDecrement = { onChange { it.copy(reps = it.reps - 1) } },
-                    onIncrement = { onChange { it.copy(reps = it.reps + 1) } },
-                    modifier = Modifier.weight(1f),
-                )
+                if (item.exercise.measure == ExerciseMeasure.TIME) {
+                    NumberStepper(
+                        value = Durations.setTime(item.reps),
+                        label = stringResource(R.string.item_time),
+                        onDecrement = { onChange { it.copy(reps = TimedSets.step(it.reps, up = false)) } },
+                        onIncrement = { onChange { it.copy(reps = TimedSets.step(it.reps, up = true)) } },
+                        modifier = Modifier.weight(1f),
+                    )
+                } else {
+                    NumberStepper(
+                        value = item.reps.toString(),
+                        label = stringResource(R.string.item_reps),
+                        onDecrement = { onChange { it.copy(reps = it.reps - 1) } },
+                        onIncrement = { onChange { it.copy(reps = it.reps + 1) } },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
             NumberStepper(
                 value = Durations.rest(item.restSeconds),

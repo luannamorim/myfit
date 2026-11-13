@@ -138,7 +138,13 @@ fun <T> FilterChipRow(
 }
 
 @Composable
-fun MyFitChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun MyFitChip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leading: (@Composable () -> Unit)? = null,
+) {
     val c = MyFitTheme.colors
     Surface(
         onClick = onClick,
@@ -148,6 +154,13 @@ fun MyFitChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Mo
         contentColor = if (selected) c.background else c.textSecondary,
         border = BorderStroke(1.dp, if (selected) c.textPrimary else c.outline),
     ) {
-        Text(text, style = MyFitTheme.type.label, modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp))
+        if (leading == null) {
+            Text(text, style = MyFitTheme.type.label, modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp))
+        } else {
+            Row(Modifier.padding(start = 12.dp, end = 14.dp, top = 9.dp, bottom = 9.dp), verticalAlignment = Alignment.CenterVertically) {
+                leading()
+                Text(text, style = MyFitTheme.type.label, modifier = Modifier.padding(start = 8.dp))
+            }
+        }
     }
 }

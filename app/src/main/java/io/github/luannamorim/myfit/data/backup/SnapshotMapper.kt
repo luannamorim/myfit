@@ -24,6 +24,7 @@ import io.github.luannamorim.myfit.domain.backup.RoutineExerciseDto
 import io.github.luannamorim.myfit.domain.backup.SessionDto
 import io.github.luannamorim.myfit.domain.backup.SessionExerciseDto
 import io.github.luannamorim.myfit.domain.backup.SessionSetDto
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.Intensity
 
 /** Converts the whole database to/from the versioned backup DTOs. */
@@ -76,8 +77,8 @@ object SnapshotMapper {
     private fun Mark.toDto() = MarkDto(wallMs, elapsedMs, bootCount)
     private fun MarkDto.toMark() = Mark(wallMs, elapsedMs, bootCount)
 
-    private fun ExerciseEntity.toDto() = ExerciseDto(id, name, muscleGroup.name, movementType.name, imagePath, notes, isCustom, archived, createdAtMs, seedKey)
-    private fun ExerciseDto.toEntity() = ExerciseEntity(id, name, enumOf(muscleGroup), enumOf(movementType), imagePath, notes, isCustom, archived, createdAtMs, seedKey)
+    private fun ExerciseEntity.toDto() = ExerciseDto(id, name, muscleGroup.name, movementType.name, imagePath, notes, isCustom, archived, createdAtMs, seedKey, measure.name)
+    private fun ExerciseDto.toEntity() = ExerciseEntity(id, name, enumOf(muscleGroup), enumOf(movementType), imagePath, notes, isCustom, archived, createdAtMs, seedKey, measureOf(measure))
 
     private fun RoutineEntity.toDto() = RoutineDto(id, name, description, position, createdAtMs, updatedAtMs)
     private fun RoutineDto.toEntity() = RoutineEntity(id, name, description, position, createdAtMs, updatedAtMs)
@@ -98,10 +99,11 @@ object SnapshotMapper {
     )
 
     private fun SessionExerciseEntity.toDto() = SessionExerciseDto(
-        id, sessionId, exerciseId, position, name, muscleGroup.name, movementType.name, imagePath, restSeconds, notes, status.name, seedKey,
+        id, sessionId, exerciseId, position, name, muscleGroup.name, movementType.name, imagePath, restSeconds, notes, status.name, seedKey, measure.name,
     )
     private fun SessionExerciseDto.toEntity() = SessionExerciseEntity(
         id, sessionId, exerciseId, position, name, enumOf(muscleGroup), enumOf(movementType), imagePath, restSeconds, notes, enumOf(status), seedKey,
+        measureOf(measure),
     )
 
     private fun SessionSetEntity.toDto() = SessionSetDto(id, sessionExerciseId, setIndex, plannedReps, plannedLoadKg, actualReps, actualLoadKg, status.name, completedAtWallMs)
@@ -126,6 +128,9 @@ object SnapshotMapper {
         id, enumOf(sport), name, dateEpochDay, durationMinutes, distanceKm,
         intensity?.let { name -> Intensity.entries.firstOrNull { it.name == name } }, notes, imagePath, createdAtMs,
     )
+
+    /** Unknown values (a newer app) fall back to repetitions instead of failing the restore. */
+    private fun measureOf(name: String) = ExerciseMeasure.entries.firstOrNull { it.name == name } ?: ExerciseMeasure.REPS
 
     private inline fun <reified E : Enum<E>> enumOf(name: String): E =
         enumValues<E>().firstOrNull { it.name == name } ?: throw IllegalArgumentException("unknown ${E::class.simpleName}: $name")

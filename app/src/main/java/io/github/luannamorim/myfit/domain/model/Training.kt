@@ -10,12 +10,15 @@ data class Exercise(
     val isCustom: Boolean = true,
     /** Library entry this exercise came from (drawing, original name); null when user-created. */
     val seedKey: String? = null,
+    /** For [ExerciseMeasure.TIME], the "reps" of its sets are seconds. */
+    val measure: ExerciseMeasure = ExerciseMeasure.REPS,
 )
 
 data class RoutineItem(
     val id: Long = 0,
     val exercise: Exercise,
     val sets: Int,
+    /** Repetitions per set, or seconds per set when the exercise is timed. */
     val reps: Int,
     val restSeconds: Int,
     val loadKg: Double? = null,

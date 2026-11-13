@@ -34,7 +34,7 @@ class HistoryRepository @Inject constructor(
         if (row == null || row.session.status != SessionStatus.FINISHED) return@map null
         SessionDetail(
             summary = row.toSummary(),
-            exercises = row.toActive().exercises.map { SessionExerciseDetail(it.name, it.status, it.sets) },
+            exercises = row.toActive().exercises.map { SessionExerciseDetail(it.name, it.status, it.sets, it.measure) },
         )
     }
 

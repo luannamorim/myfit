@@ -1,19 +1,25 @@
 package io.github.luannamorim.myfit.ui.common
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -38,6 +44,7 @@ fun IntensityPicker(selected: Intensity?, onSelect: (Intensity?) -> Unit, modifi
                     stringResource(level.labelRes),
                     selected = selected == level,
                     onClick = { onSelect(if (selected == level) null else level) },
+                    leading = { IntensityBars(level) },
                 )
             }
         }
@@ -68,5 +75,26 @@ fun PhotoField(imagePath: String?, onPick: () -> Unit, onRemove: () -> Unit, mod
             SecondaryButton(stringResource(R.string.workout_photo_add), onClick = onPick, icon = Icons.Rounded.AddAPhoto, modifier = Modifier.fillMaxWidth())
         }
         if (error) Text(stringResource(R.string.exercise_image_error), style = MyFitTheme.type.caption, color = c.danger)
+    }
+}
+
+/** Three rising bars, the first [level] ones filled (in the current content color). */
+@Composable
+fun IntensityBars(level: Intensity, modifier: Modifier = Modifier) {
+    val color = LocalContentColor.current
+    val filled = level.ordinal + 1
+    Canvas(modifier.size(width = 14.dp, height = 14.dp)) {
+        val barWidth = 3.dp.toPx()
+        val gap = (size.width - 3 * barWidth) / 2
+        val radius = CornerRadius(barWidth / 2, barWidth / 2)
+        for (i in 0 until 3) {
+            val height = size.height * (i + 1) / 3f
+            drawRoundRect(
+                color = if (i < filled) color else color.copy(alpha = 0.28f),
+                topLeft = Offset(i * (barWidth + gap), size.height - height),
+                size = Size(barWidth, height),
+                cornerRadius = radius,
+            )
+        }
     }
 }

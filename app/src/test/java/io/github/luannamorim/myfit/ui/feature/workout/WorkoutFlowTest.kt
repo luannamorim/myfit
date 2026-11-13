@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.model.ItemStatus
+import io.github.luannamorim.myfit.testutil.FakeSounds
 import io.github.luannamorim.myfit.testutil.SessionEnv
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -32,7 +33,7 @@ class WorkoutFlowTest {
     @Test
     fun fullWorkout_completeAllSets_thenFinish() {
         runBlocking { env.startWorkout(2, 2) }
-        val vm = WorkoutViewModel(env.controller, env.time, env.settings)
+        val vm = WorkoutViewModel(env.controller, env.time, env.settings, FakeSounds())
         var finishedSession: Long? = null
         compose.setContent {
             WorkoutScreen(onMinimize = {}, onFinish = { finishedSession = it }, onSessionGone = {}, viewModel = vm)

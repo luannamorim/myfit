@@ -1,9 +1,11 @@
 package io.github.luannamorim.myfit.data.db.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 
@@ -20,6 +22,8 @@ data class ExerciseEntity(
     val createdAtMs: Long,
     /** Key of the library entry this row came from (see ExerciseSeed); null for user-created ones. */
     val seedKey: String? = null,
+    /** Since v5: timed exercises store seconds where others store reps. */
+    @ColumnInfo(defaultValue = "REPS") val measure: ExerciseMeasure = ExerciseMeasure.REPS,
 )
 
 @Entity(tableName = "routine")

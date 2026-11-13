@@ -44,6 +44,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import io.github.luannamorim.myfit.R
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.ui.common.ArtSource
@@ -83,6 +84,7 @@ fun ExerciseEditorScreen(onClose: () -> Unit, viewModel: ExerciseEditorViewModel
         onSave = { viewModel.save() },
         onDelete = viewModel::delete,
         onBack = onClose,
+        onMeasure = viewModel::setMeasure,
     )
 }
 
@@ -99,6 +101,7 @@ fun ExerciseEditorContent(
     onSave: () -> Unit,
     onDelete: () -> Unit,
     onBack: () -> Unit,
+    onMeasure: (ExerciseMeasure) -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     var confirmDelete by remember { mutableStateOf(false) }
@@ -141,6 +144,11 @@ fun ExerciseEditorContent(
                     MovementType.entries.forEach { type ->
                         MyFitChip(stringResource(type.labelRes), selected = state.movementType == type, onClick = { onMovement(type) })
                     }
+                }
+                SectionHeader(stringResource(R.string.exercise_measure))
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    MyFitChip(stringResource(R.string.exercise_measure_reps), selected = state.measure == ExerciseMeasure.REPS, onClick = { onMeasure(ExerciseMeasure.REPS) })
+                    MyFitChip(stringResource(R.string.exercise_measure_time), selected = state.measure == ExerciseMeasure.TIME, onClick = { onMeasure(ExerciseMeasure.TIME) })
                 }
                 SectionHeader(stringResource(R.string.exercise_image))
                 ImageBox(state, onPickImage, onRemoveImage)

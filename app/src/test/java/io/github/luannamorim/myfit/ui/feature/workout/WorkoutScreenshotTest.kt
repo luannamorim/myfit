@@ -69,6 +69,13 @@ class WorkoutScreenshotTest {
 
     @Test fun workout_rest() = snap("workout_rest", base.copy(rest = RestUi(52_000, 0.58f, "One-arm dumbbell row", 2, 3)))
 
+    @Test fun workout_timed_set() = snap("workout_timed_set", base.copy(exerciseName = "Plank", seedKey = "plank", muscleGroup = MuscleGroup.ABS, timed = true, reps = 45, loadKg = null))
+
+    @Test fun workout_hold() = snap(
+        "workout_hold",
+        base.copy(exerciseName = "Plank", seedKey = "plank", muscleGroup = MuscleGroup.ABS, timed = true, reps = 45, loadKg = null, hold = HoldUi(32_000, 45_000)),
+    )
+
     @Test fun workout_paused() = snap("workout_paused", base.copy(isPaused = true))
 
     @Test fun workout_done() = snap("workout_done", base.copy(allDone = true))

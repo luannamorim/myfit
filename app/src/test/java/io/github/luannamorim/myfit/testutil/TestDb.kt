@@ -9,6 +9,7 @@ import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineExerciseEntity
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 
@@ -27,8 +28,9 @@ suspend fun MyFitDatabase.insertExercise(
     group: MuscleGroup = MuscleGroup.BACK,
     type: MovementType = MovementType.PULL,
     custom: Boolean = true,
+    measure: ExerciseMeasure = ExerciseMeasure.REPS,
 ): Long = exerciseDao().insert(
-    ExerciseEntity(name = name, muscleGroup = group, movementType = type, isCustom = custom, createdAtMs = 0),
+    ExerciseEntity(name = name, muscleGroup = group, movementType = type, isCustom = custom, createdAtMs = 0, measure = measure),
 )
 
 /** Inserts a routine with one item per exercise id (3x12, 90s). */

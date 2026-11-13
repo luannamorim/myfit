@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.domain.session
 
 import io.github.luannamorim.myfit.core.time.Mark
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 
@@ -32,6 +33,7 @@ data class SessionExercise(
     val status: ItemStatus,
     val sets: List<SessionSet>,
     val seedKey: String? = null,
+    val measure: ExerciseMeasure = ExerciseMeasure.REPS,
 ) {
     val hasPending: Boolean get() = sets.any { it.status == ItemStatus.PENDING }
     val doneCount: Int get() = sets.count { it.status == ItemStatus.DONE }

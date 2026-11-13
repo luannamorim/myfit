@@ -140,6 +140,9 @@ fun WorkoutScreen(
             onDiscard = viewModel::discard,
             onDismissDiscardPrompt = viewModel::dismissDiscardPrompt,
             onRestOver = { RestFeedback.restOver(context) },
+            onStartHold = viewModel::startHold,
+            onFinishHold = viewModel::finishHold,
+            onCancelHold = viewModel::cancelHold,
         )
     }
 }
@@ -162,6 +165,9 @@ fun WorkoutContent(
     onDiscard: () -> Unit,
     onDismissDiscardPrompt: () -> Unit,
     onRestOver: () -> Unit,
+    onStartHold: () -> Unit = {},
+    onFinishHold: () -> Unit = {},
+    onCancelHold: () -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     var confirmDiscard by remember { mutableStateOf(false) }
@@ -207,7 +213,11 @@ fun WorkoutContent(
                 ) { phase ->
                     when (phase) {
                         Phase.REST -> RestPanel(state, onAdjustRest, onSkipRest)
-                        Phase.SET -> SetPanel(state, onChangeReps, onChangeLoad, onCompleteSet, onSkipSet)
+                        Phase.SET -> if (state.timed) {
+                            TimedSetPanel(state, onChangeReps, onChangeLoad, onCompleteSet, onSkipSet, onStartHold, onFinishHold, onCancelHold, onRestOver)
+                        } else {
+                            SetPanel(state, onChangeReps, onChangeLoad, onCompleteSet, onSkipSet)
+                        }
                         Phase.DONE -> DonePanel(onFinish)
                     }
                 }
@@ -389,6 +399,79 @@ private fun SetPanel(
                 modifier = Modifier.fillMaxWidth(),
             )
             TextAction(stringResource(R.string.workout_skip_set), onClick = onSkipSet, color = c.textSecondary)
+        }
+    }
+}
+
+/**
+ * A set measured in time (plank, cardio): target with ± steps and a timer that counts down with
+ * beeps, keeps counting past the target and completes the set with the seconds actually held.
+ */
+@Composable
+private fun TimedSetPanel(
+    state: WorkoutUiState,
+    onChangeTime: (Int) -> Unit,
+    onChangeLoad: (Double) -> Unit,
+    onCompleteSet: () -> Unit,
+    onSkipSet: () -> Unit,
+    onStartHold: () -> Unit,
+    onFinishHold: () -> Unit,
+    onCancelHold: () -> Unit,
+    onTargetReached: () -> Unit,
+) {
+    val c = MyFitTheme.colors
+    val hold = state.hold
+    LaunchedEffect(hold?.reachedTarget) { if (hold?.reachedTarget == true) onTargetReached() }
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = Spacing.l),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.l, Alignment.CenterVertically),
+    ) {
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Text(stringResource(R.string.workout_set_of, state.setNumber, state.setCount).uppercase(), style = MyFitTheme.type.overline, color = c.textSecondary)
+            Text(state.exerciseName, style = MyFitTheme.type.display, color = c.textPrimary)
+            state.exerciseNotes?.let { Text(it, style = MyFitTheme.type.body, color = c.textSecondary) }
+        }
+        if (hold == null) {
+            ExerciseVisual(
+                imagePath = state.imagePath,
+                seedKey = state.seedKey,
+                muscleGroup = state.muscleGroup,
+                name = state.exerciseName,
+                modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp).aspectRatio(16f / 9f),
+                background = c.surface,
+            )
+            NumberStepper(
+                value = Durations.setTime(state.reps),
+                label = stringResource(R.string.item_time),
+                onDecrement = { onChangeTime(-1) },
+                onIncrement = { onChangeTime(1) },
+                valueStyle = MyFitTheme.type.numericHero.copy(fontSize = MyFitTheme.type.numericHero.fontSize * 0.75f),
+            )
+            NumberStepper(
+                value = state.loadKg?.let { DecimalInput.format(it) } ?: "—",
+                unit = state.loadKg?.let { stringResource(R.string.unit_kg) },
+                label = stringResource(R.string.item_load),
+                onDecrement = { onChangeLoad(-LOAD_STEP_KG) },
+                onIncrement = { onChangeLoad(LOAD_STEP_KG) },
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                PrimaryButton(stringResource(R.string.workout_hold_start), onClick = onStartHold, icon = Icons.Rounded.PlayArrow, minHeight = 64.dp, modifier = Modifier.fillMaxWidth())
+                Row {
+                    TextAction(stringResource(R.string.workout_complete_set), onClick = onCompleteSet, color = c.textSecondary)
+                    TextAction(stringResource(R.string.workout_skip_set), onClick = onSkipSet, color = c.textSecondary)
+                }
+            }
+        } else {
+            val over = hold.elapsedMs - hold.targetMs
+            RestRing(
+                progress = if (hold.reachedTarget) 1f else hold.elapsedMs.toFloat() / hold.targetMs.coerceAtLeast(1),
+                remainingText = if (over >= 0) "+" + Durations.countdown(over) else Durations.countdown(-over),
+                caption = stringResource(if (hold.reachedTarget) R.string.workout_hold_extra else R.string.workout_hold_running, Durations.setTime(state.reps)),
+                size = 260.dp,
+            )
+            PrimaryButton(stringResource(R.string.workout_hold_done), onClick = onFinishHold, icon = Icons.Rounded.Check, minHeight = 64.dp, modifier = Modifier.fillMaxWidth())
+            TextAction(stringResource(R.string.action_cancel), onClick = onCancelHold, color = c.textSecondary)
         }
     }
 }

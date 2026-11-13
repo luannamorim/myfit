@@ -10,8 +10,10 @@ import io.github.luannamorim.myfit.data.repository.ExerciseRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.Exercise
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.Routine
 import io.github.luannamorim.myfit.domain.model.RoutineItem
+import io.github.luannamorim.myfit.domain.model.TimedSets
 import io.github.luannamorim.myfit.ui.navigation.RoutineEditorRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,7 +88,8 @@ class RoutineEditorViewModel @Inject constructor(
             _state.update { s ->
                 s.copy(
                     items = s.items + picked.map { ex ->
-                        DraftItem(nextKey++, ex, sets = DEFAULT_SETS, reps = DEFAULT_REPS, restSeconds = rest, loadKg = null, notes = null)
+                        val target = if (ex.measure == ExerciseMeasure.TIME) TimedSets.defaultSeconds(ex.muscleGroup) else DEFAULT_REPS
+                        DraftItem(nextKey++, ex, sets = DEFAULT_SETS, reps = target, restSeconds = rest, loadKg = null, notes = null)
                     },
                     dirty = true,
                 )
@@ -115,7 +118,8 @@ class RoutineEditorViewModel @Inject constructor(
         val updated = transform(s.items[index]).let {
             it.copy(
                 sets = it.sets.coerceIn(1, 20),
-                reps = it.reps.coerceIn(1, 100),
+                // Timed exercises keep seconds in reps.
+                reps = if (it.exercise.measure == ExerciseMeasure.TIME) it.reps.coerceIn(5, TimedSets.MAX_SECONDS) else it.reps.coerceIn(1, 100),
                 restSeconds = it.restSeconds.coerceIn(0, AppSettings.MAX_REST_SECONDS),
                 loadKg = it.loadKg?.coerceIn(0.0, 1000.0),
             )

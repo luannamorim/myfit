@@ -84,6 +84,8 @@
     <string name="item_summary">%1$d × %2$d · %3$s</string>
     <string name="item_sets">Séries</string>
     <string name="item_reps">Repetições</string>
+    <string name="item_time">Tempo por série</string>
+    <string name="item_summary_time">%1$d × %2$s · %3$s</string>
     <string name="item_rest">Descanso</string>
     <string name="item_load">Carga</string>
     <string name="item_load_hint">Sem carga</string>
@@ -108,6 +110,9 @@
     <string name="exercise_name_required">Dê um nome ao exercício</string>
     <string name="exercise_group">Grupo muscular</string>
     <string name="exercise_movement">Tipo de movimento</string>
+    <string name="exercise_measure">Cada série conta</string>
+    <string name="exercise_measure_reps">Repetições</string>
+    <string name="exercise_measure_time">Tempo</string>
     <string name="exercise_notes">Observações</string>
     <string name="exercise_image">Imagem demonstrativa</string>
     <string name="exercise_image_pick">Escolher da galeria</string>
@@ -141,6 +146,10 @@
     <string name="workout_set_of">Série %1$d de %2$d</string>
     <string name="workout_complete_set">Concluir série</string>
     <string name="workout_skip_set">Pular série</string>
+    <string name="workout_hold_start">Iniciar</string>
+    <string name="workout_hold_done">Concluir</string>
+    <string name="workout_hold_running">Meta %1$s</string>
+    <string name="workout_hold_extra">Meta de %1$s batida · continue</string>
     <string name="workout_rest">Descanso</string>
     <string name="workout_rest_over">Descanso concluído</string>
     <string name="workout_skip_rest">Pular descanso</string>
@@ -199,7 +208,7 @@
     <string name="sport_pilates">Pilates</string>
     <string name="sport_stretching">Alongamento</string>
     <string name="sport_other">Livre</string>
-    <string name="activity_log">Nova atividade</string>
+    <string name="activity_log">Iniciar atividade</string>
     <string name="activity_title_new">Nova atividade</string>
     <string name="activity_title_edit">Atividade</string>
     <string name="activity_title_done">Atividade concluída</string>

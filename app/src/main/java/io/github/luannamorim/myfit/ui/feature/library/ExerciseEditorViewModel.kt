@@ -12,6 +12,7 @@ import io.github.luannamorim.myfit.data.repository.ExerciseDeleteResult
 import io.github.luannamorim.myfit.data.repository.ExerciseRepository
 import io.github.luannamorim.myfit.di.ApplicationScope
 import io.github.luannamorim.myfit.domain.model.Exercise
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.ui.navigation.ExerciseEditorRoute
@@ -29,6 +30,7 @@ data class ExerciseEditorUiState(
     val name: String = "",
     val muscleGroup: MuscleGroup = MuscleGroup.CHEST,
     val movementType: MovementType = MovementType.PUSH,
+    val measure: ExerciseMeasure = ExerciseMeasure.REPS,
     val notes: String = "",
     val imagePath: String? = null,
     /** Library entry of a predefined exercise (its bundled drawing); null for user-created ones. */
@@ -67,6 +69,7 @@ class ExerciseEditorViewModel @Inject constructor(
                     name = existing.name,
                     muscleGroup = existing.muscleGroup,
                     movementType = existing.movementType,
+                    measure = existing.measure,
                     notes = existing.notes.orEmpty(),
                     imagePath = existing.imagePath,
                     seedKey = existing.seedKey,
@@ -78,6 +81,7 @@ class ExerciseEditorViewModel @Inject constructor(
     fun setName(value: String) = _state.update { it.copy(name = value, nameError = false) }
     fun setGroup(value: MuscleGroup) = _state.update { it.copy(muscleGroup = value) }
     fun setMovement(value: MovementType) = _state.update { it.copy(movementType = value) }
+    fun setMeasure(value: ExerciseMeasure) = _state.update { it.copy(measure = value) }
     fun setNotes(value: String) = _state.update { it.copy(notes = value) }
 
     fun pickImage(uri: Uri) {
@@ -113,6 +117,7 @@ class ExerciseEditorViewModel @Inject constructor(
                     name = s.name,
                     muscleGroup = s.muscleGroup,
                     movementType = s.movementType,
+                    measure = s.measure,
                     imagePath = s.imagePath,
                     notes = s.notes,
                     isCustom = isCustom,

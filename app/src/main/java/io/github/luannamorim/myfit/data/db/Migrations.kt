@@ -3,6 +3,8 @@ package io.github.luannamorim.myfit.data.db
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
+import io.github.luannamorim.myfit.domain.model.TimedSets
 
 /** Every schema migration, oldest first. Each one has a case in `MigrationTest`. */
 object Migrations {
@@ -20,5 +22,30 @@ object Migrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4)
+    /**
+     * v5: exercises (and session snapshots) say whether a set counts reps or seconds. Library holds
+     * and cardio become timed; their workout targets that were clearly reps get a time default.
+     * Past sessions keep what was recorded (as reps).
+     */
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE exercise ADD COLUMN measure TEXT NOT NULL DEFAULT 'REPS'")
+            db.execSQL("ALTER TABLE session_exercise ADD COLUMN measure TEXT NOT NULL DEFAULT 'REPS'")
+            val timed = ExerciseSeed.items.filter { it.measure == ExerciseMeasure.TIME }
+            if (timed.isEmpty()) return
+            val keys = timed.joinToString(",") { "'${it.key}'" }
+            db.execSQL("UPDATE exercise SET measure = 'TIME' WHERE seedKey IN ($keys)")
+            timed.forEach { item ->
+                db.execSQL(
+                    "UPDATE routine_exercise SET reps = ? WHERE reps < $REPS_LIKE_BELOW AND exerciseId IN (SELECT id FROM exercise WHERE seedKey = ?)",
+                    arrayOf<Any>(TimedSets.defaultSeconds(item.muscleGroup), item.key),
+                )
+            }
+        }
+    }
+
+    /** Targets below this are taken as repetitions when an exercise becomes timed. */
+    private const val REPS_LIKE_BELOW = 15
+
+    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4, MIGRATION_4_5)
 }
