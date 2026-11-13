@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.luannamorim.myfit.ui.feature.activity.ActivityEditorScreen
+import io.github.luannamorim.myfit.ui.feature.activity.LiveActivityScreen
 import io.github.luannamorim.myfit.ui.feature.evolution.AssessmentCompareScreen
 import io.github.luannamorim.myfit.ui.feature.evolution.AssessmentEditorScreen
 import io.github.luannamorim.myfit.ui.feature.evolution.EvolutionActions
@@ -64,6 +65,7 @@ fun MyFitNavHost(
     navController: NavHostController = rememberNavController(),
     openWorkoutRequest: Int = 0,
     openBackupRequest: Int = 0,
+    openActivityRequest: Int = 0,
     appViewModel: AppViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(appViewModel) {
@@ -81,6 +83,9 @@ fun MyFitNavHost(
     val activeSession by appViewModel.activeSession.collectAsStateWithLifecycle()
     LaunchedEffect(openBackupRequest) {
         if (openBackupRequest > 0) navController.navigate(BackupRoute) { launchSingleTop = true }
+    }
+    LaunchedEffect(openActivityRequest) {
+        if (openActivityRequest > 0) navController.navigate(LiveActivityRoute) { launchSingleTop = true }
     }
     // Notification tap / launcher intent asking to show the workout.
     LaunchedEffect(openWorkoutRequest) {
@@ -161,6 +166,7 @@ fun MyFitNavHost(
                             onOpenHistory = { navController.navigateToTopLevel(TopLevelDestination.HISTORY) },
                             onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
                             onLogActivity = { navController.navigate(ActivityEditorRoute()) },
+                            onOpenLiveActivity = { navController.navigate(LiveActivityRoute) { launchSingleTop = true } },
                         ),
                     )
                 }
@@ -190,7 +196,27 @@ fun MyFitNavHost(
                     )
                 }
                 composable<AssessmentEditorRoute> { AssessmentEditorScreen(onClose = { navController.popBackStack() }) }
-                composable<ActivityEditorRoute> { ActivityEditorScreen(onClose = { navController.popBackStack() }) }
+                composable<ActivityEditorRoute> {
+                    ActivityEditorScreen(
+                        onClose = { navController.popBackStack() },
+                        onStarted = {
+                            navController.navigate(LiveActivityRoute) {
+                                popUpTo<ActivityEditorRoute> { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                    )
+                }
+                composable<LiveActivityRoute> {
+                    LiveActivityScreen(
+                        onClose = { navController.popBackStack() },
+                        onFinished = { id ->
+                            navController.navigate(ActivityEditorRoute(activityId = id)) {
+                                popUpTo<LiveActivityRoute> { inclusive = true }
+                            }
+                        },
+                    )
+                }
                 composable<AssessmentCompareRoute> { AssessmentCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<PhotoCompareRoute> { PhotoCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<SettingsRoute> {

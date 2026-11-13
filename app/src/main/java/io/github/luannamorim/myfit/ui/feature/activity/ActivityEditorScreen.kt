@@ -1,6 +1,9 @@
 package io.github.luannamorim.myfit.ui.feature.activity
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,12 +22,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,11 +42,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
@@ -52,8 +64,10 @@ import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.DateField
+import io.github.luannamorim.myfit.ui.components.MyFitCard
 import io.github.luannamorim.myfit.ui.components.MyFitTextField
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
+import io.github.luannamorim.myfit.ui.components.PrimaryButton
 import io.github.luannamorim.myfit.ui.components.SecondaryButton
 import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
@@ -62,11 +76,32 @@ import io.github.luannamorim.myfit.ui.theme.Spacing
 import java.time.LocalDate
 
 @Composable
-fun ActivityEditorScreen(onClose: () -> Unit, viewModel: ActivityEditorViewModel = hiltViewModel()) {
+fun ActivityEditorScreen(onClose: () -> Unit, onStarted: () -> Unit = {}, viewModel: ActivityEditorViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     LaunchedEffect(state.done) { if (state.done) onClose() }
+    LaunchedEffect(state.started) { if (state.started) onStarted() }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         if (uri != null) viewModel.setPhoto(uri)
+    }
+    fun granted(permission: String) = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+    // Notifications (the ongoing timer) and, for GPS distance, location while the app is in use.
+    val permissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        viewModel.startLive(locationGranted = granted(Manifest.permission.ACCESS_FINE_LOCATION))
+    }
+    val startNow = {
+        if (viewModel.canStart()) {
+            val needed = buildList {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !granted(Manifest.permission.POST_NOTIFICATIONS)) {
+                    add(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                if (state.gps && state.sport.gpsCapable && !granted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    add(Manifest.permission.ACCESS_FINE_LOCATION)
+                    add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                }
+            }
+            if (needed.isEmpty()) viewModel.startLive(granted(Manifest.permission.ACCESS_FINE_LOCATION)) else permissions.launch(needed.toTypedArray())
+        }
     }
     ActivityEditorContent(
         state = state,
@@ -83,6 +118,8 @@ fun ActivityEditorScreen(onClose: () -> Unit, viewModel: ActivityEditorViewModel
             onNotes = viewModel::setNotes,
             onPickPhoto = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
             onRemovePhoto = viewModel::removePhoto,
+            onGps = viewModel::setGps,
+            onStartNow = startNow,
         ),
     )
 }
@@ -100,6 +137,8 @@ data class ActivityEditorActions(
     val onNotes: (String) -> Unit = {},
     val onPickPhoto: () -> Unit = {},
     val onRemovePhoto: () -> Unit = {},
+    val onGps: (Boolean) -> Unit = {},
+    val onStartNow: () -> Unit = {},
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -137,6 +176,10 @@ fun ActivityEditorContent(state: ActivityEditorUiState, actions: ActivityEditorA
                         supportingText = if (state.nameError) stringResource(R.string.activity_name_error) else null,
                         modifier = Modifier.fillMaxWidth(),
                     )
+                }
+                if (state.isNew) {
+                    StartNowCard(state, actions)
+                    Text(stringResource(R.string.activity_or_log), style = MyFitTheme.type.caption, color = c.textSecondary)
                 }
                 DateField(stringResource(R.string.activity_date), state.date, actions.onDate, Modifier.fillMaxWidth(), maxDate = state.today)
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
@@ -220,3 +263,38 @@ private fun SportChip(sport: Sport, selected: Boolean, onClick: () -> Unit) {
         }
     }
 }
+
+/** "Doing it now?": start a live timer (with GPS distance for outdoor sports) instead of logging after. */
+@Composable
+private fun StartNowCard(state: ActivityEditorUiState, actions: ActivityEditorActions) {
+    val c = MyFitTheme.colors
+    MyFitCard(Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.activity_now_title), style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
+        Text(stringResource(R.string.activity_now_hint), style = MyFitTheme.type.caption, color = c.textSecondary)
+        if (state.sport.gpsCapable) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .toggleable(value = state.gps, role = Role.Switch, onValueChange = actions.onGps)
+                    .padding(top = Spacing.s),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Rounded.LocationOn, contentDescription = null, tint = c.textSecondary, modifier = Modifier.size(20.dp))
+                Text(
+                    stringResource(R.string.activity_now_gps),
+                    style = MyFitTheme.type.body,
+                    color = c.textPrimary,
+                    modifier = Modifier.weight(1f).padding(start = Spacing.s),
+                )
+                Switch(
+                    checked = state.gps,
+                    onCheckedChange = null,
+                    colors = SwitchDefaults.colors(checkedTrackColor = c.accent, checkedThumbColor = c.onAccent),
+                )
+            }
+        }
+        Spacer(Modifier.height(Spacing.m))
+        PrimaryButton(stringResource(R.string.activity_now_start), onClick = actions.onStartNow, icon = Icons.Rounded.PlayArrow, modifier = Modifier.fillMaxWidth())
+    }
+}
+

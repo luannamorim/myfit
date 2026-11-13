@@ -16,6 +16,7 @@ import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.DistanceUnit
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Intensity
+import io.github.luannamorim.myfit.platform.activity.LiveActivityController
 import io.github.luannamorim.myfit.ui.navigation.ActivityEditorRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +45,10 @@ data class ActivityEditorUiState(
     val durationError: Boolean = false,
     val distanceError: Boolean = false,
     val photoError: Boolean = false,
+    /** For "start now": measure the distance with GPS (outdoor sports). */
+    val gps: Boolean = true,
+    /** A live activity was started: the screen moves to its timer. */
+    val started: Boolean = false,
     val done: Boolean = false,
 )
 
@@ -54,6 +59,7 @@ class ActivityEditorViewModel @Inject constructor(
     private val activities: ActivityRepository,
     private val images: ImageStore,
     time: TimeSource,
+    private val live: LiveActivityController,
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<ActivityEditorRoute>()
     private val today = time.today()
@@ -102,6 +108,25 @@ class ActivityEditorViewModel @Inject constructor(
     fun setDistance(text: String) = _state.update { it.copy(distance = text.take(8), distanceError = false) }
     fun setIntensity(value: Intensity?) = _state.update { it.copy(intensity = value) }
     fun setNotes(text: String) = _state.update { it.copy(notes = text) }
+    fun setGps(value: Boolean) = _state.update { it.copy(gps = value) }
+
+    /** Checks what "start now" needs (a name for a free activity). */
+    fun canStart(): Boolean {
+        val missing = _state.value.sport == Sport.OTHER && _state.value.name.isBlank()
+        if (missing) _state.update { it.copy(nameError = true) }
+        return !missing
+    }
+
+    /** Starts timing the chosen sport now; GPS only when asked for and permitted. */
+    fun startLive(locationGranted: Boolean) {
+        val s = _state.value
+        viewModelScope.launch {
+            live.start(s.sport, s.name, gps = s.gps && s.sport.gpsCapable && locationGranted)
+            // A photo picked before starting isn't attached to anything.
+            if (s.imagePath != savedImagePath) images.delete(s.imagePath)
+            _state.update { it.copy(started = true) }
+        }
+    }
 
     fun setPhoto(uri: Uri) {
         viewModelScope.launch {

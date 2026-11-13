@@ -8,6 +8,7 @@ import io.github.luannamorim.myfit.data.repository.EmptyRoutineException
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.session.ActiveSession
+import io.github.luannamorim.myfit.platform.activity.LiveActivityController
 import io.github.luannamorim.myfit.platform.session.SessionController
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,7 @@ sealed interface AppEvent {
 @HiltViewModel
 class AppViewModel @Inject constructor(
     private val controller: SessionController,
+    private val live: LiveActivityController,
     settings: SettingsRepository,
 ) : ViewModel() {
 
@@ -54,5 +56,6 @@ class AppViewModel @Inject constructor(
     /** Re-arms the rest alarm and the foreground service for an in-progress session. */
     fun resync() {
         viewModelScope.launch { controller.resync() }
+        viewModelScope.launch { live.resync() }
     }
 }

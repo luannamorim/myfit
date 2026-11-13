@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
 
     /** Incremented whenever an intent asks to show the running workout / the backup screen. */
     private val openWorkoutRequest = mutableIntStateOf(0)
+    private val openActivityRequest = mutableIntStateOf(0)
     private val openBackupRequest = mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +48,7 @@ class MainActivity : ComponentActivity() {
             MyFitTheme(mode) {
                 MyFitNavHost(
                     openWorkoutRequest = openWorkoutRequest.intValue,
+                    openActivityRequest = openActivityRequest.intValue,
                     openBackupRequest = openBackupRequest.intValue,
                     appViewModel = app,
                 )
@@ -62,12 +64,14 @@ class MainActivity : ComponentActivity() {
     private fun handle(intent: Intent?) {
         when (intent?.action) {
             ACTION_OPEN_WORKOUT -> openWorkoutRequest.intValue++
+            ACTION_OPEN_ACTIVITY -> openActivityRequest.intValue++
             ACTION_OPEN_BACKUP -> openBackupRequest.intValue++
         }
     }
 
     companion object {
         const val ACTION_OPEN_WORKOUT = "io.github.luannamorim.myfit.action.OPEN_WORKOUT"
+        const val ACTION_OPEN_ACTIVITY = "io.github.luannamorim.myfit.action.OPEN_ACTIVITY"
         const val ACTION_OPEN_BACKUP = "io.github.luannamorim.myfit.action.OPEN_BACKUP"
     }
 }

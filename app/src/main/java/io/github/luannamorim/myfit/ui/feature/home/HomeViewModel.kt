@@ -9,12 +9,14 @@ import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
+import io.github.luannamorim.myfit.domain.activity.LiveActivity
 import io.github.luannamorim.myfit.domain.body.BodyComparison
 import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.session.ActiveSession
+import io.github.luannamorim.myfit.platform.activity.LiveActivityController
 import io.github.luannamorim.myfit.platform.session.SessionController
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +46,8 @@ data class HomeUiState(
     val greeting: Greeting = Greeting.MORNING,
     val today: LocalDate = LocalDate.MIN,
     val active: ActiveSession? = null,
+    /** A sport being timed right now. */
+    val live: LiveActivity? = null,
     val todaySessions: List<SessionSummary> = emptyList(),
     val suggested: RoutineOverview? = null,
     val routines: List<RoutineOverview> = emptyList(),
@@ -65,6 +69,7 @@ class HomeViewModel @Inject constructor(
     history: HistoryRepository,
     activities: ActivityRepository,
     controller: SessionController,
+    liveActivity: LiveActivityController,
     body: BodyRepository,
     time: TimeSource,
 ) : ViewModel() {
@@ -75,9 +80,9 @@ class HomeViewModel @Inject constructor(
         routines.observeOverviews(),
         combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
         history.observeLast(),
-        controller.active,
+        combine(controller.active, liveActivity.live) { a, l -> a to l },
         body.observeAssessments(),
-    ) { list, (weekSessions, weekActivities), last, active, assessments ->
+    ) { list, (weekSessions, weekActivities), last, (active, live), assessments ->
         val hour = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone()).hour
         val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
         HomeUiState(
@@ -85,6 +90,7 @@ class HomeViewModel @Inject constructor(
             greeting = Greeting.forHour(hour),
             today = today,
             active = active,
+            live = live,
             todaySessions = weekSessions.filter { it.startDate == today },
             suggested = suggestRoutine(list),
             routines = list,

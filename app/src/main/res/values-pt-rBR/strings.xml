@@ -126,9 +126,7 @@
     <string name="channel_session_ongoing">Treino em andamento</string>
     <string name="channel_session_ongoing_desc">Cronômetro e ações rápidas durante o treino</string>
     <string name="channel_rest_end">Fim do descanso</string>
-    <string name="channel_rest_end_desc">Aviso sonoro quando o descanso termina (segue o modo do celular)</string>
-    <string name="channel_rest_end_alarm">Fim do descanso (toca sempre)</string>
-    <string name="channel_rest_end_alarm_desc">Aviso que toca mesmo com o celular no silencioso ou vibrar</string>
+    <string name="channel_rest_end_desc">Aviso e vibração quando o descanso termina (o app toca o próprio som)</string>
     <string name="notif_workout_title">Treino em andamento</string>
     <string name="notif_paused">Pausado</string>
     <string name="notif_resting">Descanso · a seguir: %1$s</string>
@@ -217,6 +215,25 @@
     <string name="unit_min">min</string>
     <string name="unit_km">km</string>
     <string name="unit_m">m</string>
+    <string name="activity_now_title">Vai fazer agora?</string>
+    <string name="activity_now_hint">Inicie o cronômetro; ao finalizar, o tempo (e a distância) já vêm preenchidos.</string>
+    <string name="activity_now_gps">Medir distância pelo GPS</string>
+    <string name="activity_now_start">Iniciar cronômetro</string>
+    <string name="activity_or_log">Ou registre uma que você já fez:</string>
+    <string name="live_running">Em andamento</string>
+    <string name="live_paused">Pausada</string>
+    <string name="live_pause">Pausar</string>
+    <string name="live_resume">Retomar</string>
+    <string name="live_finish">Finalizar</string>
+    <string name="live_discard">Descartar</string>
+    <string name="live_discard_title">Descartar esta atividade?</string>
+    <string name="live_discard_message">O tempo não será salvo.</string>
+    <string name="live_pace_unit">min/km</string>
+    <string name="live_speed_unit">km/h</string>
+    <string name="live_gps_searching">Procurando sinal de GPS… ao ar livre leva alguns segundos.</string>
+    <string name="live_gps_disabled">A localização está desligada. Ative para medir a distância.</string>
+    <string name="live_gps_off">Sem permissão de localização: só o tempo é medido.</string>
+    <string name="live_bar_title">%1$s em andamento</string>
     <!-- Sessão em andamento -->
     <string name="active_bar_title">Treino em andamento</string>
     <string name="active_bar_resume">Retomar</string>
@@ -414,6 +431,8 @@
     <string name="settings_rest_sound">Som do fim do descanso</string>
     <string name="settings_rest_sound_follow">Segue o modo do celular</string>
     <string name="settings_rest_sound_always">Toca sempre</string>
+    <string name="settings_countdown">Bipe nos 3 segundos finais</string>
+    <string name="settings_countdown_hint">Contagem antes do fim do descanso, também com a tela bloqueada</string>
     <string name="settings_keep_screen">Manter a tela ligada no treino</string>
     <string name="settings_update_loads">Atualizar cargas ao finalizar</string>
     <string name="settings_update_loads_hint">Usa as cargas de hoje como planejadas no próximo treino</string>

@@ -18,6 +18,11 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- Workout reminders: re-arm their alarms after a reboot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Live activities: GPS distance (outdoor sports) while the activity runs, asked at start. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <application
         android:name=".MyFitApp"
@@ -46,6 +51,15 @@
             android:name=".platform.session.WorkoutService"
             android:exported="false"
             android:foregroundServiceType="health" />
+
+        <service
+            android:name=".platform.activity.ActivityTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="health|location" />
+
+        <receiver
+            android:name=".platform.activity.LiveActivityActionReceiver"
+            android:exported="false" />
 
         <receiver
             android:name=".platform.session.RestAlarmReceiver"

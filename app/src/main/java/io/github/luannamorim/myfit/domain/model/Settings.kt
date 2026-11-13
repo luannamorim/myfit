@@ -15,6 +15,8 @@ data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.DARK,
     val defaultRestSeconds: Int = 90,
     val restSound: RestSound = RestSound.ALWAYS,
+    /** Three short beeps in the last 3 seconds of rest (with the app's own end-of-rest sound). */
+    val countdownBeeps: Boolean = true,
     val keepScreenOn: Boolean = true,
     val updateRoutineLoadsOnFinish: Boolean = true,
     val autoBackup: Boolean = true,

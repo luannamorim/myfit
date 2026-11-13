@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.ui.feature.activity
 
 import android.content.Context
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.testing.invoke
 import androidx.test.core.app.ApplicationProvider
@@ -8,16 +9,23 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.core.time.FakeTimeSource
 import io.github.luannamorim.myfit.core.time.today
 import io.github.luannamorim.myfit.data.images.ImageStore
+import io.github.luannamorim.myfit.data.prefs.LiveActivityStore
 import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Intensity
+import io.github.luannamorim.myfit.platform.activity.ActivityServiceStarter
+import io.github.luannamorim.myfit.platform.activity.LiveActivityController
 import io.github.luannamorim.myfit.testutil.MainDispatcherRule
 import io.github.luannamorim.myfit.testutil.awaitUntil
 import io.github.luannamorim.myfit.testutil.inMemoryDb
 import io.github.luannamorim.myfit.ui.navigation.ActivityEditorRoute
+import java.io.File
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -27,6 +35,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
@@ -39,11 +48,39 @@ class ActivityEditorTest {
     private val time = FakeTimeSource()
     private val activities = ActivityRepository(db, time, BackupTrigger { })
     private val images = ImageStore(context, Dispatchers.Unconfined)
+    @get:Rule val tmp = TemporaryFolder()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val live by lazy {
+        val store = LiveActivityStore(PreferenceDataStoreFactory.create(scope = scope) { File(tmp.root, "live.preferences_pb") })
+        LiveActivityController(store, activities, time, object : ActivityServiceStarter {
+            override fun start() = Unit
+            override fun stop() = Unit
+        }, scope)
+    }
 
-    @After fun tearDown() = db.close()
+    @After fun tearDown() {
+        db.close()
+        scope.cancel()
+    }
 
     private fun editor(route: ActivityEditorRoute = ActivityEditorRoute()) =
-        ActivityEditorViewModel(SavedStateHandle(route = route), activities, images, time)
+        ActivityEditorViewModel(SavedStateHandle(route = route), activities, images, time, live)
+
+    @Test
+    fun startNow_startsTimingTheChosenSport_gpsOnlyWhenPermitted() = runBlocking {
+        val vm = editor()
+        vm.state.awaitUntil { !it.loading }
+        vm.setSport(Sport.OTHER)
+        assertFalse(vm.canStart()) // a free activity needs a name first
+        vm.setName("Trilha")
+        assertTrue(vm.canStart())
+        vm.startLive(locationGranted = false)
+        vm.state.awaitUntil { it.started }
+        val running = live.current()!!
+        assertEquals(Sport.OTHER, running.sport)
+        assertEquals("Trilha", running.name)
+        assertFalse(running.gps) // permission denied: time only
+    }
 
     @Test
     fun newActivity_validates_thenSavesSwimmingDistanceInMeters() = runBlocking {

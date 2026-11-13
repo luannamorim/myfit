@@ -10,6 +10,7 @@ import io.github.luannamorim.myfit.data.repository.SessionRepository
 import io.github.luannamorim.myfit.di.ApplicationScope
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,6 +22,7 @@ class RestEndHandler @Inject constructor(
     private val settings: SettingsRepository,
     private val notifications: SessionNotifications,
     private val time: TimeSource,
+    private val sounds: RestSoundPlayer,
 ) {
     suspend fun onRestAlarm() {
         val session = repository.getActive() ?: return
@@ -28,12 +30,33 @@ class RestEndHandler @Inject constructor(
         val remaining = SessionEngine.restRemainingMs(session, now)
         // Ignore stale alarms (rest skipped/extended or paused after scheduling).
         if (session.isPaused || remaining == null || remaining > STALE_TOLERANCE_MS) return
-        notifications.postRestEnd(session, settings.current().restSound)
+        notifications.postRestEnd(session)
         notifications.postOngoing(session, now)
+        // The app's own sound, even when notifications are off.
+        sounds.play(RestCue.GO, settings.current().restSound)
+    }
+
+    /** Fired [RestAlarmScheduler.COUNTDOWN_MS] before the end: a beep at 3, 2 and 1 seconds left. */
+    suspend fun onCountdownAlarm() {
+        val prefs = settings.current()
+        if (!prefs.countdownBeeps) return
+        val first = repository.getActive() ?: return
+        val left = SessionEngine.restRemainingMs(first, time.now()) ?: return
+        if (first.isPaused || left !in COUNTDOWN_WINDOW_MS) return
+        for (second in 3 downTo 1) {
+            // Re-read each time: a skipped, paused or extended rest stops the countdown.
+            val session = repository.getActive() ?: return
+            if (session.isPaused || session.rest != first.rest) return
+            val wait = (SessionEngine.restRemainingMs(session, time.now()) ?: return) - second * 1_000L
+            if (wait > 0) delay(wait)
+            if (wait > -LATE_BEEP_MS) sounds.play(RestCue.TICK, prefs.restSound)
+        }
     }
 
     private companion object {
         const val STALE_TOLERANCE_MS = 1_500L
+        val COUNTDOWN_WINDOW_MS = 1_500L..4_500L
+        const val LATE_BEEP_MS = 400L
     }
 }
 
@@ -43,11 +66,13 @@ class RestAlarmReceiver : BroadcastReceiver() {
     @Inject @ApplicationScope lateinit var scope: CoroutineScope
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != ACTION_REST_END) return
+        val action = intent.action
+        if (action != ACTION_REST_END && action != ACTION_REST_COUNTDOWN) return
+        // goAsync keeps the alarm's wake lock until finish(): the 3-second countdown fits well within it.
         val pending = goAsync()
         scope.launch {
             try {
-                handler.onRestAlarm()
+                if (action == ACTION_REST_END) handler.onRestAlarm() else handler.onCountdownAlarm()
             } finally {
                 pending.finish()
             }
@@ -56,6 +81,7 @@ class RestAlarmReceiver : BroadcastReceiver() {
 
     companion object {
         const val ACTION_REST_END = "io.github.luannamorim.myfit.action.REST_END"
+        const val ACTION_REST_COUNTDOWN = "io.github.luannamorim.myfit.action.REST_COUNTDOWN"
     }
 }
 

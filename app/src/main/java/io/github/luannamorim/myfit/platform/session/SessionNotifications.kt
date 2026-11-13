@@ -6,15 +6,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.luannamorim.myfit.MainActivity
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.time.Mark
-import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.session.ActiveSession
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 import javax.inject.Inject
@@ -34,27 +31,16 @@ class SessionNotifications @Inject constructor(
             description = context.getString(R.string.channel_session_ongoing_desc)
             setShowBadge(false)
         }
+        // Silent channel: the app plays its own countdown and end-of-rest sounds (RestSoundPlayer).
         val restEnd = NotificationChannel(CHANNEL_REST_END, context.getString(R.string.channel_rest_end), NotificationManager.IMPORTANCE_HIGH).apply {
             description = context.getString(R.string.channel_rest_end_desc)
             enableVibration(true)
             vibrationPattern = vibration
-            setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build(),
-            )
+            setSound(null, null)
         }
-        val restEndAlarm = NotificationChannel(CHANNEL_REST_END_ALARM, context.getString(R.string.channel_rest_end_alarm), NotificationManager.IMPORTANCE_HIGH).apply {
-            description = context.getString(R.string.channel_rest_end_alarm_desc)
-            enableVibration(true)
-            vibrationPattern = vibration
-            setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build(),
-            )
-        }
-        system.createNotificationChannels(listOf(ongoing, restEnd, restEndAlarm))
+        // Channels of version 1.4 and earlier played the phone's notification sound.
+        LEGACY_CHANNELS.forEach { system.deleteNotificationChannel(it) }
+        system.createNotificationChannels(listOf(ongoing, restEnd))
     }
 
     /** Ongoing notification: counts down during rest, counts the workout time up otherwise. */
@@ -108,11 +94,10 @@ class SessionNotifications @Inject constructor(
         }
     }
 
-    /** Loud "rest is over" alert (sound + vibration per channel), shown even with the app closed. */
-    fun postRestEnd(session: ActiveSession, sound: RestSound) {
+    /** "Rest is over" heads-up with vibration, shown even with the app closed (the sound is played separately). */
+    fun postRestEnd(session: ActiveSession) {
         if (!manager.areNotificationsEnabled()) return
-        val channel = if (sound == RestSound.ALWAYS) CHANNEL_REST_END_ALARM else CHANNEL_REST_END
-        val notification = NotificationCompat.Builder(context, channel)
+        val notification = NotificationCompat.Builder(context, CHANNEL_REST_END)
             .setSmallIcon(R.drawable.ic_stat_myfit)
             .setContentTitle(context.getString(R.string.notif_rest_end_title))
             .setContentText(context.getString(R.string.notif_rest_end_text, nextLabel(session)))
@@ -160,8 +145,8 @@ class SessionNotifications @Inject constructor(
 
     companion object {
         const val CHANNEL_ONGOING = "session_ongoing"
-        const val CHANNEL_REST_END = "rest_end"
-        const val CHANNEL_REST_END_ALARM = "rest_end_alarm"
+        const val CHANNEL_REST_END = "rest_end_v2"
+        private val LEGACY_CHANNELS = listOf("rest_end", "rest_end_alarm")
         const val ID_ONGOING = 1001
         const val ID_REST_END = 1002
         private const val REQ_OPEN = 10

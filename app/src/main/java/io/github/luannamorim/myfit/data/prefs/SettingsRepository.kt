@@ -27,6 +27,7 @@ class SettingsRepository @Inject constructor(
         val theme = stringPreferencesKey("theme_mode")
         val defaultRest = intPreferencesKey("default_rest_seconds")
         val restSound = stringPreferencesKey("rest_sound")
+        val countdownBeeps = booleanPreferencesKey("countdown_beeps")
         val keepScreenOn = booleanPreferencesKey("keep_screen_on")
         val updateLoads = booleanPreferencesKey("update_routine_loads_on_finish")
         val autoBackup = booleanPreferencesKey("auto_backup")
@@ -48,6 +49,7 @@ class SettingsRepository @Inject constructor(
             prefs[Keys.theme] = next.themeMode.name
             prefs[Keys.defaultRest] = next.defaultRestSeconds
             prefs[Keys.restSound] = next.restSound.name
+            prefs[Keys.countdownBeeps] = next.countdownBeeps
             prefs[Keys.keepScreenOn] = next.keepScreenOn
             prefs[Keys.updateLoads] = next.updateRoutineLoadsOnFinish
             prefs[Keys.autoBackup] = next.autoBackup
@@ -68,6 +70,7 @@ class SettingsRepository @Inject constructor(
             themeMode = this[Keys.theme]?.let { enumValueOrNull<ThemeMode>(it) } ?: defaults.themeMode,
             defaultRestSeconds = this[Keys.defaultRest] ?: defaults.defaultRestSeconds,
             restSound = this[Keys.restSound]?.let { enumValueOrNull<RestSound>(it) } ?: defaults.restSound,
+            countdownBeeps = this[Keys.countdownBeeps] ?: defaults.countdownBeeps,
             keepScreenOn = this[Keys.keepScreenOn] ?: defaults.keepScreenOn,
             updateRoutineLoadsOnFinish = this[Keys.updateLoads] ?: defaults.updateRoutineLoadsOnFinish,
             autoBackup = this[Keys.autoBackup] ?: defaults.autoBackup,

@@ -43,6 +43,13 @@ object DataModule {
     fun provideBackupStateDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
         PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("backup_state") }
 
+    /** The sport being timed right now (transient: not part of backups). */
+    @Provides
+    @Singleton
+    @Named("live_activity")
+    fun provideLiveActivityDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("live_activity") }
+
     @Provides
     fun provideBackupTrigger(scheduler: BackupScheduler): BackupTrigger = scheduler
 

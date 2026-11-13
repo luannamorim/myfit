@@ -18,6 +18,7 @@ import io.github.luannamorim.myfit.testutil.insertExercise
 import io.github.luannamorim.myfit.testutil.insertRoutine
 import io.github.luannamorim.myfit.testutil.testSettings
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -39,10 +40,22 @@ class SessionPlatformTest {
     private val time = FakeTimeSource()
     private val repo = SessionRepository(db, BackupTrigger { })
     private val notifications = SessionNotifications(context)
-    private val alarms = AndroidRestAlarmScheduler(context, notifications)
+    private val alarms = AndroidRestAlarmScheduler(context, notifications, time)
     private val starter = FakeServiceStarter()
     private val controller = SessionController(repo, time, alarms, starter, notifications)
     private val alarmShadow get() = shadowOf(context.getSystemService(AlarmManager::class.java))
+
+    /** The scheduled alarm whose broadcast has [action] (rest end or countdown). */
+    private fun alarm(action: String = RestAlarmReceiver.ACTION_REST_END) =
+        alarmShadow.scheduledAlarms.singleOrNull { shadowOf(it.operation).savedIntent.action == action }
+    private val sounds = FakeSounds()
+
+    private class FakeSounds : RestSoundPlayer {
+        val played = mutableListOf<Pair<RestCue, RestSound>>()
+        override suspend fun play(cue: RestCue, mode: RestSound) {
+            played += cue to mode
+        }
+    }
     private val notificationShadow get() = shadowOf(context.getSystemService(NotificationManager::class.java))
 
     @Before
@@ -70,9 +83,9 @@ class SessionPlatformTest {
     fun completeSet_schedulesAlarmAtRestEnd() = runBlocking {
         startWorkout()
         controller.completeSet(12, 40.0)
-        val alarm = alarmShadow.peekNextScheduledAlarm()
-        assertNotNull(alarm)
-        assertEquals(time.now().wallMs + 90_000, alarm!!.triggerAtMs)
+        assertEquals(time.now().wallMs + 90_000, alarm()!!.triggerAtMs)
+        // Countdown beeps start 3 s before the end.
+        assertEquals(time.now().wallMs + 87_000, alarm(RestAlarmReceiver.ACTION_REST_COUNTDOWN)!!.triggerAtMs)
     }
 
     @Test
@@ -92,7 +105,7 @@ class SessionPlatformTest {
         assertNull(alarmShadow.peekNextScheduledAlarm())
         time.advance(600_000)
         controller.resume()
-        assertEquals(time.now().wallMs + 60_000, alarmShadow.peekNextScheduledAlarm()!!.triggerAtMs)
+        assertEquals(time.now().wallMs + 60_000, alarm()!!.triggerAtMs)
     }
 
     @Test
@@ -100,41 +113,56 @@ class SessionPlatformTest {
         startWorkout()
         controller.completeSet(12, 40.0)
         controller.adjustRest(15)
-        assertEquals(time.now().wallMs + 105_000, alarmShadow.peekNextScheduledAlarm()!!.triggerAtMs)
+        assertEquals(time.now().wallMs + 105_000, alarm()!!.triggerAtMs)
+        assertEquals(time.now().wallMs + 102_000, alarm(RestAlarmReceiver.ACTION_REST_COUNTDOWN)!!.triggerAtMs)
     }
 
     @Test
     fun restEndHandler_postsRestEndNotification_onlyWhenRestIsOver() = runBlocking {
         startWorkout()
         controller.completeSet(12, 40.0)
-        val handler = RestEndHandler(repo, testSettings(), notifications, time)
+        val handler = RestEndHandler(repo, testSettings(), notifications, time, sounds)
 
         handler.onRestAlarm() // too early: stale alarm, nothing posted
-        assertTrue(notificationShadow.allNotifications.none { it.channelId in REST_END_CHANNELS })
+        assertTrue(notificationShadow.allNotifications.none { it.channelId == SessionNotifications.CHANNEL_REST_END })
+        assertTrue(sounds.played.isEmpty())
 
         time.advance(90_000)
         handler.onRestAlarm()
-        // Default settings ring on the alarm channel, so the alert is heard with the phone on vibrate.
-        val restEnd = notificationShadow.allNotifications.single { it.channelId in REST_END_CHANNELS }
-        assertEquals(SessionNotifications.CHANNEL_REST_END_ALARM, restEnd.channelId)
+        val restEnd = notificationShadow.allNotifications.single { it.channelId == SessionNotifications.CHANNEL_REST_END }
         assertEquals("Descanso concluído", shadowOf(restEnd).contentTitle)
         assertEquals("A seguir: Remada curvada · série 2 de 3", shadowOf(restEnd).contentText)
+        // The app's own "go" sound on the alarm stream (default: rings even on vibrate).
+        assertEquals(listOf(RestCue.GO to RestSound.ALWAYS), sounds.played)
     }
 
     @Test
-    fun restEnd_alwaysSound_usesAlarmChannel() = runBlocking {
-        startWorkout()
-        controller.completeSet(12, 40.0)
-        notifications.postRestEnd(repo.getActive()!!, RestSound.ALWAYS)
-        assertTrue(notificationShadow.allNotifications.any { it.channelId == SessionNotifications.CHANNEL_REST_END_ALARM })
+    fun restEndChannel_isSilent_andLegacyChannelsAreRemoved() {
+        val system = context.getSystemService(NotificationManager::class.java)
+        system.createNotificationChannel(android.app.NotificationChannel("rest_end_alarm", "old", NotificationManager.IMPORTANCE_HIGH))
+        notifications.ensureChannels()
+        assertNull(system.getNotificationChannel(SessionNotifications.CHANNEL_REST_END).sound)
+        assertNull(system.getNotificationChannel("rest_end_alarm"))
     }
 
     @Test
-    fun restEnd_followRinger_usesNotificationChannel() = runBlocking {
+    fun countdown_beepsThreeTimes_onlyNearTheEnd_andCanBeTurnedOff() = runTest {
         startWorkout()
         controller.completeSet(12, 40.0)
-        notifications.postRestEnd(repo.getActive()!!, RestSound.FOLLOW_RINGER)
-        assertTrue(notificationShadow.allNotifications.any { it.channelId == SessionNotifications.CHANNEL_REST_END })
+        val settings = testSettings()
+        val handler = RestEndHandler(repo, settings, notifications, time, sounds)
+
+        handler.onCountdownAlarm() // 90 s left: stale
+        assertTrue(sounds.played.isEmpty())
+
+        time.advance(87_000)
+        handler.onCountdownAlarm() // 3 s left: tick, tick, tick
+        assertEquals(List(3) { RestCue.TICK to RestSound.ALWAYS }, sounds.played)
+
+        sounds.played.clear()
+        settings.update { it.copy(countdownBeeps = false) }
+        handler.onCountdownAlarm()
+        assertTrue(sounds.played.isEmpty())
     }
 
     @Test
@@ -193,4 +221,3 @@ class SessionPlatformTest {
     }
 }
 
-private val REST_END_CHANNELS = setOf(SessionNotifications.CHANNEL_REST_END, SessionNotifications.CHANNEL_REST_END_ALARM)

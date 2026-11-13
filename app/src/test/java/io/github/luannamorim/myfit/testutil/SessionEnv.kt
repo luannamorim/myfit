@@ -24,7 +24,7 @@ class SessionEnv {
     val repo = SessionRepository(db, BackupTrigger { })
     val notifications = SessionNotifications(context)
     val starter = FakeServiceStarter()
-    val controller = SessionController(repo, time, AndroidRestAlarmScheduler(context, notifications), starter, notifications)
+    val controller = SessionController(repo, time, AndroidRestAlarmScheduler(context, notifications, time), starter, notifications)
     val settings = testSettings()
 
     /** Creates a routine with [setsPerExercise] sets per exercise (12 reps, 40 kg, 90 s) and starts it. */

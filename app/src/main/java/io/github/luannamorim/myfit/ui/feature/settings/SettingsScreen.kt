@@ -130,6 +130,9 @@ fun SettingsContent(
                 MyFitChip(stringResource(R.string.settings_rest_sound_always), selected = s.restSound == RestSound.ALWAYS, onClick = { onUpdate { it.copy(restSound = RestSound.ALWAYS) } })
             }
             Spacer(Modifier.height(Spacing.m))
+            SwitchRow(stringResource(R.string.settings_countdown), stringResource(R.string.settings_countdown_hint), s.countdownBeeps) { v ->
+                onUpdate { it.copy(countdownBeeps = v) }
+            }
             SwitchRow(stringResource(R.string.settings_keep_screen), null, s.keepScreenOn) { v -> onUpdate { it.copy(keepScreenOn = v) } }
             SwitchRow(stringResource(R.string.settings_update_loads), stringResource(R.string.settings_update_loads_hint), s.updateRoutineLoadsOnFinish) { v ->
                 onUpdate { it.copy(updateRoutineLoadsOnFinish = v) }

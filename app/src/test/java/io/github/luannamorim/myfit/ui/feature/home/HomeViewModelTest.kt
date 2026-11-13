@@ -1,7 +1,9 @@
 package io.github.luannamorim.myfit.ui.feature.home
 
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.prefs.LiveActivityStore
 import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.BodyRepository
@@ -11,9 +13,16 @@ import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.session.SessionEngine
+import io.github.luannamorim.myfit.platform.activity.ActivityServiceStarter
+import io.github.luannamorim.myfit.platform.activity.LiveActivityController
 import io.github.luannamorim.myfit.testutil.MainDispatcherRule
 import io.github.luannamorim.myfit.testutil.SessionEnv
 import io.github.luannamorim.myfit.testutil.awaitUntil
+import java.io.File
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -21,16 +30,23 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
 class HomeViewModelTest {
+    @get:Rule val tmp = TemporaryFolder()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     @get:Rule val main = MainDispatcherRule()
     private val env = SessionEnv()
 
-    @After fun tearDown() = env.close()
+    @After fun tearDown() {
+        env.close()
+        scope.cancel()
+    }
 
     @Test
     fun greeting_byHour() {
@@ -64,6 +80,15 @@ class HomeViewModelTest {
             HistoryRepository(env.db, env.time, BackupTrigger { }),
             activities,
             env.controller,
+            LiveActivityController(
+                LiveActivityStore(PreferenceDataStoreFactory.create(scope = scope) { File(tmp.root, "live.preferences_pb") }),
+                activities, env.time,
+                object : ActivityServiceStarter {
+                    override fun start() = Unit
+                    override fun stop() = Unit
+                },
+                scope,
+            ),
             BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { }),
             env.time,
         )

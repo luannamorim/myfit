@@ -27,6 +27,14 @@ enum class Sport(val distance: DistanceUnit? = null) {
 
     /** "Free": the user names it. */
     OTHER(DistanceUnit.KM),
+    ;
+
+    /** Outdoor sports whose distance the phone's GPS can measure while the activity runs. */
+    val gpsCapable: Boolean get() = this in GPS_SPORTS
+
+    private companion object {
+        val GPS_SPORTS by lazy { setOf(CYCLING, RUNNING, WALKING, OTHER) }
+    }
 }
 
 /** A sport logged after the fact: when, how long, optionally how far and how hard. */

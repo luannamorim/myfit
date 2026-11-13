@@ -48,6 +48,7 @@ import io.github.luannamorim.myfit.ui.components.SecondaryButton
 import io.github.luannamorim.myfit.ui.components.SectionHeader
 import io.github.luannamorim.myfit.ui.components.TabScreen
 import io.github.luannamorim.myfit.ui.components.TextAction
+import io.github.luannamorim.myfit.ui.feature.activity.LiveActivityBar
 import io.github.luannamorim.myfit.ui.feature.evolution.BodySnapshotTiles
 import io.github.luannamorim.myfit.ui.feature.history.SessionRow
 import io.github.luannamorim.myfit.ui.navigation.ActiveSessionBar
@@ -65,6 +66,7 @@ data class HomeActions(
     val onOpenHistory: () -> Unit = {},
     val onOpenBody: () -> Unit = {},
     val onLogActivity: () -> Unit = {},
+    val onOpenLiveActivity: () -> Unit = {},
 )
 
 @Composable
@@ -93,6 +95,7 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
     ) {
         if (state.loading) return@TabScreen
         val active = state.active
+        state.live?.let { LiveActivityBar(it, onOpen = actions.onOpenLiveActivity) }
         when {
             active != null -> ActiveSessionBar(active, onResume = actions.onResume)
             state.todaySessions.isNotEmpty() -> TodayDone(state)

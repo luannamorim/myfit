@@ -25,3 +25,4 @@ import kotlinx.serialization.Serializable
 
 /** [activityId] 0 creates a new one; [dateEpochDay] pre-fills its date (History's selected day). */
 @Serializable data class ActivityEditorRoute(val activityId: Long = 0, val dateEpochDay: Long? = null)
+@Serializable data object LiveActivityRoute
