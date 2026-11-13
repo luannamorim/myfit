@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -35,6 +36,9 @@ interface ExerciseDao {
 
     @Query("UPDATE exercise SET favorite = :favorite WHERE id = :id")
     suspend fun setFavorite(id: Long, favorite: Boolean)
+
+    @Query("UPDATE exercise SET measure = :measure WHERE id = :id")
+    suspend fun setMeasure(id: Long, measure: ExerciseMeasure)
 
     @Query("DELETE FROM exercise WHERE id = :id")
     suspend fun delete(id: Long)

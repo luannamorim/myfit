@@ -1,12 +1,15 @@
 package io.github.luannamorim.myfit.ui.feature.library
 
 import androidx.compose.ui.test.assertHasNoClickAction
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,8 +24,8 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 /**
- * A library exercise shows its name, group (body map), movement type, drawing, video link and star, each
- * with only its own value; a custom one keeps every field.
+ * A library exercise shows its name, group (body map), movement type, drawing, video link and star, group
+ * and movement with only their own value; how sets count stays a choice. A custom one keeps every field.
  * Section headers are shown in capitals.
  */
 @RunWith(AndroidJUnit4::class)
@@ -41,11 +44,15 @@ class ExerciseEditorContentTest {
     )
 
     @Test
-    fun libraryExercise_hasNoEditsNotesOrDelete_butCanBeStarred() {
+    fun libraryExercise_onlyMeasureAndStarChange_noNotesOrDelete() {
         var state by mutableStateOf(library)
         compose.setContent {
             MyFitTheme(ThemeMode.LIGHT) {
-                ExerciseEditorContent(state, onToggleFavorite = { state = state.copy(favorite = !state.favorite) })
+                ExerciseEditorContent(
+                    state,
+                    onToggleFavorite = { state = state.copy(favorite = !state.favorite) },
+                    onMeasure = { state = state.copy(measure = it) },
+                )
             }
         }
         compose.onNodeWithText("Exercício").assertExists()
@@ -54,9 +61,15 @@ class ExerciseEditorContentTest {
         // Group and movement type show only this exercise's value, not every option.
         listOf("GRUPO MUSCULAR", "Peito", "TIPO DE MOVIMENTO", "Empurrar", "IMAGEM DEMONSTRATIVA")
             .forEach { compose.onNodeWithText(it).assertExists() }
-        listOf("Costas", "Puxar", "CADA SÉRIE CONTA", "Escolher da galeria", "Observações", "Excluir", "Salvar")
+        listOf("Costas", "Puxar", "Escolher da galeria", "Observações", "Excluir", "Salvar")
             .forEach { compose.onNodeWithText(it).assertDoesNotExist() }
         compose.onNodeWithText("Peito").assertHasNoClickAction()
+
+        // How sets count is still a choice.
+        compose.onNodeWithText("CADA SÉRIE CONTA").assertExists()
+        compose.onNodeWithText("Tempo").performScrollTo().performClick()
+        compose.onNodeWithText("Tempo").assertIsSelected()
+        compose.onNodeWithText("Repetições").assertIsNotSelected()
 
         val star = compose.onNodeWithContentDescription("Favorito")
         star.assertIsOff()

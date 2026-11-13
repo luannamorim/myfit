@@ -67,7 +67,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 6. MUST allow creating, editing, duplicating and deleting workouts (name, optional description, ordered list of exercises), with no limit on how many.
 7. MUST allow adding, removing and reordering exercises in a workout.
 8. Each exercise in a workout MUST have: sets, reps per set (or time per set for exercises measured in time, such as planks and cardio), rest between sets (s), load (kg, optional) and notes.
-9. MUST offer a library of predefined exercises (name, muscle group, push/pull/legs/other movement type, a line drawing of the start and end position) with search and filtering by group. Predefined exercises are read-only (they can't be edited or deleted); any exercise can be starred as a favorite and favorites are listed first.
+9. MUST offer a library of predefined exercises (name, muscle group, push/pull/legs/other movement type, a line drawing of the start and end position) with search and filtering by group. Predefined exercises are read-only (they can't be edited or deleted), except for whether each set counts repetitions or time; any exercise can be starred as a favorite and favorites are listed first.
 10. MUST allow creating custom exercises with an optional demo image picked from the gallery and whether each set counts repetitions or time; a photo picked by the user takes precedence over the library drawing.
 10a. SHOULD show a body map highlighting the exercise's muscle group (live while editing it, and as the picture of exercises without a photo or drawing) and offer a video search for the exercise, opened in another app.
 

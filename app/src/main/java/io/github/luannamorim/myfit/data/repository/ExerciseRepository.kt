@@ -6,6 +6,7 @@ import io.github.luannamorim.myfit.data.db.dao.ExerciseDao
 import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.model.Exercise
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -81,6 +82,12 @@ class ExerciseRepository @Inject constructor(
 
     suspend fun setFavorite(id: Long, favorite: Boolean) {
         dao.setFavorite(id, favorite)
+        backup.onDataChanged()
+    }
+
+    /** The one thing a library exercise lets the user change: whether its sets count reps or time. */
+    suspend fun setMeasure(id: Long, measure: ExerciseMeasure) {
+        dao.setMeasure(id, measure)
         backup.onDataChanged()
     }
 

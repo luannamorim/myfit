@@ -37,7 +37,7 @@ data class ExerciseEditorUiState(
     val seedKey: String? = null,
     /**
      * A predefined exercise: shown read-only (official name in the app's language, its drawing), can't be
-     * deleted; only the favorite star changes.
+     * deleted; only the favorite star and how sets count (reps or time) change, both saved right away.
      */
     val isLibrary: Boolean = false,
     val favorite: Boolean = false,
@@ -92,7 +92,14 @@ class ExerciseEditorViewModel @Inject constructor(
     fun setName(value: String) = _state.update { it.copy(name = value, nameError = false) }
     fun setGroup(value: MuscleGroup) = _state.update { it.copy(muscleGroup = value) }
     fun setMovement(value: MovementType) = _state.update { it.copy(movementType = value) }
-    fun setMeasure(value: ExerciseMeasure) = _state.update { it.copy(measure = value) }
+    /** A library exercise has no Save: its measure is saved right away. A custom one waits for Save. */
+    fun setMeasure(value: ExerciseMeasure) {
+        val s = _state.value
+        if (s.measure == value) return
+        _state.update { it.copy(measure = value) }
+        val id = exerciseId
+        if (s.isLibrary && id != null) viewModelScope.launch { repository.setMeasure(id, value) }
+    }
     /** Saved right away (no Save needed); only for an exercise that already exists. */
     fun toggleFavorite() {
         val id = exerciseId ?: return

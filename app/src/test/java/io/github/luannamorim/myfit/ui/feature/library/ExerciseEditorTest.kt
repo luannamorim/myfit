@@ -10,6 +10,7 @@ import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
 import io.github.luannamorim.myfit.data.images.ImageStore
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.ExerciseRepository
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.testutil.LocaleRule
@@ -102,6 +103,26 @@ class ExerciseEditorTest {
         val saved = db.exerciseDao().get(custom)!!
         assertTrue(saved.favorite)
         assertEquals("Meu exercício novo", saved.name)
+    }
+
+    @Test
+    fun libraryMeasure_isSavedRightAway_customWaitsForSave() = runBlocking {
+        val library = insert("Barbell bench press", "barbell-bench-press")
+        val vm = editor(library)
+        vm.state.awaitUntil { !it.isLoading }
+        vm.setMeasure(ExerciseMeasure.TIME)
+        db.exerciseDao().observeActive().map { list -> list.single { it.id == library }.measure }.awaitUntil { it == ExerciseMeasure.TIME }
+        assertEquals(ExerciseMeasure.TIME, editor(library).state.awaitUntil { !it.isLoading }.measure)
+        assertEquals("Barbell bench press", db.exerciseDao().get(library)!!.name)
+
+        val custom = insert("Meu exercício", null)
+        val customVm = editor(custom)
+        customVm.state.awaitUntil { !it.isLoading }
+        customVm.setMeasure(ExerciseMeasure.TIME)
+        assertEquals(ExerciseMeasure.REPS, db.exerciseDao().get(custom)!!.measure)
+        assertTrue(customVm.save())
+        customVm.state.awaitUntil { it.done }
+        assertEquals(ExerciseMeasure.TIME, db.exerciseDao().get(custom)!!.measure)
     }
 
     @Test

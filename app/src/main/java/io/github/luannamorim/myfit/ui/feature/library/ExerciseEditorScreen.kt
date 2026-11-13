@@ -95,8 +95,9 @@ fun ExerciseEditorScreen(onClose: () -> Unit, viewModel: ExerciseEditorViewModel
 }
 
 /**
- * A library exercise is read-only: name, its muscle group (with the body map), movement type, drawing,
- * video link and the favorite star. A custom one is fully editable and can be deleted.
+ * A library exercise is read-only (name, its muscle group with the body map, movement type, drawing, video
+ * link) except for how sets count and the favorite star, both saved right away. A custom one is fully
+ * editable and can be deleted.
  */
 @Composable
 fun ExerciseEditorContent(
@@ -145,7 +146,7 @@ fun ExerciseEditorContent(
                 verticalArrangement = Arrangement.spacedBy(Spacing.l),
             ) {
                 if (state.isLibrary) {
-                    LibraryDetail(state)
+                    LibraryDetail(state, onMeasure)
                 } else {
                     CustomFields(state, onName, onGroup, onMovement, onMeasure, onPickImage, onRemoveImage)
                 }
@@ -194,17 +195,30 @@ private fun FavoriteToggle(favorite: Boolean, onToggle: () -> Unit) {
     }
 }
 
-/** Same sections as the custom editor, each showing only this exercise's value instead of every option. */
+/**
+ * Same sections as the custom editor; group and movement type show only this exercise's value instead of
+ * every option. How sets count stays a choice.
+ */
 @Composable
-private fun ColumnScope.LibraryDetail(state: ExerciseEditorUiState) {
+private fun ColumnScope.LibraryDetail(state: ExerciseEditorUiState, onMeasure: (ExerciseMeasure) -> Unit) {
     Text(state.name, style = MyFitTheme.type.title, color = MyFitTheme.colors.textPrimary)
     SectionHeader(stringResource(R.string.exercise_group))
     ValueChip(stringResource(state.muscleGroup.labelRes))
     MuscleMap(state.muscleGroup, Modifier.fillMaxWidth().height(180.dp).padding(vertical = Spacing.xs))
     SectionHeader(stringResource(R.string.exercise_movement))
     ValueChip(stringResource(state.movementType.labelRes))
+    MeasureChoice(state.measure, onMeasure)
     SectionHeader(stringResource(R.string.exercise_image))
     ExerciseImage(state)
+}
+
+@Composable
+private fun MeasureChoice(measure: ExerciseMeasure, onMeasure: (ExerciseMeasure) -> Unit) {
+    SectionHeader(stringResource(R.string.exercise_measure))
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        MyFitChip(stringResource(R.string.exercise_measure_reps), selected = measure == ExerciseMeasure.REPS, onClick = { onMeasure(ExerciseMeasure.REPS) })
+        MyFitChip(stringResource(R.string.exercise_measure_time), selected = measure == ExerciseMeasure.TIME, onClick = { onMeasure(ExerciseMeasure.TIME) })
+    }
 }
 
 /** Looks like a selected [MyFitChip] but isn't clickable: a value, not a choice. */
@@ -248,11 +262,7 @@ private fun ColumnScope.CustomFields(
             MyFitChip(stringResource(type.labelRes), selected = state.movementType == type, onClick = { onMovement(type) })
         }
     }
-    SectionHeader(stringResource(R.string.exercise_measure))
-    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-        MyFitChip(stringResource(R.string.exercise_measure_reps), selected = state.measure == ExerciseMeasure.REPS, onClick = { onMeasure(ExerciseMeasure.REPS) })
-        MyFitChip(stringResource(R.string.exercise_measure_time), selected = state.measure == ExerciseMeasure.TIME, onClick = { onMeasure(ExerciseMeasure.TIME) })
-    }
+    MeasureChoice(state.measure, onMeasure)
     SectionHeader(stringResource(R.string.exercise_image))
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
         ExerciseImage(state)
