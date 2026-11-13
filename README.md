@@ -11,8 +11,8 @@ A personal, offline Android app to plan workouts, run them with a reliable rest 
 - **Workouts:** create, edit, duplicate, reorder (drag) and delete exercise sequences, with sets, reps, rest, load and notes per exercise.
 - **Library:** 152 predefined exercises (in the device language), each with a line drawing of the start and end position. Accent-insensitive search, muscle-group filters and custom exercises with a photo from the gallery. A body map highlights the worked muscle group (also the picture of custom exercises without a photo), and *Watch how to do it* opens a video search in YouTube or the browser.
 - **Workout mode:** an immersive screen with sets, automatic rest, ±15 s, pause/resume, skip set or exercise, adjustable load and reps, and a summary before saving where you rate the intensity (low, medium or high) and can attach a photo (stored reduced).
-- **Reliable timer:** times come from persisted marks (wall clock + monotonic clock + boot count), never from UI counters. An exact alarm ends the rest with sound and vibration even with the screen locked, and by default it rings even with the phone on vibrate. The ongoing notification has quick actions, and an interrupted session resumes where it stopped.
-- **Other sports:** log swimming, cycling, indoor cycling, running, treadmill, walking, soccer, volleyball, basketball, beach tennis, muay thai, jiu-jitsu, boxing, yoga, pilates, stretching or a free activity you name, each with its figure, plus date, duration, distance, intensity, notes and a photo. They show in History and in the week on Home.
+- **Reliable timer:** times come from persisted marks (wall clock + monotonic clock + boot count), never from UI counters. An exact alarm ends the rest even with the screen locked: three beeps in the last 3 seconds, then MyFit's own sound and vibration (by default at alarm volume, so it rings even with the phone on vibrate). The ongoing notification has quick actions, and an interrupted session resumes where it stopped.
+- **Other sports:** log swimming, cycling, indoor cycling, running, treadmill, walking, soccer, volleyball, basketball, beach tennis, muay thai, jiu-jitsu, boxing, yoga, pilates, stretching or a free activity you name, each with its figure, plus date, duration, distance, intensity, notes and a photo. Log them afterwards or time them live with *Start timer*: the clock survives a locked screen or a killed app, and outdoor sports (running, walking, cycling, free) can measure distance with the phone's GPS, offline and without storing the route. They show in History and in the week on Home.
 - **History:** monthly calendar with training days, per-day workouts and activities, per-set details, intensity, and weekly/monthly summaries (workouts, activities, total time, frequency, exercises and sports).
 - **Progress:** assessments with weight, body fat and 14 circumferences, comparison between two dates (signed differences), per-measure charts (or *All* at once) and dated photos, including older ones, with side-by-side comparison.
 - **Backup:** an encrypted file (AES-256-GCM streaming, key derived from your recovery password) written to a folder you pick and keep in sync with Google Drive (or any cloud) through a sync app. Runs daily and after changes, keeps the last 7, and supports export and restore with integrity checks.
@@ -40,7 +40,7 @@ A personal, offline Android app to plan workouts, run them with a reliable rest 
 </p>
 <p>
   <img src="docs/screenshots/activity_swimming_dark.png" width="200" alt="Logging a sport">
-  <img src="docs/screenshots/activity_indoor_cycling_dark.png" width="200" alt="Indoor cycling with its drawing">
+  <img src="docs/screenshots/live_running_dark.png" width="200" alt="Live activity with GPS distance">
   <img src="docs/screenshots/session_detail_dark.png" width="200" alt="Session detail with intensity and photo">
   <img src="docs/screenshots/reminders_dark.png" width="200" alt="Workout reminders">
 </p>

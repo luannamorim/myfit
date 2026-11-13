@@ -30,6 +30,7 @@ Dependency rule: `domain` knows nothing about Android, except for the Tink libra
 | `platform/session` | `SessionController`, `WorkoutService`, alarm, receivers, notifications |
 | `platform/backup` | `BackupScheduler`, workers, failure notification, image cleanup |
 | `platform/reminder` | reminder alarms, notification, re-arming on start/boot/time change |
+| `platform/activity` | live activity: `LiveActivityController`, `ActivityTrackingService` (chronometer, GPS) |
 
 ## Data
 
@@ -54,6 +55,7 @@ body_assessment   body_photo   activity
 - `Activity` is logged after the fact (no live timer): it has no sets, so it lives in its own table and joins workouts only in History and the Home week (`HistoryCalculator.activeDays`, `summarize(..., activities)`).
 - Figures: every `Sport` has a Material icon; indoor cycling and treadmill reuse the Workout Guide drawings (`wg-cycling`, `wg-running`).
 - Distance is stored in km; swimming is typed and shown in meters.
+- **Live timing:** `LiveActivity` (marks, pauses, GPS distance) is kept in memory and in its own DataStore (`live_activity`, not backed up), written on every action and at most every 10 s for GPS updates. `ActivityTrackingService` (foreground, types `health` and `location`) shows the chronometer and pause/resume and, for outdoor sports with location permission, asks `LocationManager` for GPS fixes every 2 s. `GpsDistance` drops fixes worse than 30 m, steps under 4 m and jumps faster than the sport allows; pausing clears the anchor so a paused stretch never counts. Finishing saves an `Activity` (minutes rounded up, km) and opens it for intensity, photo and notes. Only the distance is kept, never the route.
 
 ## Reminders
 
@@ -85,7 +87,8 @@ body_assessment   body_photo   activity
 
 **Background**:
 - **Ongoing notification**: a foreground `WorkoutService` of type `health` (the API 34+ requirement is met by `HIGH_SAMPLING_RATE_SENSORS`, a normal permission) shows the system chronometer counting down during rest and counting up for the rest of the workout, with the "Complete set" and "Skip rest" actions. If the user swipes the notification away, it comes back.
-- **Rest end alarm**: uses `AlarmManager.setAlarmClock`, the only exact alarm immune to Doze and One UI optimizations. `RestEndHandler` ignores stale alarms and posts the notification with sound. There are two channels: by default the alert uses alarm audio and always rings, even with the phone on vibrate or silent; the other follows the phone's ringer mode (*Settings → Rest end sound*).
+- **Rest end alarm**: uses `AlarmManager.setAlarmClock`, the only exact alarm immune to Doze and One UI optimizations, plus a second one 3 s earlier for the countdown. `RestEndHandler` ignores stale alarms; the countdown alarm beeps at 3, 2 and 1 s left (re-reading the session each second), and the end alarm posts a silent heads-up notification with vibration and plays MyFit's own "go" sound.
+- **Sounds** (`RestSoundPlayer`, SoundPool): `res/raw/rest_tick.wav` and `rest_go.wav`, synthesized by `tools/rest_sounds.py` (no third-party audio). They play on the alarm stream by default (heard on vibrate or silent) or on the notification stream with *Follow phone mode*. The notification channel is `rest_end_v2`; the 1.4 channels, which played the phone's sound, are deleted.
 - **Recovery**: if the process dies, the session remains in the database. When the app returns to the foreground, it calls `resync()`, which re-arms the alarm and the service, and shows the "Resume" bar.
 
 ## Backup

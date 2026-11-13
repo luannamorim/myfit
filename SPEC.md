@@ -77,7 +77,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 12. MUST follow the flow: complete set (1 tap) → automatic rest → visual and audible alert when it ends → next set → next exercise → finish.
 13. MUST allow pausing/resuming, skipping a set, skipping an exercise, adjusting the set's load and reps, changing the rest (including ±15 s during the rest) and ending early.
 14. MUST keep timers correct with the app in the background, the screen locked, the process killed by the system or after a device restart. Time MUST be derived from persisted timestamps, never from UI counters.
-15. MUST signal the end of rest with a notification with sound and vibration even with the app closed (by default the sound plays even with the phone on vibrate), and show an ongoing workout notification with the timer and quick actions.
+15. MUST signal the end of rest with the app's own sound and vibration even with the app closed (by default at alarm volume, so it plays even with the phone on vibrate), SHOULD beep in the last 3 seconds of rest (can be turned off), and show an ongoing workout notification with the timer and quick actions.
 16. MUST persist every session step immediately and offer exact resumption when the app is reopened.
 17. When finishing, MUST automatically save: date, start and end time, duration (excluding pauses), workout, exercises, completed/skipped sets, and the reps and loads performed.
 18. SHOULD offer, when finishing, to update the workout's loads with the ones used in the session.
@@ -86,7 +86,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 ### History and calendar
 
 19. MUST show a monthly calendar with workout days highlighted.
-19a. MUST allow logging other sports after the fact (swimming, cycling, indoor cycling, running, treadmill, walking, soccer, volleyball, basketball, beach tennis, muay thai, jiu-jitsu, boxing, yoga, pilates, stretching, or a free activity named by the user), each with a figure, date, duration, optional distance, intensity, notes and photo; they appear in the calendar, the day list, the summaries and the Home week.
+19a. MUST allow logging other sports after the fact (swimming, cycling, indoor cycling, running, treadmill, walking, soccer, volleyball, basketball, beach tennis, muay thai, jiu-jitsu, boxing, yoga, pilates, stretching, or a free activity named by the user), each with a figure, date, duration, optional distance, intensity, notes and photo; they appear in the calendar, the day list, the summaries and the Home week. SHOULD also allow timing an activity live (pause/resume, surviving a locked screen or a killed app) and, for outdoor sports and with permission, measuring distance with the phone's GPS without internet and without storing the route.
 20. When a day is tapped, MUST list its sessions with duration and allow opening the detail (exercises, sets, reps, loads).
 21. MUST show weekly and monthly summaries: number of workouts and activities, total time, average weekly frequency, exercises performed and sports practiced.
 22. History MUST stay intact even if the source workout or exercise is later edited or deleted.

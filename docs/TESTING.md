@@ -45,6 +45,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Complete a set and **lock the screen** during the rest: at the end, the phone rings and vibrates, and the notification shows "Rest complete".
 - [ ] On the lock screen, the notification shows the timer and the "Skip rest" button works.
 - [ ] With the phone on **vibrate** and *Settings → Rest end sound → Always ring* (the default): the alert rings anyway, at the alarm volume.
+- [ ] The last 3 seconds of rest beep (also with the screen locked), then MyFit's own two-note sound plays, not the phone's notification sound. *Settings → Beep in the last 3 seconds* turns the beeps off.
 - [ ] With *Follow phone mode* and the phone on vibrate: the alert only vibrates.
 - [ ] Alarm icon in the status bar during the rest: expected (exact alarm).
 
@@ -59,6 +60,9 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] The session row shows the intensity; the session detail shows the photo, and intensity and photo can be changed or removed there.
 - [ ] "+ Activity" on a past day: log swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name. They appear on that day, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it.
 - [ ] Home: "Log activity" opens the same screen; the week counts the activity days and their time.
+- [ ] **Live:** pick Running → *Start timer* → allow notifications and location. Walk outdoors for a few minutes with the screen locked: the notification counts up and shows the km. Pause/resume from the notification. *Finish*: the activity is saved with the time and distance and opens for intensity and photo.
+- [ ] Start one, close the app from recents and reopen: Home shows "… in progress" with the right time.
+- [ ] Indoor cycling or swimming: no GPS option, only the time.
 
 ### 6. Progress
 - [ ] Log two assessments on different dates (edit the date at the top). Weight with a decimal comma.
