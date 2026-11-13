@@ -97,7 +97,7 @@ class EvolutionViewModel @Inject constructor(
         s.copy(
             loading = false,
             assessments = items,
-            snapshot = BodyComparison.snapshot(items),
+            snapshot = BodyMetrics.withStatus(BodyComparison.snapshot(items), sex),
             charts = buildCharts(items, s.selectedMeasures, s.period, today),
             photos = photos,
             selectedPhotos = s.selectedPhotos.filter { id -> photos.any { it.id == id } },

@@ -83,4 +83,43 @@ class BodyMetricsTest {
         assertEquals(20.0, derived.values[Measure.BODY_FAT]!!, 0.0)
         assertEquals(setOf(Measure.BMI), derived.estimated)
     }
+
+    private fun statuses(measure: Measure, sex: Sex?, vararg values: Double) = values.map { BodyMetrics.status(measure, it, sex) }
+
+    @Test
+    fun status_bmi_boundaries() {
+        val (P, C, G) = Triple(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD)
+        assertEquals(listOf(P, C, C, G, G, C, C, P), statuses(Measure.BMI, null, 15.9, 16.0, 18.4, 18.5, 24.9, 25.0, 29.9, 30.0))
+        assertEquals(G, BodyMetrics.status(Measure.BMI, 22.0, Sex.FEMALE)) // sex doesn't matter for BMI
+    }
+
+    @Test
+    fun status_bodyFat_men_boundaries() {
+        val (P, C, G) = Triple(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD)
+        assertEquals(listOf(P, C, C, G, G, C, C, P), statuses(Measure.BODY_FAT, Sex.MALE, 1.9, 2.0, 5.9, 6.0, 17.9, 18.0, 24.9, 25.0))
+    }
+
+    @Test
+    fun status_bodyFat_women_boundaries() {
+        val (P, C, G) = Triple(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD)
+        assertEquals(listOf(P, C, C, G, G, C, C, P), statuses(Measure.BODY_FAT, Sex.FEMALE, 9.9, 10.0, 13.9, 14.0, 24.9, 25.0, 31.9, 32.0))
+    }
+
+    @Test
+    fun status_bodyFatWithoutSex_andOtherMeasures_areNull() {
+        assertNull(BodyMetrics.status(Measure.BODY_FAT, 16.0, null))
+        assertNull(BodyMetrics.status(Measure.WEIGHT, 73.0, Sex.MALE))
+        assertNull(BodyMetrics.status(Measure.WAIST, 80.0, Sex.MALE))
+    }
+
+    @Test
+    fun withStatus_fillsHighlights() {
+        val a = BodyAssessment(1, apr, mapOf(Measure.WEIGHT to 73.25, Measure.HEIGHT to 178.0, Measure.NECK to 38.0, Measure.ABDOMEN to 85.0))
+        val snap = BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(listOf(a), Sex.MALE)), Sex.MALE)!!
+        assertEquals(
+            mapOf(Measure.WEIGHT to null, Measure.BODY_FAT to BodyStatus.GOOD, Measure.BMI to BodyStatus.GOOD),
+            snap.highlights.associate { it.measure to it.status },
+        )
+        assertNull(BodyMetrics.withStatus(null, Sex.MALE))
+    }
 }

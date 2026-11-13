@@ -22,10 +22,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.CompareArrows
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.automirrored.rounded.CompareArrows
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -55,6 +56,7 @@ import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.formatSigned
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodySnapshot
+import io.github.luannamorim.myfit.domain.body.BodyStatus
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.MeasureDiff
 import io.github.luannamorim.myfit.domain.model.PhotoPose
@@ -67,6 +69,7 @@ import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.DateField
 import io.github.luannamorim.myfit.ui.components.EmptyState
 import io.github.luannamorim.myfit.ui.components.FilterChipRow
+import io.github.luannamorim.myfit.ui.components.LabelWithDot
 import io.github.luannamorim.myfit.ui.components.MyFitCard
 import io.github.luannamorim.myfit.ui.components.MyFitChip
 import io.github.luannamorim.myfit.ui.components.PrimaryButton
@@ -214,6 +217,8 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
                     row.forEach { diff ->
                         StatTile(
                             label = measureLabel(diff.measure, diff.estimated),
+                            indicatorColor = diff.status?.color(),
+                            indicatorDescription = diff.status?.let { stringResource(it.labelRes) },
                             value = DecimalInput.format(diff.to),
                             unit = unitLabel(diff.measure).ifEmpty { null },
                             delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
@@ -227,6 +232,14 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
     }
 }
 
+/** Health-range colors: the one place body measurements get green, amber or red (see BRAND.md). */
+@Composable
+private fun BodyStatus.color(): Color = when (this) {
+    BodyStatus.GOOD -> MyFitTheme.colors.accent
+    BodyStatus.CAUTION -> MyFitTheme.colors.warning
+    BodyStatus.POOR -> MyFitTheme.colors.danger
+}
+
 /** Full-width highlight: value and change vs the previous assessment, plus a trend line of recent ones. */
 @Composable
 private fun TrendTile(diff: MeasureDiff, trend: List<Pair<LocalDate, Double>>, modifier: Modifier = Modifier) {
@@ -235,7 +248,7 @@ private fun TrendTile(diff: MeasureDiff, trend: List<Pair<LocalDate, Double>>, m
     MyFitCard(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(measureLabel(diff.measure, diff.estimated), style = MyFitTheme.type.caption, color = c.textSecondary)
+                LabelWithDot(measureLabel(diff.measure, diff.estimated), diff.status?.color(), diff.status?.let { stringResource(it.labelRes) })
                 Spacer(Modifier.height(Spacing.s))
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(DecimalInput.format(diff.to), style = MyFitTheme.type.numericLarge.copy(fontSize = 44.sp, lineHeight = 48.sp), color = c.textPrimary)

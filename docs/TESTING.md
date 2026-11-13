@@ -76,6 +76,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Home and Measurements show weight on its own card, then body fat and BMI side by side (no waist), with their change.
 - [ ] Height: type it once ("178", or "1,78" in meters, saved as 178 cm). BMI shows on that assessment and on older weigh-ins without a height.
 - [ ] Body-fat estimate: *Settings → Profile → Sex*. An assessment with neck and abdomen (women: neck, waist and hips) and no typed body fat shows "Body fat (est.)"; the editor shows the BMI and estimate line while typing. A typed body fat replaces the estimate. With Sex "Not set", only BMI appears.
+- [ ] Status dot: next to BMI and body fat on Home and Progress, green in the healthy range, amber for caution, red for poor (BMI 18,5–24,9 is green). Without Sex, body fat has no dot. In Portuguese on a small phone, the Settings chips (Sex, Theme, Rest sound) move whole to the next line instead of breaking their text.
 
 ### 6a. Reminders
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.

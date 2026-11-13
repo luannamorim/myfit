@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.ui.common
 
 import androidx.annotation.StringRes
 import io.github.luannamorim.myfit.R
+import io.github.luannamorim.myfit.domain.body.BodyStatus
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.MeasureUnit
 import io.github.luannamorim.myfit.domain.model.MovementType
@@ -75,4 +76,12 @@ val PhotoPose.labelRes: Int
         PhotoPose.SIDE -> R.string.pose_side
         PhotoPose.BACK -> R.string.pose_back
         PhotoPose.OTHER -> R.string.pose_other
+    }
+
+@get:StringRes
+val BodyStatus.labelRes: Int
+    get() = when (this) {
+        BodyStatus.GOOD -> R.string.body_status_good
+        BodyStatus.CAUTION -> R.string.body_status_caution
+        BodyStatus.POOR -> R.string.body_status_poor
     }

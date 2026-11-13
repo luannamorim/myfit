@@ -45,8 +45,21 @@ data class BodyAssessment(
     val measuredCount: Int get() = values.keys.count { it !in estimated }
 }
 
-/** [estimated]: either side is an estimate (BMI, always calculated, isn't flagged). */
-data class MeasureDiff(val measure: Measure, val from: Double?, val to: Double?, val diff: Double?, val estimated: Boolean = false)
+/** Health range of a value (BMI and body fat only), shown as a green, amber or red dot. */
+enum class BodyStatus { GOOD, CAUTION, POOR }
+
+/**
+ * [estimated]: either side is an estimate (BMI, always calculated, isn't flagged).
+ * [status]: health range of [to], filled by [BodyMetrics.withStatus] for the dashboard.
+ */
+data class MeasureDiff(
+    val measure: Measure,
+    val from: Double?,
+    val to: Double?,
+    val diff: Double?,
+    val estimated: Boolean = false,
+    val status: BodyStatus? = null,
+)
 
 /** Latest assessment with its change versus the previous one, for the dashboard. */
 data class BodySnapshot(

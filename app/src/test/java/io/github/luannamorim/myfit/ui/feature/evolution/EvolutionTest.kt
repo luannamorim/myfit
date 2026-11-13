@@ -14,6 +14,7 @@ import io.github.luannamorim.myfit.data.images.ImageStore
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
+import io.github.luannamorim.myfit.domain.body.BodyStatus
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.domain.model.PhotoPose
@@ -182,6 +183,7 @@ class EvolutionTest {
         val vm = EvolutionViewModel(body, images, settings, time)
         val unset = vm.state.awaitUntil { !it.loading && it.snapshot != null }
         assertEquals(listOf(Measure.WEIGHT, Measure.BMI), unset.snapshot!!.highlights.map { it.measure })
+        assertEquals(BodyStatus.GOOD, unset.snapshot!!.highlights.single { it.measure == Measure.BMI }.status) // BMI 23.1
         assertTrue(unset.charts.none { it.measure == Measure.BODY_FAT })
 
         settings.update { it.copy(sex = Sex.MALE) }
@@ -190,6 +192,7 @@ class EvolutionTest {
         val fat = male.snapshot!!.highlights.single { it.measure == Measure.BODY_FAT }
         assertEquals(16.4, fat.to!!, 0.0)
         assertTrue(fat.estimated)
+        assertEquals(BodyStatus.GOOD, fat.status) // 16.4 % for a man
         assertTrue(male.charts.single { it.measure == Measure.BODY_FAT }.hasEstimates)
         assertFalse(male.charts.single { it.measure == Measure.BMI }.hasEstimates)
         // The list counts only what was typed: weight, height, neck, abdomen.

@@ -305,6 +305,9 @@
     <string name="measure_body_fat">Gordura corporal</string>
     <string name="measure_bmi">IMC</string>
     <string name="measure_estimated">%1$s (estimada)</string>
+    <string name="body_status_good">Bom</string>
+    <string name="body_status_caution">Atenção</string>
+    <string name="body_status_poor">Ruim</string>
     <string name="measure_neck">Pescoço</string>
     <string name="measure_shoulders">Ombros</string>
     <string name="measure_chest">Peitoral</string>

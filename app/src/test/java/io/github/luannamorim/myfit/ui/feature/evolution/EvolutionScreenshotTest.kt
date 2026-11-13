@@ -48,7 +48,7 @@ class EvolutionScreenshotTest {
         loading = false,
         section = section,
         assessments = assessments,
-        snapshot = BodyComparison.snapshot(assessments),
+        snapshot = BodyMetrics.withStatus(BodyComparison.snapshot(assessments), Sex.MALE),
         charts = buildCharts(assessments, DEFAULT_CHART_MEASURES, ChartPeriod.ALL, today),
         today = today,
     )

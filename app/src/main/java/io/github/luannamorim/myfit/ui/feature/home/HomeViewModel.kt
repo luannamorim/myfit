@@ -86,8 +86,10 @@ class HomeViewModel @Inject constructor(
         combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
         history.observeLast(),
         combine(controller.active, liveActivity.live) { a, l -> a to l },
-        combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex -> BodyMetrics.derive(raw, sex) },
-    ) { list, (weekSessions, weekActivities), last, (active, live), assessments ->
+        combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
+            BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(raw, sex)), sex)
+        },
+    ) { list, (weekSessions, weekActivities), last, (active, live), bodySnapshot ->
         val hour = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone()).hour
         val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
         HomeUiState(
@@ -100,7 +102,7 @@ class HomeViewModel @Inject constructor(
             suggested = suggestRoutine(list),
             routines = list,
             last = last,
-            body = BodyComparison.snapshot(assessments),
+            body = bodySnapshot,
             week = WeekStrip(
                 days = (0L..6L).map { week.start.plusDays(it) }.map { DayMark(it, it in trainedDays, it == today) },
                 sessions = weekSessions.size,

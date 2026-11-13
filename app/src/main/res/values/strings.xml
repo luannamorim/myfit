@@ -277,6 +277,9 @@
     <string name="measure_body_fat">Body fat</string>
     <string name="measure_bmi">BMI</string>
     <string name="measure_estimated">%1$s (est.)</string>
+    <string name="body_status_good">Good</string>
+    <string name="body_status_caution">Caution</string>
+    <string name="body_status_poor">Poor</string>
     <string name="measure_neck">Neck</string>
     <string name="measure_shoulders">Shoulders</string>
     <string name="measure_chest">Chest</string>
