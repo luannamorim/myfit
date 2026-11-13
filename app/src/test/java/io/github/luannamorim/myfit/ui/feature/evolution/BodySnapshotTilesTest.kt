@@ -1,8 +1,10 @@
 package io.github.luannamorim.myfit.ui.feature.evolution
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
@@ -31,14 +33,15 @@ class BodySnapshotTilesTest {
         compose.setContent { MyFitTheme(ThemeMode.DARK) { BodySnapshotTiles(snapshot) } }
     }
 
-    /** Cards whose label ends with this status word (the dot is inline content read as that word). */
-    private fun count(status: String) = compose.onAllNodes(hasText(" $status", substring = true), useUnmergedTree = true)
+    /** Cards whose label is read with this status word ("BMI Good"); the dot itself is drawn in the corner. */
+    private fun count(status: String) = compose.onAllNodes(hasContentDescription(" $status", substring = true), useUnmergedTree = true)
 
     @Test
     fun bmiAndBodyFat_showTheirDot_weightDoesNot() {
         show(mapOf(Measure.WEIGHT to 73.25, Measure.HEIGHT to 178.0, Measure.NECK to 38.0, Measure.ABDOMEN to 85.0), Sex.MALE)
         count("Good").assertCountEquals(2) // BMI 23.1, body fat 16.4 %
-        compose.onNodeWithText("BMI Good", useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription("BMI Good", useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription("Body fat Good", useUnmergedTree = true).assertExists() // no "(est.)"
         count("Caution").assertCountEquals(0)
         count("Poor").assertCountEquals(0)
     }

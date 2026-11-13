@@ -75,6 +75,7 @@ class ExerciseVisualScreenshotTest {
                 muscleGroup = MuscleGroup.CHEST,
                 movementType = MovementType.PUSH,
                 seedKey = "barbell-bench-press",
+                nameLocked = true,
             ),
             {}, {}, {}, {}, {}, {}, {}, {}, {},
         )

@@ -129,8 +129,13 @@ fun ExerciseEditorContent(
                     onValueChange = onName,
                     label = stringResource(R.string.exercise_name),
                     isError = state.nameError,
-                    supportingText = if (state.nameError) stringResource(R.string.exercise_name_required) else null,
+                    supportingText = when {
+                        state.nameError -> stringResource(R.string.exercise_name_required)
+                        state.nameLocked -> stringResource(R.string.exercise_name_locked)
+                        else -> null
+                    },
                     capitalization = KeyboardCapitalization.Sentences,
+                    enabled = !state.nameLocked,
                 )
                 SectionHeader(stringResource(R.string.exercise_group))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {

@@ -109,6 +109,7 @@
     <string name="exercise_editor_edit">Editar exercício</string>
     <string name="exercise_name">Nome</string>
     <string name="exercise_name_required">Dê um nome ao exercício</string>
+    <string name="exercise_name_locked">Exercícios da biblioteca mantêm o nome.</string>
     <string name="exercise_group">Grupo muscular</string>
     <string name="exercise_movement">Tipo de movimento</string>
     <string name="exercise_measure">Cada série conta</string>
@@ -208,6 +209,7 @@
     <string name="sport_yoga" tools:ignore="Typos">Yoga</string>
     <string name="sport_pilates">Pilates</string>
     <string name="sport_stretching">Alongamento</string>
+    <string name="sport_gym">Academia</string>
     <string name="sport_other">Livre</string>
     <string name="activity_log">Iniciar atividade</string>
     <string name="activity_title_new">Nova atividade</string>
@@ -304,7 +306,6 @@
     <string name="measure_height">Altura</string>
     <string name="measure_body_fat">Gordura corporal</string>
     <string name="measure_bmi">IMC</string>
-    <string name="measure_estimated">%1$s (estimada)</string>
     <string name="body_status_good">Bom</string>
     <string name="body_status_caution">Atenção</string>
     <string name="body_status_poor">Ruim</string>
@@ -357,7 +358,7 @@
     <string name="assessment_delete_message">As medidas desta data serão removidas do histórico e dos gráficos.</string>
     <string name="assessment_last_hint">última: %1$s</string>
     <string name="assessment_bmi">IMC %1$s</string>
-    <string name="assessment_fat_estimated">gordura estimada %1$s</string>
+    <string name="assessment_body_fat">gordura %1$s</string>
     <string name="compare_title">Comparar avaliações</string>
     <string name="compare_from">De</string>
     <string name="compare_to">Para</string>
@@ -373,7 +374,6 @@
     <string name="body_trend_since">%1$s desde %2$s</string>
     <string name="charts_pick_measure">Escolha uma ou mais medidas acima.</string>
     <string name="charts_no_data">Sem dados dessas medidas no período.</string>
-    <string name="charts_includes_estimates">Inclui valores estimados.</string>
     <string name="photos_date">Data</string>
     <string name="photos_add">Adicionar foto</string>
     <string name="photos_empty">Fotos por data ajudam a ver a evolução que a fita métrica não mostra.</string>

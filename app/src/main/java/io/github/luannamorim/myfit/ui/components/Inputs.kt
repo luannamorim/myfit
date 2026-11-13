@@ -30,11 +30,13 @@ fun MyFitTextField(
     imeAction: ImeAction = ImeAction.Default,
     textStyle: TextStyle = MyFitTheme.type.body,
     suffix: String? = null,
+    enabled: Boolean = true,
 ) {
     val c = MyFitTheme.colors
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         modifier = modifier.fillMaxWidth(),
         label = { Text(label) },
         placeholder = placeholder?.let { { Text(it, color = c.textTertiary) } },
@@ -57,6 +59,12 @@ fun MyFitTextField(
             errorBorderColor = c.danger,
             errorLabelColor = c.danger,
             errorSupportingTextColor = c.danger,
+            // Locked fields stay readable: same text and surface, only the border and label calm down.
+            disabledTextColor = c.textPrimary,
+            disabledContainerColor = c.surface,
+            disabledBorderColor = c.outline,
+            disabledLabelColor = c.textSecondary,
+            disabledSupportingTextColor = c.textTertiary,
         ),
     )
 }

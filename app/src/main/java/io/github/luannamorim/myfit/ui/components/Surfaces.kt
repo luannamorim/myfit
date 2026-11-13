@@ -8,25 +8,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -78,9 +76,8 @@ fun SectionHeader(
 }
 
 /**
- * A card caption with an optional status dot drawn as part of the text, right after the last word, so it
- * stays next to the label when the label wraps. Screen readers read [dotDescription] with the label
- * ("BMI Good").
+ * A card caption with an optional status dot in the card's top-right corner, level with the first line.
+ * Screen readers read [dotDescription] with the label ("BMI Good").
  */
 @Composable
 fun LabelWithDot(label: String, dotColor: Color?, dotDescription: String?) {
@@ -90,18 +87,20 @@ fun LabelWithDot(label: String, dotColor: Color?, dotDescription: String?) {
         Text(label, style = style, color = color)
         return
     }
-    val text = buildAnnotatedString {
-        append(label)
-        append(' ')
-        appendInlineContent(STATUS_DOT, dotDescription ?: "")
+    Row {
+        Text(
+            label,
+            style = style,
+            color = color,
+            modifier = Modifier.weight(1f).then(
+                if (dotDescription != null) Modifier.semantics { contentDescription = "$label $dotDescription" } else Modifier,
+            ),
+        )
+        Spacer(Modifier.width(Spacing.s))
+        // Centered on the caption's first line (16 sp line, 8 dp dot).
+        Box(Modifier.padding(top = 4.dp).size(8.dp).background(dotColor, CircleShape).testTag("statusDot"))
     }
-    val dot = InlineTextContent(Placeholder(8.sp, 8.sp, PlaceholderVerticalAlign.TextCenter)) {
-        Box(Modifier.fillMaxSize().background(dotColor, CircleShape))
-    }
-    Text(text, style = style, color = color, inlineContent = mapOf(STATUS_DOT to dot))
 }
-
-private const val STATUS_DOT = "statusDot"
 
 @Composable
 fun StatTile(

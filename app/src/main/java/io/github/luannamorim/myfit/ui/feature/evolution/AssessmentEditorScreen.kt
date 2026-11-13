@@ -35,11 +35,11 @@ import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
+import io.github.luannamorim.myfit.ui.components.MyFitDatePickerDialog
 import io.github.luannamorim.myfit.ui.components.MyFitTextField
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.SecondaryButton
 import io.github.luannamorim.myfit.ui.components.SectionHeader
-import io.github.luannamorim.myfit.ui.components.MyFitDatePickerDialog
 import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
@@ -64,7 +64,7 @@ fun AssessmentEditorScreen(onClose: () -> Unit, viewModel: AssessmentEditorViewM
 private fun CalculatedLine(state: AssessmentEditorUiState) {
     val parts = listOfNotNull(
         state.bmi?.let { stringResource(R.string.assessment_bmi, DecimalInput.format(it)) },
-        state.estimatedBodyFat?.let { stringResource(R.string.assessment_fat_estimated, formatMeasure(Measure.BODY_FAT, it)) },
+        state.estimatedBodyFat?.let { stringResource(R.string.assessment_body_fat, formatMeasure(Measure.BODY_FAT, it)) },
     )
     if (parts.isEmpty()) return
     Text(parts.joinToString(" · "), style = MyFitTheme.type.body, color = MyFitTheme.colors.textSecondary)

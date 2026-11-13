@@ -197,8 +197,6 @@ class EvolutionTest {
         assertEquals(16.4, fat.to!!, 0.0)
         assertTrue(fat.estimated)
         assertEquals(BodyStatus.GOOD, fat.status) // 16.4 % for a man
-        assertTrue(male.charts.single { it.measure == Measure.BODY_FAT }.hasEstimates)
-        assertFalse(male.charts.single { it.measure == Measure.BMI }.hasEstimates)
         // The list counts only what was typed: weight, height, neck, abdomen.
         assertEquals(4, male.assessments.first { it.date == apr }.measuredCount)
     }

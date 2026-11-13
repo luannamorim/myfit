@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.data.images.ImageKind
 import io.github.luannamorim.myfit.data.images.ImageStore
 import io.github.luannamorim.myfit.data.repository.ExerciseDeleteResult
@@ -35,6 +36,8 @@ data class ExerciseEditorUiState(
     val imagePath: String? = null,
     /** Library entry of a predefined exercise (its bundled drawing); null for user-created ones. */
     val seedKey: String? = null,
+    /** Library exercises keep their official name (shown in the app's language): the field is read-only. */
+    val nameLocked: Boolean = false,
     val nameError: Boolean = false,
     val imageError: Boolean = false,
     val isImporting: Boolean = false,
@@ -73,6 +76,7 @@ class ExerciseEditorViewModel @Inject constructor(
                     notes = existing.notes.orEmpty(),
                     imagePath = existing.imagePath,
                     seedKey = existing.seedKey,
+                    nameLocked = ExerciseSeed.nameFor(existing.seedKey) != null,
                 )
             }
         }

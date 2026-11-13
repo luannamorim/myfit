@@ -4,10 +4,9 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
-import io.github.luannamorim.myfit.core.format.SearchText
 import androidx.sqlite.db.SupportSQLiteDatabase
+import io.github.luannamorim.myfit.core.format.SearchText
 import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
-import java.util.Locale
 import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MovementType.LEGS
 import io.github.luannamorim.myfit.domain.model.MovementType.OTHER
@@ -27,6 +26,7 @@ import io.github.luannamorim.myfit.domain.model.MuscleGroup.HAMSTRINGS
 import io.github.luannamorim.myfit.domain.model.MuscleGroup.QUADRICEPS
 import io.github.luannamorim.myfit.domain.model.MuscleGroup.SHOULDERS
 import io.github.luannamorim.myfit.domain.model.MuscleGroup.TRICEPS
+import java.util.Locale
 
 data class SeedExercise(
     val namePt: String,
@@ -230,6 +230,15 @@ object ExerciseSeed {
 
     /** The library entry behind an exercise row, or null for exercises the user created. */
     fun forKey(key: String?): SeedExercise? = key?.let(byKey::get)
+
+    /** Official name of a library exercise in [locale]; null when [seedKey] isn't a library entry. */
+    fun nameFor(seedKey: String?, locale: Locale = Locale.getDefault()): String? = forKey(seedKey)?.name(locale)
+
+    /**
+     * Name to show: library exercises always use their official name in the app's language (they can't be
+     * renamed); anything else keeps the [stored] name the user gave it.
+     */
+    fun displayName(seedKey: String?, stored: String, locale: Locale = Locale.getDefault()): String = nameFor(seedKey, locale) ?: stored
 
     /**
      * Inserts [candidates] whose name (in either language, ignoring case and accents) is not in the

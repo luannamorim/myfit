@@ -32,8 +32,7 @@ import javax.inject.Inject
 enum class EvolutionSection { MEASURES, CHARTS, PHOTOS }
 enum class ChartPeriod { ALL, YEAR, SIX_MONTHS }
 
-/** [hasEstimates]: some points are estimates (body fat the user didn't type). */
-data class ChartUi(val measure: Measure, val points: List<Pair<LocalDate, Double>>, val change: Double?, val hasEstimates: Boolean = false)
+data class ChartUi(val measure: Measure, val points: List<Pair<LocalDate, Double>>, val change: Double?)
 
 data class EvolutionUiState(
     val loading: Boolean = true,
@@ -72,8 +71,7 @@ fun buildCharts(items: List<BodyAssessment>, measures: Set<Measure>, period: Cha
     return CHART_MEASURES.filter { it in measures }.mapNotNull { m ->
         val points = BodyComparison.series(inPeriod, m)
         if (points.isEmpty()) return@mapNotNull null
-        val hasEstimates = !m.derived && inPeriod.any { m in it.estimated }
-        ChartUi(m, points, if (points.size >= 2) points.last().second - points.first().second else null, hasEstimates)
+        ChartUi(m, points, if (points.size >= 2) points.last().second - points.first().second else null)
     }
 }
 

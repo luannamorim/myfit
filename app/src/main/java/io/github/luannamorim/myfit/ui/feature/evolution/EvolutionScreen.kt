@@ -167,10 +167,9 @@ fun unitLabel(measure: Measure): String = stringResource(measure.unit.labelRes)
 fun formatMeasure(measure: Measure, value: Double?): String =
     if (value == null) "—" else "${DecimalInput.format(value)} ${unitLabel(measure)}".trim()
 
-/** Measure name, marked when the value is the app's estimate. */
+/** Measure name as shown on cards and in Compare (estimates are not labeled: the user asked to drop the word). */
 @Composable
-fun measureLabel(measure: Measure, estimated: Boolean = false): String =
-    stringResource(measure.labelRes).let { if (estimated) stringResource(R.string.measure_estimated, it) else it }
+fun measureLabel(measure: Measure): String = stringResource(measure.labelRes)
 
 @Composable
 private fun MeasuresSection(state: EvolutionUiState, actions: EvolutionActions) {
@@ -220,7 +219,7 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
                 Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
                     row.forEach { diff ->
                         StatTile(
-                            label = measureLabel(diff.measure, diff.estimated),
+                            label = measureLabel(diff.measure),
                             indicatorColor = diff.status?.color(),
                             indicatorDescription = diff.status?.let { stringResource(it.labelRes) },
                             value = diff.to?.let { DecimalInput.format(it) } ?: EMPTY_VALUE,
@@ -256,7 +255,7 @@ private fun TrendTile(diff: MeasureDiff, trend: List<Pair<LocalDate, Double>>, m
     MyFitCard(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                LabelWithDot(measureLabel(diff.measure, diff.estimated), diff.status?.color(), diff.status?.let { stringResource(it.labelRes) })
+                LabelWithDot(measureLabel(diff.measure), diff.status?.color(), diff.status?.let { stringResource(it.labelRes) })
                 Spacer(Modifier.height(Spacing.s))
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(diff.to?.let { DecimalInput.format(it) } ?: EMPTY_VALUE, style = MyFitTheme.type.numericLarge.copy(fontSize = 44.sp, lineHeight = 48.sp), color = c.textPrimary)
@@ -350,10 +349,6 @@ private fun ChartsSection(
                 MeasureChart(chart.points)
             } else {
                 Text(stringResource(R.string.charts_not_enough), style = MyFitTheme.type.caption, color = c.textTertiary)
-            }
-            if (chart.hasEstimates) {
-                Spacer(Modifier.height(Spacing.s))
-                Text(stringResource(R.string.charts_includes_estimates), style = MyFitTheme.type.caption, color = c.textTertiary)
             }
         }
     }

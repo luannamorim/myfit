@@ -91,6 +91,7 @@
     <string name="exercise_editor_edit">Edit exercise</string>
     <string name="exercise_name">Name</string>
     <string name="exercise_name_required">Give the exercise a name</string>
+    <string name="exercise_name_locked">Library exercises keep their name.</string>
     <string name="exercise_group">Muscle group</string>
     <string name="exercise_movement">Movement type</string>
     <string name="exercise_measure">Each set counts</string>
@@ -186,6 +187,7 @@
     <string name="sport_yoga">Yoga</string>
     <string name="sport_pilates">Pilates</string>
     <string name="sport_stretching">Stretching</string>
+    <string name="sport_gym">Gym</string>
     <string name="sport_other">Other</string>
     <string name="activity_log">Start activity</string>
     <string name="activity_title_new">New activity</string>
@@ -276,7 +278,6 @@
     <string name="measure_height">Height</string>
     <string name="measure_body_fat">Body fat</string>
     <string name="measure_bmi">BMI</string>
-    <string name="measure_estimated">%1$s (est.)</string>
     <string name="body_status_good">Good</string>
     <string name="body_status_caution">Caution</string>
     <string name="body_status_poor">Poor</string>
@@ -328,7 +329,7 @@
     <string name="assessment_delete_message">This date\'s measurements will be removed from your history and charts.</string>
     <string name="assessment_last_hint">last: %1$s</string>
     <string name="assessment_bmi">BMI %1$s</string>
-    <string name="assessment_fat_estimated">estimated body fat %1$s</string>
+    <string name="assessment_body_fat">body fat %1$s</string>
     <string name="compare_title">Compare assessments</string>
     <string name="compare_from">From</string>
     <string name="compare_to">To</string>
@@ -344,7 +345,6 @@
     <string name="body_trend_since">%1$s since %2$s</string>
     <string name="charts_pick_measure">Pick one or more measurements above.</string>
     <string name="charts_no_data">No data for these measurements in this period.</string>
-    <string name="charts_includes_estimates">Includes estimated values.</string>
     <string name="photos_date">Date</string>
     <string name="photos_add">Add photo</string>
     <string name="photos_empty">Dated photos show progress a tape measure misses.</string>

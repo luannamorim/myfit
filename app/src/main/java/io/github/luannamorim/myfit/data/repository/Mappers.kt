@@ -4,6 +4,7 @@ import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineItemWithExercise
 import io.github.luannamorim.myfit.data.db.entity.RoutineOverviewRow
 import io.github.luannamorim.myfit.data.db.entity.RoutineWithItems
+import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.model.Exercise
 import io.github.luannamorim.myfit.domain.model.Routine
 import io.github.luannamorim.myfit.domain.model.RoutineItem
@@ -11,12 +12,14 @@ import io.github.luannamorim.myfit.domain.model.RoutineOverview
 
 fun ExerciseEntity.toDomain() = Exercise(
     id = id,
-    name = name,
+    name = ExerciseSeed.displayName(seedKey, name),
     muscleGroup = muscleGroup,
     movementType = movementType,
     imagePath = imagePath,
     notes = notes,
-    isCustom = isCustom,
+    // A user exercise linked to a library entry by name (migration 2→3, restore) is shown as a library one:
+    // official name, locked, no "Custom" badge.
+    isCustom = isCustom && ExerciseSeed.forKey(seedKey) == null,
     seedKey = seedKey,
     measure = measure,
 )

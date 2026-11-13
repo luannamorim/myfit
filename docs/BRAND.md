@@ -34,7 +34,7 @@ The interface follows the same principle: graphite neutrals, firm typography and
 
 Contrast is enforced by `ColorContrastTest`: primary text ≥ 7:1, secondary ≥ 4.5:1, text on green ≥ 4.5:1, green on background ≥ 3:1.
 
-**Green rule:** only for progress (rest ring, completed set, positive load change), the screen's primary action and action links. Body measurement differences use a neutral color, because the app doesn't judge whether going up or down is good. **Exception:** BMI and body fat show a small status dot after their label on Home and Progress (`accent` = healthy range, `warning` = caution, `danger` = poor; WHO bands for BMI, ACE chart for body fat by sex). The dot is the only colored mark on measurements, and screen readers announce it ("Good", "Caution", "Poor").
+**Green rule:** only for progress (rest ring, completed set, positive load change), the screen's primary action and action links. Body measurement differences use a neutral color, because the app doesn't judge whether going up or down is good. **Exception:** BMI and body fat show a small status dot in the top-right corner of their cards on Home and Progress (`accent` = healthy range, `warning` = caution, `danger` = poor; WHO bands for BMI, ACE chart for body fat by sex). The dot is the only colored mark on measurements, and screen readers announce it ("Good", "Caution", "Poor").
 
 ## Typography
 

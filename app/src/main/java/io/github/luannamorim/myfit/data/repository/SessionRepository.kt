@@ -7,6 +7,7 @@ import io.github.luannamorim.myfit.data.db.entity.SessionExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionSetEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionWithExercises
 import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
+import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.SessionStatus
@@ -61,7 +62,7 @@ class SessionRepository @Inject constructor(
                     sessionId = sessionId,
                     exerciseId = row.exercise.id,
                     position = position,
-                    name = row.exercise.name,
+                    name = ExerciseSeed.displayName(row.exercise.seedKey, row.exercise.name),
                     muscleGroup = row.exercise.muscleGroup,
                     movementType = row.exercise.movementType,
                     imagePath = row.exercise.imagePath,
@@ -182,7 +183,7 @@ internal fun SessionWithExercises.toActive(): ActiveSession {
             SessionExercise(
                 id = row.exercise.id,
                 exerciseId = row.exercise.exerciseId,
-                name = row.exercise.name,
+                name = ExerciseSeed.displayName(row.exercise.seedKey, row.exercise.name),
                 muscleGroup = row.exercise.muscleGroup,
                 imagePath = row.exercise.imagePath,
                 seedKey = row.exercise.seedKey,

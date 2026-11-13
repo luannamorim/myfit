@@ -3,6 +3,7 @@ package io.github.luannamorim.myfit.data.repository
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.data.db.MyFitDatabase
 import io.github.luannamorim.myfit.data.db.entity.SessionWithExercises
+import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.history.SessionDetail
 import io.github.luannamorim.myfit.domain.history.SessionExerciseDetail
 import io.github.luannamorim.myfit.domain.history.SessionSummary
@@ -68,7 +69,7 @@ class HistoryRepository @Inject constructor(
             durationMs = session.durationMs ?: 0,
             setsDone = ordered.sumOf { e -> e.sets.count { it.status == ItemStatus.DONE } },
             // Only exercises actually trained (at least one set done).
-            exercises = ordered.filter { e -> e.sets.any { it.status == ItemStatus.DONE } }.map { it.exercise.name },
+            exercises = ordered.filter { e -> e.sets.any { it.status == ItemStatus.DONE } }.map { ExerciseSeed.displayName(it.exercise.seedKey, it.exercise.name) },
             intensity = session.intensity,
             imagePath = session.imagePath,
         )

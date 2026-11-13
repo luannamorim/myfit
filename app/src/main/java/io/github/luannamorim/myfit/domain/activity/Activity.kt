@@ -25,6 +25,9 @@ enum class Sport(val distance: DistanceUnit? = null) {
     PILATES,
     STRETCHING,
 
+    /** A gym session logged as an activity (no routine). */
+    GYM,
+
     /** "Free": the user names it. */
     OTHER(DistanceUnit.KM),
     ;

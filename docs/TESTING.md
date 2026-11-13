@@ -28,6 +28,8 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Edit sets, reps, rest and load, typing "42,5" (comma). Reorder by dragging the handle.
 - [ ] Create a custom exercise with an image from the gallery. It shows up in the list and in the workout.
 - [ ] Duplicate the workout ("(copy)" appears) and delete the copy.
+- [ ] Predefined exercises: their name field is locked ("Exercícios da biblioteca mantêm o nome.") and the name follows the app language (switch Portuguese ↔ English: Library, routines, workout and History change with it). A custom exercise keeps its name and photo.
+- [ ] Activities: "Academia" / "Gym" is in the sport list (dumbbell icon), without distance.
 - [ ] The library shows a drawing next to every predefined exercise. Open one: start → end drawing, the body map with its group in green, and "Watch how to do it" opens a YouTube search.
 - [ ] In the exercise editor, change the muscle group: the body map updates at once. Pick a photo: it replaces the drawing; remove it: the drawing comes back.
 - [ ] A custom exercise without a photo shows the body map in the list and during the workout.
@@ -75,9 +77,9 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Workout or activity photo: tapping it opens it full screen.
 - [ ] Home and Measurements show weight on its own card, then body fat and BMI side by side (no waist), with their change.
 - [ ] Height: type it once ("178", or "1,78" in meters, saved as 178 cm). BMI shows on that assessment and on older weigh-ins without a height.
-- [ ] Body-fat estimate: *Settings → Profile → Sex*. An assessment with neck and abdomen (women: neck, waist and hips) and no typed body fat shows "Body fat (est.)"; the editor shows the BMI and estimate line while typing. A typed body fat replaces the estimate. With Sex "Not set", only BMI appears.
-- [ ] Status dot: next to BMI and body fat on Home and Progress, green in the healthy range, amber for caution, red for poor (BMI 18,5–24,9 is green). Without Sex, body fat has no dot. In Portuguese on a small phone, the Settings chips (Sex, Theme, Rest sound) move whole to the next line instead of breaking their text.
-- [ ] Body cards always present once there is an assessment: without height BMI shows "—" and "Height missing"; without Sex body fat shows "—" and "Set your sex" (in Portuguese "Falta a altura" / "Defina o sexo"). Body fat and BMI cards always have the same height, even when "Gordura corporal (estimada)" wraps.
+- [ ] Body-fat estimate: *Settings → Profile → Sex*. An assessment with neck and abdomen (women: neck, waist and hips) and no typed body fat shows a body-fat value (estimates are not labeled); the editor shows the BMI and estimate line while typing. A typed body fat replaces the estimate. With Sex "Not set", only BMI appears.
+- [ ] Status dot: in the top-right corner of the BMI and body-fat cards on Home and Progress, green in the healthy range, amber for caution, red for poor (BMI 18,5–24,9 is green). Without Sex, body fat has no dot. In Portuguese on a small phone, the Settings chips (Sex, Theme, Rest sound) move whole to the next line instead of breaking their text.
+- [ ] Body cards always present once there is an assessment: without height BMI shows "—" and "Height missing"; without Sex body fat shows "—" and "Set your sex" (in Portuguese "Falta a altura" / "Defina o sexo"). Body fat and BMI cards always have the same height, even when a label wraps (bigger font).
 
 ### 6a. Reminders
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.

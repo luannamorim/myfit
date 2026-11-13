@@ -3,15 +3,16 @@ package io.github.luannamorim.myfit.data.db.seed
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.testutil.inMemoryDb
-import java.io.File
-import java.text.Normalizer
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.io.File
+import java.text.Normalizer
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
@@ -87,5 +88,16 @@ class ExerciseSeedTest {
         assertTrue(v3.size >= 50)
         assertTrue(v3.all { it.art != null })
         assertEquals(3, ExerciseSeed.VERSION)
+    }
+
+    @Test
+    fun nameFor_followsLocale_andUnknownKeysFallBack() {
+        val pt = java.util.Locale.forLanguageTag("pt-BR")
+        assertEquals("Supino reto com barra", ExerciseSeed.nameFor("barbell-bench-press", pt))
+        assertEquals("Barbell bench press", ExerciseSeed.nameFor("barbell-bench-press", java.util.Locale.US))
+        assertNull(ExerciseSeed.nameFor("no-such-key", pt))
+        assertNull(ExerciseSeed.nameFor(null, pt))
+        assertEquals("Mine", ExerciseSeed.displayName("no-such-key", "Mine", pt))
+        assertEquals("Supino reto com barra", ExerciseSeed.displayName("barbell-bench-press", "Meu supino", pt))
     }
 }

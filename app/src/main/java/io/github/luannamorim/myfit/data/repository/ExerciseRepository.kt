@@ -4,6 +4,7 @@ import io.github.luannamorim.myfit.core.format.SearchText
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.data.db.dao.ExerciseDao
 import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
+import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.model.Exercise
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import kotlinx.coroutines.flow.Flow
@@ -24,8 +25,8 @@ class ExerciseRepository @Inject constructor(
         dao.observeActive().map { list ->
             list.asSequence()
                 .filter { groups.isEmpty() || it.muscleGroup in groups }
-                .filter { SearchText.matches(it.name, query) }
                 .map { it.toDomain() }
+                .filter { SearchText.matches(it.name, query) } // the shown name (library names follow the app's language)
                 .sortedBy { SearchText.normalize(it.name) }
                 .toList()
         }
@@ -58,7 +59,8 @@ class ExerciseRepository @Inject constructor(
             val current = checkNotNull(dao.get(exercise.id)) { "exercise ${exercise.id} not found" }
             dao.update(
                 current.copy(
-                    name = name,
+                    // A library exercise can't be renamed: its stored name stays, the official one is shown.
+                    name = if (ExerciseSeed.nameFor(current.seedKey) != null) current.name else name,
                     muscleGroup = exercise.muscleGroup,
                     movementType = exercise.movementType,
                     imagePath = exercise.imagePath,

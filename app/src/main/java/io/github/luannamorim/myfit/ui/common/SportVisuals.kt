@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
 import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.AccessibilityNew
 import androidx.compose.material.icons.rounded.EmojiPeople
+import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.PedalBike
 import androidx.compose.material.icons.rounded.Pool
 import androidx.compose.material.icons.rounded.SelfImprovement
@@ -66,6 +67,7 @@ val Sport.labelRes: Int
         Sport.YOGA -> R.string.sport_yoga
         Sport.PILATES -> R.string.sport_pilates
         Sport.STRETCHING -> R.string.sport_stretching
+        Sport.GYM -> R.string.sport_gym
         Sport.OTHER -> R.string.sport_other
     }
 
@@ -87,6 +89,7 @@ val Sport.icon: ImageVector
         Sport.YOGA -> Icons.Rounded.SelfImprovement
         Sport.PILATES -> Icons.Rounded.SportsGymnastics
         Sport.STRETCHING -> Icons.Rounded.AccessibilityNew
+        Sport.GYM -> Icons.Rounded.FitnessCenter
         Sport.OTHER -> Icons.Rounded.EmojiPeople
     }
 
