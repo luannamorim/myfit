@@ -107,3 +107,4 @@ Kotlin 2.4 · Jetpack Compose + Material 3 (adaptive) · Navigation Compose (typ
 
 - **Geist font:** SIL Open Font License 1.1 ([`docs/licenses/GEIST_OFL.txt`](docs/licenses/GEIST_OFL.txt)).
 - **Exercise illustrations** (`app/src/main/assets/exercises/`): CC BY-SA 4.0, by [Everkinetic](https://github.com/everkinetic/data) and by Bryl Lim ([Workout Guide](https://github.com/bryllim/workout-guide)); one drawing via [wger](https://wger.de) under CC BY-SA 3.0. They were cropped, scaled and converted by [`tools/exercise_art.py`](tools/exercise_art.py); see the folder's [`NOTICE.md`](app/src/main/assets/exercises/NOTICE.md) and *Settings → Image credits* in the app.
+- **Rest countdown beep** (`app/src/main/res/raw/rest_tick.wav`): from [SoundJay.com](https://www.soundjay.com), trimmed and leveled; not covered by the MIT license.
