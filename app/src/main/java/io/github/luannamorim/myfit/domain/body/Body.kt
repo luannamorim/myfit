@@ -48,6 +48,9 @@ data class BodyAssessment(
 /** Health range of a value (BMI and body fat only), shown as a green, amber or red dot. */
 enum class BodyStatus { GOOD, CAUTION, POOR }
 
+/** One band of a reference table: [from] inclusive, [until] exclusive; null = open end. */
+data class BodyRange(val from: Double?, val until: Double?, val status: BodyStatus)
+
 /** Why a dashboard card has no value: what the user can add to get one. */
 enum class BodyMissing { HEIGHT, WEIGHT, SEX, MEASUREMENTS }
 
@@ -73,6 +76,8 @@ data class BodySnapshot(
     val highlights: List<MeasureDiff>,
     /** Recent values of each highlight, oldest first (at most [BodyComparison.TREND_POINTS]). */
     val trends: Map<Measure, List<Pair<LocalDate, Double>>> = emptyMap(),
+    /** Sex used for the body-fat ranges (set by [BodyMetrics.withStatus]); null when not set. */
+    val sex: Sex? = null,
 )
 
 data class BodyPhoto(val id: Long, val date: LocalDate, val imagePath: String, val pose: io.github.luannamorim.myfit.domain.model.PhotoPose)

@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -198,7 +199,7 @@ private fun MeasuresSection(state: EvolutionUiState, actions: EvolutionActions) 
 
 /** Latest weight, body fat and BMI with change vs the previous assessment (neutral color: no judgment). */
 @Composable
-fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
+fun BodySnapshotTiles(snapshot: BodySnapshot, onOpenWeight: (() -> Unit)? = null) {
     val c = MyFitTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
         Text(
@@ -206,14 +207,21 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
             style = MyFitTheme.type.caption,
             color = c.textSecondary,
         )
-        val clickable = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+        // Weight opens Progress (Home only); BMI and body fat open their ranges table on both screens.
+        var openRanges by rememberSaveable { mutableStateOf<Measure?>(null) }
+        val seeRanges = stringResource(R.string.body_ranges_open)
+        fun clickFor(m: Measure): Modifier = when {
+            m == Measure.BMI || m == Measure.BODY_FAT -> Modifier.clickable(onClickLabel = seeRanges) { openRanges = m }
+            onOpenWeight != null -> Modifier.clickable(onClick = onOpenWeight)
+            else -> Modifier
+        }
         // Weight leads on its own row; the others go in pairs.
         val (weight, others) = snapshot.highlights.partition { it.measure == Measure.WEIGHT }
         (weight.map { listOf(it) } + others.chunked(2)).forEach { row ->
             val single = row.singleOrNull()
             if (single != null) {
                 // Alone in its row: full width, with the recent trend beside it.
-                TrendTile(single, snapshot.trends[single.measure].orEmpty(), Modifier.fillMaxWidth().then(clickable))
+                TrendTile(single, snapshot.trends[single.measure].orEmpty(), Modifier.fillMaxWidth().testTag("bodyTile_${single.measure.name}").then(clickFor(single.measure)))
             } else {
                 // Same height for both cards, even when one label wraps (e.g. "Gordura corporal (estimada)").
                 Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
@@ -227,11 +235,14 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
                             delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
                             deltaPositive = null,
                             hint = diff.missing?.let { stringResource(it.labelRes) },
-                            modifier = Modifier.weight(1f).fillMaxHeight().testTag("bodyTile_${diff.measure.name}").then(clickable),
+                            modifier = Modifier.weight(1f).fillMaxHeight().testTag("bodyTile_${diff.measure.name}").then(clickFor(diff.measure)),
                         )
                     }
                 }
             }
+        }
+        openRanges?.let { m ->
+            snapshot.highlights.firstOrNull { it.measure == m }?.let { BodyRangesSheet(it, snapshot.sex, onDismiss = { openRanges = null }) }
         }
     }
 }
@@ -241,7 +252,7 @@ private const val EMPTY_VALUE = "—"
 
 /** Health-range colors: the one place body measurements get green, amber or red (see BRAND.md). */
 @Composable
-private fun BodyStatus.color(): Color = when (this) {
+internal fun BodyStatus.color(): Color = when (this) {
     BodyStatus.GOOD -> MyFitTheme.colors.accent
     BodyStatus.CAUTION -> MyFitTheme.colors.warning
     BodyStatus.POOR -> MyFitTheme.colors.danger

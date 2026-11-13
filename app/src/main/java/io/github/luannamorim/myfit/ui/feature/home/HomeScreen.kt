@@ -76,7 +76,7 @@ fun HomeScreen(actions: HomeActions, modifier: Modifier = Modifier, viewModel: H
     val state by viewModel.state.collectAsStateWithLifecycle()
     HomeContent(state, actions, modifier, body = {
         val snapshot = state.body
-        if (snapshot == null) BodyEmptyCard(actions.onOpenBody) else BodySnapshotTiles(snapshot, onClick = actions.onOpenBody)
+        if (snapshot == null) BodyEmptyCard(actions.onOpenBody) else BodySnapshotTiles(snapshot, onOpenWeight = actions.onOpenBody)
     })
 }
 

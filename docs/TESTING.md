@@ -79,6 +79,8 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Height: type it once ("178", or "1,78" in meters, saved as 178 cm). BMI shows on that assessment and on older weigh-ins without a height.
 - [ ] Body-fat estimate: *Settings → Profile → Sex*. An assessment with neck and abdomen (women: neck, waist and hips) and no typed body fat shows a body-fat value (estimates are not labeled); the editor shows the BMI and estimate line while typing. A typed body fat replaces the estimate. With Sex "Not set", only BMI appears.
 - [ ] Status dot: in the top-right corner of the BMI and body-fat cards on Home and Progress, green in the healthy range, amber for caution, red for poor (BMI 18,5–24,9 is green). Without Sex, body fat has no dot. In Portuguese on a small phone, the Settings chips (Sex, Theme, Rest sound) move whole to the next line instead of breaking their text.
+- [ ] Tapping the BMI or body-fat card (Home or Progress, also when it shows "—") opens its ranges table with the current band highlighted; body fat without Sex shows the men and women columns and "Set your sex". On Home, tapping weight still opens Progress.
+- [ ] Height typed once comes filled in on the next new assessment; saving a new assessment without typing anything else is refused as empty.
 - [ ] Body cards always present once there is an assessment: without height BMI shows "—" and "Height missing"; without Sex body fat shows "—" and "Set your sex" (in Portuguese "Falta a altura" / "Defina o sexo"). Body fat and BMI cards always have the same height, even when a label wraps (bigger font).
 
 ### 6a. Reminders

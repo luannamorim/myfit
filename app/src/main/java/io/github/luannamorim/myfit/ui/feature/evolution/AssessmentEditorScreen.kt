@@ -106,6 +106,7 @@ fun AssessmentEditorContent(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 if (state.emptyError) Text(stringResource(R.string.assessment_empty_error), style = MyFitTheme.type.caption, color = c.danger)
+                if (state.heightOnlyError) Text(stringResource(R.string.assessment_height_only_error), style = MyFitTheme.type.caption, color = c.danger)
                 Groups.forEach { (title, measures) ->
                     SectionHeader(stringResource(title), Modifier.padding(top = Spacing.s))
                     measures.chunked(2).forEach { pair ->

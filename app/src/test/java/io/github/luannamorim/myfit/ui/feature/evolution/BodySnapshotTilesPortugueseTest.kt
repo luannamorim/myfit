@@ -10,9 +10,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodyComparison
 import io.github.luannamorim.myfit.domain.body.BodyMetrics
@@ -70,5 +72,16 @@ class BodySnapshotTilesPortugueseTest {
         val fat = compose.onNodeWithTag("bodyTile_BODY_FAT").getBoundsInRoot()
         val bmi = compose.onNodeWithTag("bodyTile_BMI").getBoundsInRoot()
         assertEquals(fat.bottom - fat.top, bmi.bottom - bmi.top)
+    }
+
+    @Test
+    fun rangesSheets_screenshots() {
+        val values = mapOf(Measure.WEIGHT to 80.0, Measure.HEIGHT to 178.0, Measure.NECK to 38.0, Measure.ABDOMEN to 92.0)
+        val items = BodyMetrics.derive(listOf(BodyAssessment(1, LocalDate.of(2026, 11, 12), values)), Sex.MALE)
+        val snapshot = BodyMetrics.withStatus(BodyComparison.snapshot(items), Sex.MALE)!!
+        compose.setContent { MyFitTheme(ThemeMode.DARK) { BodySnapshotTiles(snapshot) } }
+        compose.onNodeWithTag("bodyTile_BODY_FAT").performClick()
+        compose.waitForIdle()
+        captureScreenRoboImage("$SCREENSHOT_DIR/body_ranges_fat_pt_dark.png")
     }
 }

@@ -65,18 +65,26 @@ object BodyMetrics {
      * (no sex, no status). Lower bounds are inclusive. Null for every other measure.
      */
     fun status(measure: Measure, value: Double, sex: Sex?): BodyStatus? {
-        // Upper bounds of POOR, CAUTION, GOOD and CAUTION; above the last one is POOR again.
-        val bounds = when (measure) {
-            Measure.BMI -> BMI_BOUNDS
-            Measure.BODY_FAT -> when (sex) {
-                Sex.MALE -> FAT_MEN_BOUNDS
-                Sex.FEMALE -> FAT_WOMEN_BOUNDS
-                null -> return null
-            }
-            else -> return null
-        }
+        val bounds = bounds(measure, sex) ?: return null
         val band = bounds.indexOfFirst { value < it }.let { if (it == -1) bounds.size else it }
         return BANDS[band]
+    }
+
+    /** The reference table behind [status] (same bounds), lowest band first; empty when there is none. */
+    fun ranges(measure: Measure, sex: Sex?): List<BodyRange> {
+        val bounds = bounds(measure, sex) ?: return emptyList()
+        return BANDS.mapIndexed { i, status -> BodyRange(bounds.getOrNull(i - 1), bounds.getOrNull(i), status) }
+    }
+
+    /** Upper bounds of POOR, CAUTION, GOOD and CAUTION; above the last one is POOR again. */
+    private fun bounds(measure: Measure, sex: Sex?): List<Double>? = when (measure) {
+        Measure.BMI -> BMI_BOUNDS
+        Measure.BODY_FAT -> when (sex) {
+            Sex.MALE -> FAT_MEN_BOUNDS
+            Sex.FEMALE -> FAT_WOMEN_BOUNDS
+            null -> null
+        }
+        else -> null
     }
 
     /**
@@ -84,6 +92,7 @@ object BodyMetrics {
      * body fat without a value, what is missing ([MeasureDiff.missing]).
      */
     fun withStatus(snapshot: BodySnapshot?, sex: Sex?): BodySnapshot? = snapshot?.copy(
+        sex = sex,
         highlights = snapshot.highlights.map { d ->
             d.copy(status = d.to?.let { status(d.measure, it, sex) }, missing = if (d.to == null) missing(d.measure, snapshot.latest, sex) else null)
         },

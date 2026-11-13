@@ -313,6 +313,14 @@
     <string name="body_missing_weight">Falta o peso</string>
     <string name="body_missing_sex">Defina o sexo</string>
     <string name="body_missing_measures">Faltam medidas</string>
+    <string name="body_ranges_open">Ver faixas</string>
+    <string name="body_range_below">Abaixo de %1$s</string>
+    <string name="body_range_above">%1$s ou mais</string>
+    <string name="body_ranges_men">Homens</string>
+    <string name="body_ranges_women">Mulheres</string>
+    <string name="body_ranges_bmi_note">Faixas da OMS para adultos. O IMC não separa músculo de gordura.</string>
+    <string name="body_ranges_fat_note">Faixas do ACE para adultos.</string>
+    <string name="body_ranges_calculated">Valor calculado pelas medidas: margem de 3–4 pontos.</string>
     <string name="measure_neck">Pescoço</string>
     <string name="measure_shoulders">Ombros</string>
     <string name="measure_chest">Peitoral</string>
@@ -354,6 +362,7 @@
     <string name="assessment_group_legs">Pernas</string>
     <string name="assessment_notes">Observações</string>
     <string name="assessment_empty_error">Preencha pelo menos uma medida</string>
+    <string name="assessment_height_only_error">Preencha alguma medida além da altura.</string>
     <string name="assessment_delete_title">Excluir avaliação?</string>
     <string name="assessment_delete_message">As medidas desta data serão removidas do histórico e dos gráficos.</string>
     <string name="assessment_last_hint">última: %1$s</string>

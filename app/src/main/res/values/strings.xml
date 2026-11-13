@@ -285,6 +285,14 @@
     <string name="body_missing_weight">Weight missing</string>
     <string name="body_missing_sex">Set your sex</string>
     <string name="body_missing_measures">Measurements missing</string>
+    <string name="body_ranges_open">See ranges</string>
+    <string name="body_range_below">Below %1$s</string>
+    <string name="body_range_above">%1$s or more</string>
+    <string name="body_ranges_men">Men</string>
+    <string name="body_ranges_women">Women</string>
+    <string name="body_ranges_bmi_note">WHO ranges for adults. BMI doesn\'t tell muscle from fat.</string>
+    <string name="body_ranges_fat_note">ACE ranges for adults.</string>
+    <string name="body_ranges_calculated">Calculated from measurements: ±3–4 points.</string>
     <string name="measure_neck">Neck</string>
     <string name="measure_shoulders">Shoulders</string>
     <string name="measure_chest">Chest</string>
@@ -325,6 +333,7 @@
     <string name="assessment_group_legs">Legs</string>
     <string name="assessment_notes">Notes</string>
     <string name="assessment_empty_error">Fill in at least one measurement</string>
+    <string name="assessment_height_only_error">Fill in a measurement besides height.</string>
     <string name="assessment_delete_title">Delete assessment?</string>
     <string name="assessment_delete_message">This date\'s measurements will be removed from your history and charts.</string>
     <string name="assessment_last_hint">last: %1$s</string>

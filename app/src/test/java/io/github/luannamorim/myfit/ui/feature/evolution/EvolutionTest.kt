@@ -149,6 +149,28 @@ class EvolutionTest {
     }
 
     @Test
+    fun editor_newAssessment_prefillsLastHeight_existingDoesNot() = runBlocking {
+        body.save(BodyAssessment(date = jan, values = mapOf(Measure.WEIGHT to 71.0, Measure.HEIGHT to 178.0)))
+        val noHeight = body.save(BodyAssessment(date = apr, values = mapOf(Measure.WEIGHT to 73.0)))
+        val new = AssessmentEditorViewModel(SavedStateHandle(route = AssessmentEditorRoute()), body, settings, time).state.awaitUntil { !it.loading }
+        assertEquals("178", new.fields[Measure.HEIGHT]) // typed once, comes filled in
+        val old = AssessmentEditorViewModel(SavedStateHandle(route = AssessmentEditorRoute(noHeight)), body, settings, time).state.awaitUntil { !it.loading }
+        assertNull(old.fields[Measure.HEIGHT]) // an existing assessment is shown as saved
+    }
+
+    @Test
+    fun editor_prefilledHeightAlone_isNotAnAssessment() = runBlocking {
+        body.save(BodyAssessment(date = jan, values = mapOf(Measure.WEIGHT to 71.0, Measure.HEIGHT to 178.0)))
+        val vm = AssessmentEditorViewModel(SavedStateHandle(route = AssessmentEditorRoute()), body, settings, time)
+        vm.state.awaitUntil { !it.loading }
+        assertFalse(vm.save()) // nothing typed: only the pre-filled height
+        assertTrue(vm.state.value.heightOnlyError) // its own message, not "fill in a measurement"
+        vm.setField(Measure.HEIGHT, "178") // retyping the same height on purpose is fine
+        assertFalse(vm.state.value.heightOnlyError)
+        assertTrue(vm.save())
+    }
+
+    @Test
     fun editor_heightInMeters_savedAsCm() = runBlocking {
         val vm = AssessmentEditorViewModel(SavedStateHandle(route = AssessmentEditorRoute()), body, settings, time)
         vm.state.awaitUntil { !it.loading }

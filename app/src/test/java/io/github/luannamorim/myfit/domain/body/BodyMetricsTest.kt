@@ -146,4 +146,46 @@ class BodyMetricsTest {
         // (d) only an implausible height: BMI still asks for the height.
         assertEquals(BodyMissing.HEIGHT, missing(listOf(BodyAssessment(1, apr, mapOf(Measure.WEIGHT to 73.0, Measure.HEIGHT to 17.8))), null)[Measure.BMI])
     }
+
+    @Test
+    fun ranges_bmi_exact() {
+        assertEquals(
+            listOf(
+                BodyRange(null, 16.0, BodyStatus.POOR),
+                BodyRange(16.0, 18.5, BodyStatus.CAUTION),
+                BodyRange(18.5, 25.0, BodyStatus.GOOD),
+                BodyRange(25.0, 30.0, BodyStatus.CAUTION),
+                BodyRange(30.0, null, BodyStatus.POOR),
+            ),
+            BodyMetrics.ranges(Measure.BMI, null),
+        )
+    }
+
+    @Test
+    fun ranges_bodyFat_bySex() {
+        assertEquals(listOf(2.0, 6.0, 18.0, 25.0), BodyMetrics.ranges(Measure.BODY_FAT, Sex.MALE).mapNotNull { it.until })
+        assertEquals(listOf(10.0, 14.0, 25.0, 32.0), BodyMetrics.ranges(Measure.BODY_FAT, Sex.FEMALE).mapNotNull { it.until })
+        assertEquals(emptyList<BodyRange>(), BodyMetrics.ranges(Measure.BODY_FAT, null))
+        assertEquals(emptyList<BodyRange>(), BodyMetrics.ranges(Measure.WEIGHT, Sex.MALE))
+    }
+
+    @Test
+    fun ranges_agreeWithStatus() {
+        val cases = listOf(Measure.BMI to null, Measure.BODY_FAT to Sex.MALE, Measure.BODY_FAT to Sex.FEMALE)
+        for ((m, sex) in cases) {
+            val ranges = BodyMetrics.ranges(m, sex)
+            for (i in 0..700) {
+                val v = i / 10.0
+                val band = ranges.single { (it.from == null || v >= it.from!!) && (it.until == null || v < it.until!!) }
+                assertEquals("$m $sex $v", BodyMetrics.status(m, v, sex), band.status)
+            }
+        }
+    }
+
+    @Test
+    fun withStatus_carriesSex() {
+        val snap = BodyComparison.snapshot(listOf(BodyAssessment(1, apr, mapOf(Measure.WEIGHT to 73.0))))
+        assertEquals(Sex.FEMALE, BodyMetrics.withStatus(snap, Sex.FEMALE)!!.sex)
+        assertNull(BodyMetrics.withStatus(snap, null)!!.sex)
+    }
 }

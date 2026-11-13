@@ -35,6 +35,8 @@ data class AssessmentEditorUiState(
     val notes: String = "",
     val invalid: Set<Measure> = emptySet(),
     val emptyError: Boolean = false,
+    /** Save refused: the only value is the height filled in from the last assessment, untouched. */
+    val heightOnlyError: Boolean = false,
     val done: Boolean = false,
     /** Calculated from the typed weight and height (or the height of another assessment). */
     val bmi: Double? = null,
@@ -57,16 +59,23 @@ class AssessmentEditorViewModel @Inject constructor(
     private var others: List<BodyAssessment> = emptyList()
     private var sex: Sex? = null
 
+    /** Height text filled in for a new assessment; saving only that, untouched, is refused. */
+    private var prefilledHeight: String? = null
+    private var heightEdited = false
+
     init {
         viewModelScope.launch {
             val existing = id?.let { body.get(it) }
             others = body.observeAssessments().first().filter { it.id != id }
+            if (existing == null) prefilledHeight = others.firstNotNullOfOrNull { it.values[Measure.HEIGHT] }?.let { DecimalInput.format(it) }
             sex = settings.current().sex
             _state.update { s ->
                 s.copy(
                     loading = false,
                     date = existing?.date ?: s.date,
-                    fields = existing?.values?.mapValues { DecimalInput.format(it.value) }.orEmpty(),
+                    // A new assessment comes with the last recorded height filled in (typed once, reused).
+                    fields = existing?.values?.mapValues { DecimalInput.format(it.value) }
+                        ?: prefilledHeight?.let { mapOf(Measure.HEIGHT to it) }.orEmpty(),
                     notes = existing?.notes.orEmpty(),
                     // Height is typed rarely: its hint is the last height recorded, wherever it was.
                     lastValues = others.firstOrNull()?.values.orEmpty() +
@@ -79,11 +88,13 @@ class AssessmentEditorViewModel @Inject constructor(
     fun setDate(date: LocalDate) = _state.update { it.copy(date = date).withMetrics() }
 
     fun setField(measure: Measure, text: String) = _state.update { s ->
+        if (measure == Measure.HEIGHT) heightEdited = true
         val invalid = text.isNotBlank() && DecimalInput.parse(text) == null
         s.copy(
             fields = s.fields + (measure to text),
             invalid = if (invalid) s.invalid + measure else s.invalid - measure,
             emptyError = false,
+            heightOnlyError = false,
         ).withMetrics()
     }
 
@@ -113,6 +124,10 @@ class AssessmentEditorViewModel @Inject constructor(
         val values = s.values()
         if (values[Measure.HEIGHT]?.let { it !in BodyMetrics.PLAUSIBLE_HEIGHT_CM } == true) {
             _state.update { it.copy(invalid = it.invalid + Measure.HEIGHT) }
+            return false
+        }
+        if (values.keys == setOf(Measure.HEIGHT) && prefilledHeight != null && !heightEdited) {
+            _state.update { it.copy(heightOnlyError = true) }
             return false
         }
         if (values.isEmpty()) {
