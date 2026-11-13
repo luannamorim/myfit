@@ -67,6 +67,23 @@ class ActivityEditorTest {
         ActivityEditorViewModel(SavedStateHandle(route = route), activities, images, time, live)
 
     @Test
+    fun reviewAfterTimer_asksIntensityAndPhoto_keepingWhatWasMeasured() = runBlocking {
+        val id = activities.save(Activity(sport = Sport.CYCLING, date = time.today(), durationMinutes = 52, distanceKm = 18.4))
+        val vm = editor(ActivityEditorRoute(activityId = id, review = true))
+        val loaded = vm.state.awaitUntil { !it.loading }
+        assertTrue(loaded.review)
+        vm.setIntensity(Intensity.HIGH)
+        vm.setNotes("subida forte")
+        assertTrue(vm.save())
+        vm.state.awaitUntil { it.done }
+        val saved = activities.get(id)!!
+        assertEquals(Intensity.HIGH, saved.intensity)
+        assertEquals("subida forte", saved.notes)
+        assertEquals(52, saved.durationMinutes)
+        assertEquals(18.4, saved.distanceKm!!, 0.0)
+    }
+
+    @Test
     fun startNow_startsTimingTheChosenSport_gpsOnlyWhenPermitted() = runBlocking {
         val vm = editor()
         vm.state.awaitUntil { !it.loading }
@@ -136,12 +153,13 @@ class ActivityEditorTest {
         vm.setDate(time.today().plusDays(5))
         assertEquals(time.today(), vm.state.value.date)
 
-        vm.setSport(Sport.SOCCER) // no distance for soccer: the typed one is dropped
-        assertEquals("", vm.state.value.distance)
+        vm.setSport(Sport.SOCCER) // once logged, the sport can't change
+        assertEquals(Sport.RUNNING, vm.state.value.sport)
+        vm.setDistance("7,5")
         assertTrue(vm.save())
         vm.state.awaitUntil { it.done }
-        assertEquals(Sport.SOCCER, activities.get(id)!!.sport)
-        assertNull(activities.get(id)!!.distanceKm)
+        assertEquals(Sport.RUNNING, activities.get(id)!!.sport)
+        assertEquals(7.5, activities.get(id)!!.distanceKm!!, 0.0)
 
         val again = editor(ActivityEditorRoute(activityId = id))
         again.state.awaitUntil { !it.loading }

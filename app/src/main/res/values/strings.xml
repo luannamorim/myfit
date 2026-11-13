@@ -177,9 +177,10 @@
     <string name="sport_pilates">Pilates</string>
     <string name="sport_stretching">Stretching</string>
     <string name="sport_other">Other</string>
-    <string name="activity_log">Log activity</string>
+    <string name="activity_log">New activity</string>
     <string name="activity_title_new">New activity</string>
     <string name="activity_title_edit">Activity</string>
+    <string name="activity_title_done">Activity done</string>
     <string name="activity_sport">Sport</string>
     <string name="activity_name">Activity name</string>
     <string name="activity_name_error">Give the activity a name.</string>

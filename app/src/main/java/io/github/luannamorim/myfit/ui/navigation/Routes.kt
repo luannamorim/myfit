@@ -23,6 +23,9 @@ import kotlinx.serialization.Serializable
 @Serializable data object RemindersRoute
 @Serializable data class ReminderEditorRoute(val reminderId: Long? = null)
 
-/** [activityId] 0 creates a new one; [dateEpochDay] pre-fills its date (History's selected day). */
-@Serializable data class ActivityEditorRoute(val activityId: Long = 0, val dateEpochDay: Long? = null)
+/**
+ * [activityId] 0 creates a new one; [dateEpochDay] pre-fills its date (History's selected day);
+ * [review] is the "activity done" step right after a timed activity (intensity, notes, photo).
+ */
+@Serializable data class ActivityEditorRoute(val activityId: Long = 0, val dateEpochDay: Long? = null, val review: Boolean = false)
 @Serializable data object LiveActivityRoute

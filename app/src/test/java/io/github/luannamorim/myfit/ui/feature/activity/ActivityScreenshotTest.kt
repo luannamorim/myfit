@@ -41,6 +41,17 @@ class ActivityScreenshotTest {
     }
 
     @Test
+    fun activity_review() = compose.snapBothThemes("activity_review") {
+        ActivityEditorContent(
+            ActivityEditorUiState(
+                loading = false, isNew = false, review = true, sport = Sport.RUNNING, date = today, today = today,
+                duration = "28", distance = "5,23", intensity = Intensity.HIGH,
+            ),
+            ActivityEditorActions(),
+        )
+    }
+
+    @Test
     fun activity_free() = compose.snapBothThemes("activity_free") {
         ActivityEditorContent(
             ActivityEditorUiState(loading = false, sport = Sport.OTHER, date = today, today = today, nameError = true, durationError = true),

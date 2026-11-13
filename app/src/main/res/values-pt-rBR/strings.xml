@@ -199,9 +199,10 @@
     <string name="sport_pilates">Pilates</string>
     <string name="sport_stretching">Alongamento</string>
     <string name="sport_other">Livre</string>
-    <string name="activity_log">Registrar atividade</string>
+    <string name="activity_log">Nova atividade</string>
     <string name="activity_title_new">Nova atividade</string>
     <string name="activity_title_edit">Atividade</string>
+    <string name="activity_title_done">Atividade concluída</string>
     <string name="activity_sport">Esporte</string>
     <string name="activity_name">Nome da atividade</string>
     <string name="activity_name_error">Dê um nome para a atividade.</string>

@@ -211,7 +211,7 @@ fun MyFitNavHost(
                     LiveActivityScreen(
                         onClose = { navController.popBackStack() },
                         onFinished = { id ->
-                            navController.navigate(ActivityEditorRoute(activityId = id)) {
+                            navController.navigate(ActivityEditorRoute(activityId = id, review = true)) {
                                 popUpTo<LiveActivityRoute> { inclusive = true }
                             }
                         },

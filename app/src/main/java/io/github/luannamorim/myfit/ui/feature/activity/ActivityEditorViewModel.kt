@@ -30,6 +30,8 @@ import kotlin.math.roundToInt
 data class ActivityEditorUiState(
     val loading: Boolean = true,
     val isNew: Boolean = true,
+    /** Right after a timed activity: only intensity, notes and photo are asked. */
+    val review: Boolean = false,
     val sport: Sport = Sport.entries.first(),
     val name: String = "",
     val date: LocalDate = LocalDate.MIN,
@@ -64,7 +66,11 @@ class ActivityEditorViewModel @Inject constructor(
     private val route = savedStateHandle.toRoute<ActivityEditorRoute>()
     private val today = time.today()
     private val _state = MutableStateFlow(
-        ActivityEditorUiState(date = route.dateEpochDay?.let(LocalDate::ofEpochDay)?.coerceAtMost(today) ?: today, today = today),
+        ActivityEditorUiState(
+            date = route.dateEpochDay?.let(LocalDate::ofEpochDay)?.coerceAtMost(today) ?: today,
+            today = today,
+            review = route.review && route.activityId != 0L,
+        ),
     )
     val state: StateFlow<ActivityEditorUiState> = _state.asStateFlow()
 
@@ -97,6 +103,8 @@ class ActivityEditorViewModel @Inject constructor(
     }
 
     fun setSport(sport: Sport) = _state.update { s ->
+        // Once logged, an activity keeps its sport.
+        if (!s.isNew) return@update s
         // Keep a typed distance only when the unit stays the same.
         val distance = if (s.sport.distance == sport.distance) s.distance else ""
         s.copy(sport = sport, distance = distance, nameError = false, distanceError = false)

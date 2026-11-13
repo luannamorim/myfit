@@ -59,8 +59,9 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Toggle Week/Month in the summaries. Workouts, total time and frequency match what was done.
 - [ ] The session row shows the intensity; the session detail shows the photo, and intensity and photo can be changed or removed there.
 - [ ] "+ Activity" on a past day: log swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name. They appear on that day, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it.
-- [ ] Home: "Log activity" opens the same screen; the week counts the activity days and their time.
-- [ ] **Live:** pick Running → *Start timer* → allow notifications and location. Walk outdoors for a few minutes with the screen locked: the notification counts up and shows the km. Pause/resume from the notification. *Finish*: the activity is saved with the time and distance and opens for intensity and photo.
+- [ ] Home: "New activity" opens the same screen; the week counts the activity days and their time.
+- [ ] **Live:** pick Running → *Start timer* → allow notifications and location. Walk outdoors for a few minutes with the screen locked: the notification counts up and shows the km. Pause/resume from the notification. *Finish*: the activity is saved with the time and distance and "Activity done" asks for intensity, notes and photo.
+- [ ] Open a logged activity from History: the sport is fixed (no sport chips); date, time, distance, intensity and photo can be changed.
 - [ ] Start one, close the app from recents and reopen: Home shows "… in progress" with the right time.
 - [ ] Indoor cycling or swimming: no GPS option, only the time.
 

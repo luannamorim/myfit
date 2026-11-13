@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -53,6 +54,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
+import io.github.luannamorim.myfit.core.format.Durations
 import io.github.luannamorim.myfit.domain.activity.DistanceUnit
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Intensity
@@ -69,6 +71,7 @@ import io.github.luannamorim.myfit.ui.components.MyFitTextField
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.PrimaryButton
 import io.github.luannamorim.myfit.ui.components.SecondaryButton
+import io.github.luannamorim.myfit.ui.components.StatTile
 import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
@@ -149,11 +152,25 @@ fun ActivityEditorContent(state: ActivityEditorUiState, actions: ActivityEditorA
     Scaffold(
         containerColor = c.background,
         topBar = {
+            val title = when {
+                state.review -> R.string.activity_title_done
+                state.isNew -> R.string.activity_title_new
+                else -> R.string.activity_title_edit
+            }
             MyFitTopBar(
-                title = stringResource(if (state.isNew) R.string.activity_title_new else R.string.activity_title_edit),
+                title = stringResource(title),
                 onBack = actions.onBack,
-                actions = { TextAction(stringResource(R.string.action_save), onClick = actions.onSave, enabled = !state.loading) },
+                actions = {
+                    if (!state.review) TextAction(stringResource(R.string.action_save), onClick = actions.onSave, enabled = !state.loading)
+                },
             )
+        },
+        bottomBar = {
+            if (state.review && !state.loading) {
+                Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(Spacing.l), contentAlignment = Alignment.Center) {
+                    PrimaryButton(stringResource(R.string.action_save), onClick = actions.onSave, modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth())
+                }
+            }
         },
     ) { padding ->
         if (state.loading) return@Scaffold
@@ -163,11 +180,22 @@ fun ActivityEditorContent(state: ActivityEditorUiState, actions: ActivityEditorA
                 verticalArrangement = Arrangement.spacedBy(Spacing.m),
             ) {
                 SportFigure(state.sport, Modifier.fillMaxWidth().height(150.dp))
-                Text(stringResource(R.string.activity_sport), style = MyFitTheme.type.caption, color = c.textSecondary)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    Sport.entries.forEach { sport -> SportChip(sport, selected = sport == state.sport, onClick = { actions.onSport(sport) }) }
+                if (state.isNew) {
+                    Text(stringResource(R.string.activity_sport), style = MyFitTheme.type.caption, color = c.textSecondary)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                        Sport.entries.forEach { sport -> SportChip(sport, selected = sport == state.sport, onClick = { actions.onSport(sport) }) }
+                    }
+                } else {
+                    // Logged: the sport is fixed (only a free activity's name can be fixed).
+                    Text(
+                        if (state.sport == Sport.OTHER) state.name.ifBlank { stringResource(R.string.sport_other) } else stringResource(state.sport.labelRes),
+                        style = MyFitTheme.type.title,
+                        color = c.textPrimary,
+                    )
                 }
-                if (state.sport == Sport.OTHER) {
+                if (state.review) {
+                    ReviewStats(state)
+                } else if (state.sport == Sport.OTHER) {
                     MyFitTextField(
                         value = state.name,
                         onValueChange = actions.onName,
@@ -181,34 +209,36 @@ fun ActivityEditorContent(state: ActivityEditorUiState, actions: ActivityEditorA
                     StartNowCard(state, actions)
                     Text(stringResource(R.string.activity_or_log), style = MyFitTheme.type.caption, color = c.textSecondary)
                 }
-                DateField(stringResource(R.string.activity_date), state.date, actions.onDate, Modifier.fillMaxWidth(), maxDate = state.today)
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
-                    MyFitTextField(
-                        value = state.duration,
-                        onValueChange = actions.onDuration,
-                        label = stringResource(R.string.activity_duration),
-                        keyboardType = KeyboardType.Number,
-                        suffix = stringResource(R.string.unit_min),
-                        isError = state.durationError,
-                        modifier = Modifier.weight(1f),
-                    )
-                    val unit = state.sport.distance
-                    if (unit != null) {
+                if (!state.review) {
+                    DateField(stringResource(R.string.activity_date), state.date, actions.onDate, Modifier.fillMaxWidth(), maxDate = state.today)
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
                         MyFitTextField(
-                            value = state.distance,
-                            onValueChange = actions.onDistance,
-                            label = stringResource(R.string.activity_distance),
-                            keyboardType = if (unit == DistanceUnit.METERS) KeyboardType.Number else KeyboardType.Decimal,
-                            suffix = stringResource(if (unit == DistanceUnit.METERS) R.string.unit_m else R.string.unit_km),
-                            isError = state.distanceError,
+                            value = state.duration,
+                            onValueChange = actions.onDuration,
+                            label = stringResource(R.string.activity_duration),
+                            keyboardType = KeyboardType.Number,
+                            suffix = stringResource(R.string.unit_min),
+                            isError = state.durationError,
                             modifier = Modifier.weight(1f),
                         )
-                    } else {
-                        Box(Modifier.weight(1f))
+                        val unit = state.sport.distance
+                        if (unit != null) {
+                            MyFitTextField(
+                                value = state.distance,
+                                onValueChange = actions.onDistance,
+                                label = stringResource(R.string.activity_distance),
+                                keyboardType = if (unit == DistanceUnit.METERS) KeyboardType.Number else KeyboardType.Decimal,
+                                suffix = stringResource(if (unit == DistanceUnit.METERS) R.string.unit_m else R.string.unit_km),
+                                isError = state.distanceError,
+                                modifier = Modifier.weight(1f),
+                            )
+                        } else {
+                            Box(Modifier.weight(1f))
+                        }
                     }
-                }
-                if (state.durationError) {
-                    Text(stringResource(R.string.activity_duration_error), style = MyFitTheme.type.caption, color = c.danger)
+                    if (state.durationError) {
+                        Text(stringResource(R.string.activity_duration_error), style = MyFitTheme.type.caption, color = c.danger)
+                    }
                 }
                 IntensityPicker(state.intensity, actions.onIntensity)
                 MyFitTextField(
@@ -220,7 +250,7 @@ fun ActivityEditorContent(state: ActivityEditorUiState, actions: ActivityEditorA
                     modifier = Modifier.fillMaxWidth(),
                 )
                 PhotoField(state.imagePath, onPick = actions.onPickPhoto, onRemove = actions.onRemovePhoto, error = state.photoError)
-                if (!state.isNew) {
+                if (!state.isNew && !state.review) {
                     SecondaryButton(
                         stringResource(R.string.action_delete),
                         onClick = { confirmDelete = true },
@@ -295,6 +325,29 @@ private fun StartNowCard(state: ActivityEditorUiState, actions: ActivityEditorAc
         }
         Spacer(Modifier.height(Spacing.m))
         PrimaryButton(stringResource(R.string.activity_now_start), onClick = actions.onStartNow, icon = Icons.Rounded.PlayArrow, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+/** What the timer measured, shown read-only on the "activity done" step. */
+@Composable
+private fun ReviewStats(state: ActivityEditorUiState) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+        StatTile(
+            stringResource(R.string.activity_duration),
+            Durations.human((state.duration.toIntOrNull() ?: 0) * 60_000L),
+            Modifier.weight(1f),
+        )
+        val unit = state.sport.distance
+        if (unit != null && state.distance.isNotBlank()) {
+            StatTile(
+                stringResource(R.string.activity_distance),
+                state.distance,
+                Modifier.weight(1f),
+                unit = stringResource(if (unit == DistanceUnit.METERS) R.string.unit_m else R.string.unit_km),
+            )
+        } else {
+            Box(Modifier.weight(1f))
+        }
     }
 }
 
