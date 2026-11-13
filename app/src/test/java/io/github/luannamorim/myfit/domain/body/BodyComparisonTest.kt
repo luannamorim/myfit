@@ -45,6 +45,8 @@ class BodyComparisonTest {
         assertEquals(2L, snap.latest.id)
         assertEquals(1L, snap.previous!!.id)
         assertEquals(listOf(Measure.WEIGHT, Measure.BODY_FAT), snap.highlights.map { it.measure }) // waist left out on purpose
+        assertEquals(listOf(71.0, 73.0), snap.trends.getValue(Measure.WEIGHT).map { it.second }) // oldest first
+        assertEquals(listOf(15.5), snap.trends.getValue(Measure.BODY_FAT).map { it.second })
         assertEquals(2.0, snap.highlights[0].diff!!, 0.0)
         assertNull(snap.highlights[1].diff)
         assertNull(BodyComparison.snapshot(emptyList()))

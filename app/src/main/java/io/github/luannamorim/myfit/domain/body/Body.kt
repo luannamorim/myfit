@@ -38,6 +38,8 @@ data class BodySnapshot(
     val latest: BodyAssessment,
     val previous: BodyAssessment?,
     val highlights: List<MeasureDiff>,
+    /** Recent values of each highlight, oldest first (at most [BodyComparison.TREND_POINTS]). */
+    val trends: Map<Measure, List<Pair<LocalDate, Double>>> = emptyMap(),
 )
 
 data class BodyPhoto(val id: Long, val date: LocalDate, val imagePath: String, val pose: io.github.luannamorim.myfit.domain.model.PhotoPose)
@@ -64,8 +66,12 @@ object BodyComparison {
             val now = latest.values[m]
             MeasureDiff(m, prev, now, if (prev != null && now != null) round2(now - prev) else null)
         }
-        return BodySnapshot(latest, previous, diffs)
+        val trends = diffs.associate { d -> d.measure to series(items, d.measure).takeLast(TREND_POINTS) }
+        return BodySnapshot(latest, previous, diffs, trends)
     }
+
+    /** How many recent assessments the dashboard trend line shows. */
+    const val TREND_POINTS = 12
 
     private fun round2(v: Double) = Math.round(v * 100) / 100.0
 }

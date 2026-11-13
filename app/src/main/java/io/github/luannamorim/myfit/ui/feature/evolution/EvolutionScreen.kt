@@ -55,7 +55,9 @@ import io.github.luannamorim.myfit.core.format.formatSigned
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.body.Measure
+import io.github.luannamorim.myfit.domain.body.MeasureDiff
 import io.github.luannamorim.myfit.domain.model.PhotoPose
+import io.github.luannamorim.myfit.ui.common.Sparkline
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.common.localImageModel
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
@@ -191,19 +193,58 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
             style = MyFitTheme.type.caption,
             color = c.textSecondary,
         )
+        val clickable = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
         snapshot.highlights.chunked(2).forEach { row ->
-            // A tile alone in its row (e.g. weight without body fat) spans the width with a bigger number.
-            val alone = row.size == 1
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
-                row.forEach { diff ->
-                    StatTile(
-                        label = stringResource(diff.measure.labelRes),
-                        value = DecimalInput.format(diff.to),
-                        unit = unitLabel(diff.measure),
-                        delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
-                        deltaPositive = null,
-                        valueStyle = if (alone) MyFitTheme.type.numericLarge.copy(fontSize = 52.sp, lineHeight = 56.sp) else MyFitTheme.type.numericLarge,
-                        modifier = Modifier.weight(1f).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            val single = row.singleOrNull()
+            if (single != null) {
+                // Alone in its row (e.g. weight without body fat): full width, with the recent trend beside it.
+                TrendTile(single, snapshot.trends[single.measure].orEmpty(), Modifier.fillMaxWidth().then(clickable))
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                    row.forEach { diff ->
+                        StatTile(
+                            label = stringResource(diff.measure.labelRes),
+                            value = DecimalInput.format(diff.to),
+                            unit = unitLabel(diff.measure),
+                            delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
+                            deltaPositive = null,
+                            modifier = Modifier.weight(1f).then(clickable),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Full-width highlight: value and change vs the previous assessment, plus a trend line of recent ones. */
+@Composable
+private fun TrendTile(diff: MeasureDiff, trend: List<Pair<LocalDate, Double>>, modifier: Modifier = Modifier) {
+    val c = MyFitTheme.colors
+    val unit = unitLabel(diff.measure)
+    MyFitCard(modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(diff.measure.labelRes), style = MyFitTheme.type.caption, color = c.textSecondary)
+                Spacer(Modifier.height(Spacing.s))
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(DecimalInput.format(diff.to), style = MyFitTheme.type.numericLarge.copy(fontSize = 44.sp, lineHeight = 48.sp), color = c.textPrimary)
+                    Text(" $unit", style = MyFitTheme.type.label, color = c.textSecondary, modifier = Modifier.padding(bottom = 6.dp))
+                }
+                diff.diff?.let {
+                    Spacer(Modifier.height(Spacing.xs))
+                    Text(formatSigned(it, unit), style = MyFitTheme.type.body, color = c.textSecondary)
+                }
+            }
+            if (trend.size >= 2) {
+                Column(Modifier.weight(0.9f), horizontalAlignment = Alignment.End) {
+                    Sparkline(trend.map { it.second }, c.accent, Modifier.fillMaxWidth().height(56.dp))
+                    Spacer(Modifier.height(Spacing.s))
+                    val change = trend.last().second - trend.first().second
+                    Text(
+                        stringResource(R.string.body_trend_since, formatSigned(change, unit), Dates.dayMonth(trend.first().first)),
+                        style = MyFitTheme.type.caption,
+                        color = c.textTertiary,
                     )
                 }
             }

@@ -299,6 +299,7 @@
     <string name="charts_not_enough">Needs at least two assessments with this measurement.</string>
     <string name="charts_change">%1$s in period</string>
     <string name="charts_all_measures">All</string>
+    <string name="body_trend_since">%1$s since %2$s</string>
     <string name="charts_pick_measure">Pick one or more measurements above.</string>
     <string name="charts_no_data">No data for these measurements in this period.</string>
     <string name="photos_date">Date</string>
