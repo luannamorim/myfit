@@ -48,9 +48,13 @@ data class BodyAssessment(
 /** Health range of a value (BMI and body fat only), shown as a green, amber or red dot. */
 enum class BodyStatus { GOOD, CAUTION, POOR }
 
+/** Why a dashboard card has no value: what the user can add to get one. */
+enum class BodyMissing { HEIGHT, WEIGHT, SEX, MEASUREMENTS }
+
 /**
  * [estimated]: either side is an estimate (BMI, always calculated, isn't flagged).
  * [status]: health range of [to], filled by [BodyMetrics.withStatus] for the dashboard.
+ * [missing]: when [to] is null, what is missing to get a value (also from [BodyMetrics.withStatus]).
  */
 data class MeasureDiff(
     val measure: Measure,
@@ -59,6 +63,7 @@ data class MeasureDiff(
     val diff: Double?,
     val estimated: Boolean = false,
     val status: BodyStatus? = null,
+    val missing: BodyMissing? = null,
 )
 
 /** Latest assessment with its change versus the previous one, for the dashboard. */
@@ -84,18 +89,19 @@ object BodyComparison {
     fun series(items: List<BodyAssessment>, measure: Measure): List<Pair<LocalDate, Double>> =
         items.sortedWith(compareBy({ it.date }, { it.id })).mapNotNull { a -> a.values[measure]?.let { a.date to it } }
 
-    /** Snapshot of the two most recent assessments; highlights are weight, body fat and BMI when present (Home and Progress). */
+    /** Snapshot of the two most recent assessments; highlights are weight, body fat and BMI, with or without a value (Home and Progress). */
     fun snapshot(items: List<BodyAssessment>, highlight: List<Measure> = listOf(Measure.WEIGHT, Measure.BODY_FAT, Measure.BMI)): BodySnapshot? {
         val sorted = items.sortedWith(compareByDescending<BodyAssessment> { it.date }.thenByDescending { it.id })
         val latest = sorted.firstOrNull() ?: return null
         val previous = sorted.getOrNull(1)
-        val diffs = highlight.filter { latest.values[it] != null }.map { m ->
+        val diffs = highlight.map { m ->
             val prev = previous?.values?.get(m)
             val now = latest.values[m]
             // The tile shows the latest value: it's an estimate only if that one is.
             MeasureDiff(m, prev, now, if (prev != null && now != null) round2(now - prev) else null, isEstimate(m, latest, null))
         }
-        val trends = diffs.associate { d -> d.measure to series(items, d.measure).takeLast(TREND_POINTS) }
+        // A highlight without a current value gets no trend line (its card shows "—").
+        val trends = diffs.filter { it.to != null }.associate { d -> d.measure to series(items, d.measure).takeLast(TREND_POINTS) }
         return BodySnapshot(latest, previous, diffs, trends)
     }
 

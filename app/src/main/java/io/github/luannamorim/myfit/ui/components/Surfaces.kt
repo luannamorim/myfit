@@ -114,6 +114,7 @@ fun StatTile(
     valueStyle: TextStyle = MyFitTheme.type.numericLarge,
     indicatorColor: Color? = null,
     indicatorDescription: String? = null,
+    hint: String? = null,
 ) {
     val c = MyFitTheme.colors
     MyFitCard(modifier) {
@@ -141,6 +142,10 @@ fun StatTile(
                     null -> c.textSecondary
                 },
             )
+        }
+        if (hint != null) {
+            Spacer(Modifier.height(Spacing.xs))
+            Text(hint, style = MyFitTheme.type.caption, color = c.textTertiary)
         }
     }
 }

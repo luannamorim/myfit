@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -213,17 +216,19 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
                 // Alone in its row: full width, with the recent trend beside it.
                 TrendTile(single, snapshot.trends[single.measure].orEmpty(), Modifier.fillMaxWidth().then(clickable))
             } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                // Same height for both cards, even when one label wraps (e.g. "Gordura corporal (estimada)").
+                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
                     row.forEach { diff ->
                         StatTile(
                             label = measureLabel(diff.measure, diff.estimated),
                             indicatorColor = diff.status?.color(),
                             indicatorDescription = diff.status?.let { stringResource(it.labelRes) },
-                            value = DecimalInput.format(diff.to),
-                            unit = unitLabel(diff.measure).ifEmpty { null },
+                            value = diff.to?.let { DecimalInput.format(it) } ?: EMPTY_VALUE,
+                            unit = unitLabel(diff.measure).ifEmpty { null }.takeIf { diff.to != null },
                             delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
                             deltaPositive = null,
-                            modifier = Modifier.weight(1f).then(clickable),
+                            hint = diff.missing?.let { stringResource(it.labelRes) },
+                            modifier = Modifier.weight(1f).fillMaxHeight().testTag("bodyTile_${diff.measure.name}").then(clickable),
                         )
                     }
                 }
@@ -231,6 +236,9 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
         }
     }
 }
+
+/** Shown in a body card that has no value yet. */
+private const val EMPTY_VALUE = "—"
 
 /** Health-range colors: the one place body measurements get green, amber or red (see BRAND.md). */
 @Composable
@@ -251,8 +259,8 @@ private fun TrendTile(diff: MeasureDiff, trend: List<Pair<LocalDate, Double>>, m
                 LabelWithDot(measureLabel(diff.measure, diff.estimated), diff.status?.color(), diff.status?.let { stringResource(it.labelRes) })
                 Spacer(Modifier.height(Spacing.s))
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(DecimalInput.format(diff.to), style = MyFitTheme.type.numericLarge.copy(fontSize = 44.sp, lineHeight = 48.sp), color = c.textPrimary)
-                    if (unit.isNotEmpty()) Text(" $unit", style = MyFitTheme.type.label, color = c.textSecondary, modifier = Modifier.padding(bottom = 6.dp))
+                    Text(diff.to?.let { DecimalInput.format(it) } ?: EMPTY_VALUE, style = MyFitTheme.type.numericLarge.copy(fontSize = 44.sp, lineHeight = 48.sp), color = c.textPrimary)
+                    if (unit.isNotEmpty() && diff.to != null) Text(" $unit", style = MyFitTheme.type.label, color = c.textSecondary, modifier = Modifier.padding(bottom = 6.dp))
                 }
                 diff.diff?.let {
                     Spacer(Modifier.height(Spacing.xs))

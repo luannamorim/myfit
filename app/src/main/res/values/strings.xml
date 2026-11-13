@@ -280,6 +280,10 @@
     <string name="body_status_good">Good</string>
     <string name="body_status_caution">Caution</string>
     <string name="body_status_poor">Poor</string>
+    <string name="body_missing_height">Height missing</string>
+    <string name="body_missing_weight">Weight missing</string>
+    <string name="body_missing_sex">Set your sex</string>
+    <string name="body_missing_measures">Measurements missing</string>
     <string name="measure_neck">Neck</string>
     <string name="measure_shoulders">Shoulders</string>
     <string name="measure_chest">Chest</string>

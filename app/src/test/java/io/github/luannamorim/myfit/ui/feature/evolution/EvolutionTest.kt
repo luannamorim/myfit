@@ -14,6 +14,7 @@ import io.github.luannamorim.myfit.data.images.ImageStore
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
+import io.github.luannamorim.myfit.domain.body.BodyMissing
 import io.github.luannamorim.myfit.domain.body.BodyStatus
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.Sex
@@ -182,7 +183,10 @@ class EvolutionTest {
         seedForEstimate()
         val vm = EvolutionViewModel(body, images, settings, time)
         val unset = vm.state.awaitUntil { !it.loading && it.snapshot != null }
-        assertEquals(listOf(Measure.WEIGHT, Measure.BMI), unset.snapshot!!.highlights.map { it.measure })
+        assertEquals(listOf(Measure.WEIGHT, Measure.BODY_FAT, Measure.BMI), unset.snapshot!!.highlights.map { it.measure })
+        val noFat = unset.snapshot!!.highlights.single { it.measure == Measure.BODY_FAT }
+        assertNull(noFat.to)
+        assertEquals(BodyMissing.SEX, noFat.missing)
         assertEquals(BodyStatus.GOOD, unset.snapshot!!.highlights.single { it.measure == Measure.BMI }.status) // BMI 23.1
         assertTrue(unset.charts.none { it.measure == Measure.BODY_FAT })
 

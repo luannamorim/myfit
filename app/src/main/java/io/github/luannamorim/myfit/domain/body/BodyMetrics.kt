@@ -79,10 +79,21 @@ object BodyMetrics {
         return BANDS[band]
     }
 
-    /** [snapshot] with each highlight's [MeasureDiff.status] taken from its latest value. */
+    /**
+     * [snapshot] with each highlight's [MeasureDiff.status] taken from its latest value, and, for BMI and
+     * body fat without a value, what is missing ([MeasureDiff.missing]).
+     */
     fun withStatus(snapshot: BodySnapshot?, sex: Sex?): BodySnapshot? = snapshot?.copy(
-        highlights = snapshot.highlights.map { d -> d.copy(status = d.to?.let { status(d.measure, it, sex) }) },
+        highlights = snapshot.highlights.map { d ->
+            d.copy(status = d.to?.let { status(d.measure, it, sex) }, missing = if (d.to == null) missing(d.measure, snapshot.latest, sex) else null)
+        },
     )
+
+    private fun missing(measure: Measure, latest: BodyAssessment, sex: Sex?): BodyMissing? = when (measure) {
+        Measure.BMI -> if (latest.values[Measure.WEIGHT] == null) BodyMissing.WEIGHT else BodyMissing.HEIGHT
+        Measure.BODY_FAT -> if (sex == null) BodyMissing.SEX else BodyMissing.MEASUREMENTS
+        else -> null
+    }
 
     private val BANDS = listOf(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD, BodyStatus.CAUTION, BodyStatus.POOR)
     private val BMI_BOUNDS = listOf(16.0, 18.5, 25.0, 30.0)

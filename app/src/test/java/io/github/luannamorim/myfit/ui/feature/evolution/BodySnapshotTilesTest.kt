@@ -1,9 +1,9 @@
 package io.github.luannamorim.myfit.ui.feature.evolution
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.hasText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodyComparison
@@ -44,15 +44,39 @@ class BodySnapshotTilesTest {
     }
 
     @Test
-    fun bodyFatAloneInItsRow_stillShowsTheDot() {
-        // No height, so no BMI: body fat sits alone on the full-width card.
+    fun bmiMissing_showsHint_bodyFatKeepsItsDot() {
+        // No height, so no BMI value: its card stays, with "—" and what is missing.
         show(mapOf(Measure.WEIGHT to 73.0, Measure.BODY_FAT to 20.0), Sex.MALE)
         count("Caution").assertCountEquals(1)
+        compose.onNodeWithText("Height missing", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun weightOnly_showsTwoEmptyCards() {
+        show(mapOf(Measure.WEIGHT to 73.0), null)
+        compose.onNodeWithText("Set your sex", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Height missing", useUnmergedTree = true).assertExists()
+        compose.onAllNodes(hasText("—"), useUnmergedTree = true).assertCountEquals(2)
     }
 
     @Test
     fun withoutSex_bodyFatHasNoDot_bmiStillDoes() {
         show(mapOf(Measure.WEIGHT to 95.0, Measure.HEIGHT to 170.0, Measure.BODY_FAT to 30.0), null)
         count("Poor").assertCountEquals(1) // BMI 32.9; body fat 30 % gets nothing without sex
+        compose.onNodeWithText("Set your sex", useUnmergedTree = true).assertDoesNotExist() // it was typed: there is a value
+    }
+
+    @Test
+    fun emptyWeight_hasNoTrendLine() {
+        val items = listOf(
+            BodyAssessment(1, LocalDate.of(2026, 9, 1), mapOf(Measure.WEIGHT to 71.0)),
+            BodyAssessment(2, LocalDate.of(2026, 10, 1), mapOf(Measure.WEIGHT to 72.0)),
+            BodyAssessment(3, LocalDate.of(2026, 11, 12), mapOf(Measure.WAIST to 80.0)),
+        )
+        val snapshot = BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(items, null)), null)!!
+        compose.setContent { MyFitTheme(ThemeMode.DARK) { BodySnapshotTiles(snapshot) } }
+        compose.onAllNodes(hasText("—"), useUnmergedTree = true).assertCountEquals(3) // weight, body fat, BMI
+        compose.onAllNodes(hasText("since", substring = true), useUnmergedTree = true).assertCountEquals(0)
+        compose.onNodeWithText("Weight missing", useUnmergedTree = true).assertExists()
     }
 }

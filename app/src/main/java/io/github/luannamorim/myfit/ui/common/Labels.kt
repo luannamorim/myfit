@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.ui.common
 
 import androidx.annotation.StringRes
 import io.github.luannamorim.myfit.R
+import io.github.luannamorim.myfit.domain.body.BodyMissing
 import io.github.luannamorim.myfit.domain.body.BodyStatus
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.MeasureUnit
@@ -84,4 +85,13 @@ val BodyStatus.labelRes: Int
         BodyStatus.GOOD -> R.string.body_status_good
         BodyStatus.CAUTION -> R.string.body_status_caution
         BodyStatus.POOR -> R.string.body_status_poor
+    }
+
+@get:StringRes
+val BodyMissing.labelRes: Int
+    get() = when (this) {
+        BodyMissing.HEIGHT -> R.string.body_missing_height
+        BodyMissing.WEIGHT -> R.string.body_missing_weight
+        BodyMissing.SEX -> R.string.body_missing_sex
+        BodyMissing.MEASUREMENTS -> R.string.body_missing_measures
     }

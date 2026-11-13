@@ -308,6 +308,10 @@
     <string name="body_status_good">Bom</string>
     <string name="body_status_caution">Atenção</string>
     <string name="body_status_poor">Ruim</string>
+    <string name="body_missing_height">Falta a altura</string>
+    <string name="body_missing_weight">Falta o peso</string>
+    <string name="body_missing_sex">Defina o sexo</string>
+    <string name="body_missing_measures">Faltam medidas</string>
     <string name="measure_neck">Pescoço</string>
     <string name="measure_shoulders">Ombros</string>
     <string name="measure_chest">Peitoral</string>

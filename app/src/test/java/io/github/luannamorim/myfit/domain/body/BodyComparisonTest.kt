@@ -46,7 +46,10 @@ class BodyComparisonTest {
         val snap = BodyComparison.snapshot(listOf(first, current))!!
         assertEquals(2L, snap.latest.id)
         assertEquals(1L, snap.previous!!.id)
-        assertEquals(listOf(Measure.WEIGHT, Measure.BODY_FAT), snap.highlights.map { it.measure }) // waist left out on purpose
+        // Weight, body fat and BMI always (waist left out on purpose); BMI has no value here (no height).
+        assertEquals(listOf(Measure.WEIGHT, Measure.BODY_FAT, Measure.BMI), snap.highlights.map { it.measure })
+        assertNull(snap.highlights[2].to)
+        assertEquals(emptyList<Pair<LocalDate, Double>>(), snap.trends[Measure.BMI].orEmpty())
         assertEquals(listOf(71.0, 73.0), snap.trends.getValue(Measure.WEIGHT).map { it.second }) // oldest first
         assertEquals(listOf(15.5), snap.trends.getValue(Measure.BODY_FAT).map { it.second })
         assertEquals(2.0, snap.highlights[0].diff!!, 0.0)
@@ -87,6 +90,19 @@ class BodyComparisonTest {
         assertEquals(15.5, fat.to!!, 0.0)
         assertFalse(fat.estimated)
         assertTrue(BodyComparison.compare(derived[0], derived[1]).single { it.measure == Measure.BODY_FAT }.estimated) // Compare: either side
+    }
+
+    @Test
+    fun snapshot_emptyHighlight_hasNoTrend() {
+        // Two weigh-ins, then a tape-measure-only assessment: the weight card is "—", with no trend line.
+        val items = listOf(
+            BodyAssessment(1, d1, mapOf(Measure.WEIGHT to 71.0)),
+            BodyAssessment(2, LocalDate.of(2026, 2, 10), mapOf(Measure.WEIGHT to 72.0)),
+            BodyAssessment(3, d2, mapOf(Measure.WAIST to 80.0)),
+        )
+        val snap = BodyComparison.snapshot(items)!!
+        assertNull(snap.highlights.single { it.measure == Measure.WEIGHT }.to)
+        assertEquals(emptyList<Pair<LocalDate, Double>>(), snap.trends[Measure.WEIGHT].orEmpty())
     }
 
     @Test

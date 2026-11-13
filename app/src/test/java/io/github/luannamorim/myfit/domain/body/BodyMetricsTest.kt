@@ -122,4 +122,28 @@ class BodyMetricsTest {
         )
         assertNull(BodyMetrics.withStatus(null, Sex.MALE))
     }
+
+    private fun missing(items: List<BodyAssessment>, sex: Sex?): Map<Measure, BodyMissing?> =
+        BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(items, sex)), sex)!!.highlights.associate { it.measure to it.missing }
+
+    @Test
+    fun withStatus_explainsWhatIsMissing() {
+        // (a) only weight, no sex: BMI needs a height, body fat needs the sex.
+        assertEquals(
+            mapOf(Measure.WEIGHT to null, Measure.BODY_FAT to BodyMissing.SEX, Measure.BMI to BodyMissing.HEIGHT),
+            missing(listOf(BodyAssessment(1, apr, mapOf(Measure.WEIGHT to 73.0))), null),
+        )
+        // (b) sex set, but no neck: body fat needs measurements; BMI has a value.
+        val b = missing(listOf(BodyAssessment(1, apr, mapOf(Measure.WEIGHT to 73.0, Measure.HEIGHT to 178.0))), Sex.MALE)
+        assertEquals(BodyMissing.MEASUREMENTS, b[Measure.BODY_FAT])
+        assertNull(b[Measure.BMI])
+        // (c) latest assessment has no weight: weight "—", BMI asks for the weight (height is known from before).
+        val older = BodyAssessment(1, jan, mapOf(Measure.WEIGHT to 71.0, Measure.HEIGHT to 178.0))
+        val latest = BodyAssessment(2, apr, mapOf(Measure.WAIST to 80.0))
+        val snap = BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(listOf(older, latest), null)), null)!!
+        assertNull(snap.highlights.single { it.measure == Measure.WEIGHT }.to)
+        assertEquals(BodyMissing.WEIGHT, snap.highlights.single { it.measure == Measure.BMI }.missing)
+        // (d) only an implausible height: BMI still asks for the height.
+        assertEquals(BodyMissing.HEIGHT, missing(listOf(BodyAssessment(1, apr, mapOf(Measure.WEIGHT to 73.0, Measure.HEIGHT to 17.8))), null)[Measure.BMI])
+    }
 }

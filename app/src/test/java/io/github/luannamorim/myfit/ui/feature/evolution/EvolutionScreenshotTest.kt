@@ -65,9 +65,12 @@ class EvolutionScreenshotTest {
 
     @Test
     fun evolution_measures_weight_only() = compose.snapBothThemes("evolution_measures_weight_only") {
-        val weightOnly = assessments.map { it.copy(values = mapOf(Measure.WEIGHT to it.values.getValue(Measure.WEIGHT), Measure.WAIST to 78.0)) }
+        // Only weight and waist typed, no sex: body fat and BMI cards stay, saying what is missing.
+        val weightOnly = assessments.map {
+            it.copy(values = mapOf(Measure.WEIGHT to it.values.getValue(Measure.WEIGHT), Measure.WAIST to 78.0), estimated = emptySet())
+        }
         EvolutionContent(
-            state(EvolutionSection.MEASURES).copy(assessments = weightOnly, snapshot = BodyComparison.snapshot(weightOnly)),
+            state(EvolutionSection.MEASURES).copy(assessments = weightOnly, snapshot = BodyMetrics.withStatus(BodyComparison.snapshot(weightOnly), null)),
             EvolutionActions(), {}, {}, {}, {}, {}, {},
         )
     }
