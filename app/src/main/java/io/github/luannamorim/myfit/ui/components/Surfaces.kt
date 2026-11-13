@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -74,13 +75,14 @@ fun StatTile(
     unit: String? = null,
     delta: String? = null,
     deltaPositive: Boolean? = null,
+    valueStyle: TextStyle = MyFitTheme.type.numericLarge,
 ) {
     val c = MyFitTheme.colors
     MyFitCard(modifier) {
         Text(label, style = MyFitTheme.type.caption, color = c.textSecondary)
         Spacer(Modifier.height(Spacing.s))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(value, style = MyFitTheme.type.numericLarge, color = c.textPrimary)
+            Text(value, style = valueStyle, color = c.textPrimary)
             if (unit != null) {
                 Text(
                     " $unit",

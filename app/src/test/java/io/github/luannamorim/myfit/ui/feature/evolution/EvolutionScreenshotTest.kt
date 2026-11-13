@@ -55,6 +55,15 @@ class EvolutionScreenshotTest {
     }
 
     @Test
+    fun evolution_measures_weight_only() = compose.snapBothThemes("evolution_measures_weight_only") {
+        val weightOnly = assessments.map { it.copy(values = mapOf(Measure.WEIGHT to it.values.getValue(Measure.WEIGHT), Measure.WAIST to 78.0)) }
+        EvolutionContent(
+            state(EvolutionSection.MEASURES).copy(assessments = weightOnly, snapshot = BodyComparison.snapshot(weightOnly)),
+            EvolutionActions(), {}, {}, {}, {}, {}, {},
+        )
+    }
+
+    @Test
     fun evolution_charts_all() = compose.snapBothThemes("evolution_charts_all") {
         val all = Measure.entries.toSet()
         EvolutionContent(

@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -190,8 +191,9 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
             style = MyFitTheme.type.caption,
             color = c.textSecondary,
         )
-        val tiles = snapshot.highlights.ifEmpty { emptyList() }
-        tiles.chunked(2).forEach { row ->
+        snapshot.highlights.chunked(2).forEach { row ->
+            // A tile alone in its row (e.g. weight without body fat) spans the width with a bigger number.
+            val alone = row.size == 1
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
                 row.forEach { diff ->
                     StatTile(
@@ -200,10 +202,10 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onClick: (() -> Unit)? = null) {
                         unit = unitLabel(diff.measure),
                         delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
                         deltaPositive = null,
+                        valueStyle = if (alone) MyFitTheme.type.numericLarge.copy(fontSize = 52.sp, lineHeight = 56.sp) else MyFitTheme.type.numericLarge,
                         modifier = Modifier.weight(1f).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
                     )
                 }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
             }
         }
     }
