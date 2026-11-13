@@ -31,3 +31,7 @@ Thumbs.db
 # Python
 __pycache__/
 .claude/worktrees/
+
+# Superpowers (local design docs, plans and execution workspace)
+docs/superpowers/
+.superpowers/
