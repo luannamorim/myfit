@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,7 +58,9 @@ import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.MeasureDiff
 import io.github.luannamorim.myfit.domain.model.PhotoPose
+import io.github.luannamorim.myfit.ui.common.PhotoViewer
 import io.github.luannamorim.myfit.ui.common.Sparkline
+import io.github.luannamorim.myfit.ui.common.ViewerPage
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.common.localImageModel
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
@@ -337,6 +340,7 @@ private fun PhotosSection(
     val c = MyFitTheme.colors
     var confirmDelete by remember { mutableStateOf(false) }
     var pose by remember { mutableStateOf(PhotoPose.FRONT) }
+    var viewing by remember { mutableStateOf<Int?>(null) }
 
     MyFitCard(Modifier.fillMaxWidth()) {
         Text(stringResource(R.string.photos_pose), style = MyFitTheme.type.caption, color = c.textSecondary)
@@ -385,7 +389,13 @@ private fun PhotosSection(
                             .clip(MyFitShapes.small)
                             .then(if (selected) Modifier.border(BorderStroke(3.dp, c.accent), MyFitShapes.small) else Modifier)
                             .semantics { this.selected = selected }
-                            .clickable { onTogglePhoto(photo.id) },
+                            // Like a gallery: tap opens the photo; press and hold starts selecting (then taps toggle).
+                            .combinedClickable(
+                                onClick = {
+                                    if (state.selectedPhotos.isEmpty()) viewing = state.photos.indexOf(photo) else onTogglePhoto(photo.id)
+                                },
+                                onLongClick = { onTogglePhoto(photo.id) },
+                            ),
                     ) {
                         AsyncImage(model, contentDescription = stringResource(photo.pose.labelRes), contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                         Text(
@@ -407,6 +417,11 @@ private fun PhotosSection(
                 repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
+    }
+
+    viewing?.let { index ->
+        val pages = state.photos.map { ViewerPage(it.imagePath, Dates.medium(it.date) + " · " + stringResource(it.pose.labelRes)) }
+        PhotoViewer(pages, initialPage = index, onDismiss = { viewing = null })
     }
 
     if (confirmDelete) {

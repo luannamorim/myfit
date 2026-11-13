@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.ui.common
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,10 @@ import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
@@ -59,14 +64,16 @@ fun IntensityPicker(selected: Intensity?, onSelect: (Intensity?) -> Unit, modifi
 fun PhotoField(imagePath: String?, onPick: () -> Unit, onRemove: () -> Unit, modifier: Modifier = Modifier, error: Boolean = false) {
     val c = MyFitTheme.colors
     val model = localImageModel(imagePath)
+    var viewing by remember { mutableStateOf(false) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-        if (model != null) {
+        if (model != null && imagePath != null) {
             AsyncImage(
                 model,
                 contentDescription = stringResource(R.string.workout_photo_a11y),
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f).heightIn(max = 320.dp).clip(MyFitShapes.medium),
+                modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f).heightIn(max = 320.dp).clip(MyFitShapes.medium).clickable { viewing = true },
             )
+            if (viewing) PhotoViewer(listOf(ViewerPage(imagePath)), initialPage = 0, onDismiss = { viewing = false })
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 SecondaryButton(stringResource(R.string.workout_photo_change), onClick = onPick, icon = Icons.Rounded.Image, modifier = Modifier.weight(1f))
                 SecondaryButton(stringResource(R.string.workout_photo_remove), onClick = onRemove, icon = Icons.Rounded.Delete, contentColor = c.danger)

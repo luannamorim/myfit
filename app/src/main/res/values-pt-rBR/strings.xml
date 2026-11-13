@@ -12,6 +12,7 @@
     <!-- Comum -->
     <string name="action_save">Salvar</string>
     <string name="action_cancel">Cancelar</string>
+    <string name="action_close">Fechar</string>
     <string name="action_delete">Excluir</string>
     <string name="action_edit">Editar</string>
     <string name="action_duplicate">Duplicar</string>
@@ -365,7 +366,7 @@
     <string name="photos_empty">Fotos por data ajudam a ver a evolução que a fita métrica não mostra.</string>
     <string name="photos_pose">Pose</string>
     <string name="photos_compare">Comparar selecionadas</string>
-    <string name="photos_select_two">Selecione duas fotos para comparar</string>
+    <string name="photos_select_two">Toque para ver · toque e segure para selecionar e comparar</string>
     <string name="photos_delete_title">Excluir foto?</string>
     <string name="photos_delete_message">A foto será removida do aparelho.</string>
     <string name="photo_compare_title">Comparar fotos</string>

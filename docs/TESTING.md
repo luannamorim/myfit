@@ -71,7 +71,8 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Log two assessments on different dates (edit the date at the top). Weight with a decimal comma.
 - [ ] Compare the two: signed differences (+/−).
 - [ ] Charts: weight and waist appear; change the metrics and the period. "All" shows every measure you have logged; tapping it again clears the selection.
-- [ ] Photos: add two (front), one with an older date picked with *Date*, select both → "Compare selected"; delete one.
+- [ ] Photos: add two (front), one with an older date picked with *Date*. Tap one: it opens full screen; swipe to the other, pinch and double-tap to zoom, ✕ or back to close. Press and hold one to select, tap the other → "Compare selected"; delete one.
+- [ ] Workout or activity photo: tapping it opens it full screen.
 - [ ] Home and Measurements show weight and body fat (no waist) with their change.
 
 ### 6a. Reminders

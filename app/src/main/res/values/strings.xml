@@ -9,6 +9,7 @@
     <string name="nav_settings">Settings</string>
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
     <string name="action_delete">Delete</string>
     <string name="action_edit">Edit</string>
     <string name="action_duplicate">Duplicate</string>
@@ -334,7 +335,7 @@
     <string name="photos_empty">Dated photos show progress a tape measure misses.</string>
     <string name="photos_pose">Pose</string>
     <string name="photos_compare">Compare selected</string>
-    <string name="photos_select_two">Select two photos to compare</string>
+    <string name="photos_select_two">Tap to view · press and hold to select and compare</string>
     <string name="photos_delete_title">Delete photo?</string>
     <string name="photos_delete_message">The photo will be removed from the device.</string>
     <string name="photo_compare_title">Compare photos</string>
