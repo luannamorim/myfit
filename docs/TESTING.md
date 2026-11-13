@@ -28,10 +28,10 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Edit sets, reps, rest and load, typing "42,5" (comma). Reorder by dragging the handle.
 - [ ] Create a custom exercise with an image from the gallery. It shows up in the list and in the workout.
 - [ ] Duplicate the workout ("(copy)" appears) and delete the copy.
-- [ ] Predefined exercises open read-only ("Exercício"): drawing with its credit, name, group · movement, "Watch how to do it" and the star. No name field, group, movement type, set counting, photo, notes, Save or Delete. The name follows the app language (switch Portuguese ↔ English: Library, routines, workout and History change with it). A custom exercise keeps its name and photo, every field except notes, and Delete.
+- [ ] Predefined exercises open read-only ("Exercício"): name, Muscle group with only its own group (not clickable) and the body map, Movement type with only its own type, the drawing with its credit, "Watch how to do it" and the star. No other options, no set counting, photo picker, notes, Save or Delete. The name follows the app language (switch Portuguese ↔ English: Library, routines, workout and History change with it). A custom exercise keeps its name and photo, every field except notes, and Delete.
 - [ ] Tap the star (top-right) on a predefined and on a custom exercise, go back: both are at the top of the Library and the picker, with a green star on the row; tap again to unstar. A new exercise has no star until saved.
 - [ ] Activities: "Academia" / "Gym" is in the sport list (dumbbell icon), without distance.
-- [ ] The library shows a drawing next to every predefined exercise. Open one: start → end drawing, and "Watch how to do it" opens a YouTube search.
+- [ ] The library shows a drawing next to every predefined exercise. Open one: start → end drawing, the body map with its group in green, and "Watch how to do it" opens a YouTube search.
 - [ ] In a custom exercise, change the muscle group: the body map updates at once. Pick a photo: it shows; remove it: the placeholder comes back.
 - [ ] A custom exercise without a photo shows the body map in the list and during the workout.
 - [ ] *Settings → Image credits* lists the illustrations and their licenses; *About* shows "Developed by luannamorim".

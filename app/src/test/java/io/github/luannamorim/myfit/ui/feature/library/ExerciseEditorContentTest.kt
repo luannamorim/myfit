@@ -1,5 +1,6 @@
 package io.github.luannamorim.myfit.ui.feature.library
 
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -20,7 +21,8 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 /**
- * A library exercise shows only its drawing, name, video link and star; a custom one keeps every field.
+ * A library exercise shows its name, group (body map), movement type, drawing, video link and star, each
+ * with only its own value; a custom one keeps every field.
  * Section headers are shown in capitals.
  */
 @RunWith(AndroidJUnit4::class)
@@ -49,8 +51,12 @@ class ExerciseEditorContentTest {
         compose.onNodeWithText("Exercício").assertExists()
         compose.onNodeWithText("Supino reto com barra").assertExists()
         compose.onNodeWithText("Ver execução").assertExists()
-        listOf("GRUPO MUSCULAR", "TIPO DE MOVIMENTO", "CADA SÉRIE CONTA", "Escolher da galeria", "Observações", "Excluir", "Salvar")
+        // Group and movement type show only this exercise's value, not every option.
+        listOf("GRUPO MUSCULAR", "Peito", "TIPO DE MOVIMENTO", "Empurrar", "IMAGEM DEMONSTRATIVA")
+            .forEach { compose.onNodeWithText(it).assertExists() }
+        listOf("Costas", "Puxar", "CADA SÉRIE CONTA", "Escolher da galeria", "Observações", "Excluir", "Salvar")
             .forEach { compose.onNodeWithText(it).assertDoesNotExist() }
+        compose.onNodeWithText("Peito").assertHasNoClickAction()
 
         val star = compose.onNodeWithContentDescription("Favorito")
         star.assertIsOff()

@@ -3,6 +3,7 @@ package io.github.luannamorim.myfit.ui.feature.library
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,8 +95,8 @@ fun ExerciseEditorScreen(onClose: () -> Unit, viewModel: ExerciseEditorViewModel
 }
 
 /**
- * A library exercise only shows its drawing, name and video link (plus the favorite star); a custom
- * one is fully editable and can be deleted.
+ * A library exercise is read-only: name, its muscle group (with the body map), movement type, drawing,
+ * video link and the favorite star. A custom one is fully editable and can be deleted.
  */
 @Composable
 fun ExerciseEditorContent(
@@ -192,17 +194,25 @@ private fun FavoriteToggle(favorite: Boolean, onToggle: () -> Unit) {
     }
 }
 
+/** Same sections as the custom editor, each showing only this exercise's value instead of every option. */
 @Composable
 private fun ColumnScope.LibraryDetail(state: ExerciseEditorUiState) {
-    val c = MyFitTheme.colors
+    Text(state.name, style = MyFitTheme.type.title, color = MyFitTheme.colors.textPrimary)
+    SectionHeader(stringResource(R.string.exercise_group))
+    ValueChip(stringResource(state.muscleGroup.labelRes))
+    MuscleMap(state.muscleGroup, Modifier.fillMaxWidth().height(180.dp).padding(vertical = Spacing.xs))
+    SectionHeader(stringResource(R.string.exercise_movement))
+    ValueChip(stringResource(state.movementType.labelRes))
+    SectionHeader(stringResource(R.string.exercise_image))
     ExerciseImage(state)
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-        Text(state.name, style = MyFitTheme.type.title, color = c.textPrimary)
-        Text(
-            stringResource(state.muscleGroup.labelRes) + " · " + stringResource(state.movementType.labelRes),
-            style = MyFitTheme.type.caption,
-            color = c.textSecondary,
-        )
+}
+
+/** Looks like a selected [MyFitChip] but isn't clickable: a value, not a choice. */
+@Composable
+private fun ValueChip(text: String) {
+    val c = MyFitTheme.colors
+    Surface(shape = MyFitShapes.pill, color = c.textPrimary, contentColor = c.background, border = BorderStroke(1.dp, c.textPrimary)) {
+        Text(text, style = MyFitTheme.type.label, modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp))
     }
 }
 
