@@ -6,6 +6,8 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -90,6 +92,13 @@ fun SettingsScreen(
     )
 }
 
+/** Chips that move to the next line whole when they don't fit (long Portuguese labels on small phones). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ChipGroup(content: @Composable () -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) { content() }
+}
+
 @Composable
 fun SettingsContent(
     state: SettingsUiState,
@@ -109,7 +118,7 @@ fun SettingsContent(
         MyFitCard(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.settings_sex), style = MyFitTheme.type.caption, color = c.textSecondary)
             Spacer(Modifier.height(Spacing.s))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            ChipGroup {
                 listOf(null to R.string.settings_sex_unset, Sex.MALE to R.string.settings_sex_male, Sex.FEMALE to R.string.settings_sex_female)
                     .forEach { (sex, label) -> MyFitChip(stringResource(label), selected = s.sex == sex, onClick = { onUpdate { it.copy(sex = sex) } }) }
             }
@@ -121,7 +130,7 @@ fun SettingsContent(
         MyFitCard(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.settings_theme), style = MyFitTheme.type.caption, color = c.textSecondary)
             Spacer(Modifier.height(Spacing.s))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            ChipGroup {
                 listOf(ThemeMode.DARK to R.string.settings_theme_dark, ThemeMode.LIGHT to R.string.settings_theme_light, ThemeMode.SYSTEM to R.string.settings_theme_system)
                     .forEach { (mode, label) -> MyFitChip(stringResource(label), selected = s.themeMode == mode, onClick = { onUpdate { it.copy(themeMode = mode) } }) }
             }
@@ -138,7 +147,7 @@ fun SettingsContent(
             Spacer(Modifier.height(Spacing.l))
             Text(stringResource(R.string.settings_rest_sound), style = MyFitTheme.type.caption, color = c.textSecondary)
             Spacer(Modifier.height(Spacing.s))
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            ChipGroup {
                 MyFitChip(stringResource(R.string.settings_rest_sound_follow), selected = s.restSound == RestSound.FOLLOW_RINGER, onClick = { onUpdate { it.copy(restSound = RestSound.FOLLOW_RINGER) } })
                 MyFitChip(stringResource(R.string.settings_rest_sound_always), selected = s.restSound == RestSound.ALWAYS, onClick = { onUpdate { it.copy(restSound = RestSound.ALWAYS) } })
             }
