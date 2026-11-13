@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -229,7 +230,16 @@ private fun ExerciseRow(
                     if (exercise.isCustom) " · " + stringResource(R.string.library_custom_badge) else ""
                 Text(meta, style = MyFitTheme.type.caption, color = c.textSecondary)
             }
+            if (exercise.favorite) {
+                Icon(
+                    Icons.Rounded.Star,
+                    contentDescription = stringResource(R.string.exercise_favorite),
+                    tint = c.accent,
+                    modifier = Modifier.padding(start = Spacing.s).size(20.dp),
+                )
+            }
             if (selected != null) {
+                Spacer(Modifier.width(Spacing.m))
                 Box(
                     Modifier
                         .size(28.dp)

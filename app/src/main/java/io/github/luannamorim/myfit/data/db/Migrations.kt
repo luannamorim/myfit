@@ -51,8 +51,15 @@ object Migrations {
         }
     }
 
+    /** v7: exercises can be starred as favorites. */
+    val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE exercise ADD COLUMN favorite INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
     /** Targets below this are taken as repetitions when an exercise becomes timed. */
     private const val REPS_LIKE_BELOW = 15
 
-    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
 }

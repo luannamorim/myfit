@@ -33,6 +33,9 @@ interface ExerciseDao {
     @Update
     suspend fun update(exercise: ExerciseEntity)
 
+    @Query("UPDATE exercise SET favorite = :favorite WHERE id = :id")
+    suspend fun setFavorite(id: Long, favorite: Boolean)
+
     @Query("DELETE FROM exercise WHERE id = :id")
     suspend fun delete(id: Long)
 

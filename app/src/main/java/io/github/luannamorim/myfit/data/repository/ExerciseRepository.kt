@@ -20,14 +20,17 @@ class ExerciseRepository @Inject constructor(
     private val time: TimeSource,
     private val backup: BackupTrigger,
 ) {
-    /** Active (non-archived) library, filtered by accent-insensitive [query] and [groups] (empty = all). */
+    /**
+     * Active (non-archived) library, filtered by accent-insensitive [query] and [groups] (empty = all).
+     * Favorites come first, then alphabetical.
+     */
     fun observeLibrary(query: String = "", groups: Set<MuscleGroup> = emptySet()): Flow<List<Exercise>> =
         dao.observeActive().map { list ->
             list.asSequence()
                 .filter { groups.isEmpty() || it.muscleGroup in groups }
                 .map { it.toDomain() }
                 .filter { SearchText.matches(it.name, query) } // the shown name (library names follow the app's language)
-                .sortedBy { SearchText.normalize(it.name) }
+                .sortedWith(compareByDescending<Exercise> { it.favorite }.thenBy { SearchText.normalize(it.name) })
                 .toList()
         }
 
@@ -53,6 +56,7 @@ class ExerciseRepository @Inject constructor(
                     isCustom = true,
                     createdAtMs = time.now().wallMs,
                     measure = exercise.measure,
+                    favorite = exercise.favorite,
                 ),
             )
         } else {
@@ -66,6 +70,7 @@ class ExerciseRepository @Inject constructor(
                     imagePath = exercise.imagePath,
                     notes = exercise.notes?.trim()?.ifEmpty { null },
                     measure = exercise.measure,
+                    favorite = exercise.favorite,
                 ),
             )
             exercise.id
@@ -74,10 +79,20 @@ class ExerciseRepository @Inject constructor(
         return id
     }
 
-    /** Deletes the exercise, or archives it when a routine still references it. */
-    suspend fun delete(id: Long): ExerciseDeleteResult {
+    suspend fun setFavorite(id: Long, favorite: Boolean) {
+        dao.setFavorite(id, favorite)
+        backup.onDataChanged()
+    }
+
+    /**
+     * Deletes the exercise, or archives it when a routine still references it. Library exercises stay:
+     * returns null without touching them.
+     */
+    suspend fun delete(id: Long): ExerciseDeleteResult? {
+        val current = dao.get(id) ?: return null
+        if (ExerciseSeed.forKey(current.seedKey) != null) return null
         val result = if (dao.routineUsageCount(id) > 0) {
-            dao.get(id)?.let { dao.update(it.copy(archived = true)) }
+            dao.update(current.copy(archived = true))
             ExerciseDeleteResult.ARCHIVED
         } else {
             dao.delete(id)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -22,8 +23,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -78,30 +82,33 @@ fun ExerciseEditorScreen(onClose: () -> Unit, viewModel: ExerciseEditorViewModel
         onName = viewModel::setName,
         onGroup = viewModel::setGroup,
         onMovement = viewModel::setMovement,
-        onNotes = viewModel::setNotes,
+        onMeasure = viewModel::setMeasure,
         onPickImage = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
         onRemoveImage = viewModel::removeImage,
+        onToggleFavorite = viewModel::toggleFavorite,
         onSave = { viewModel.save() },
         onDelete = viewModel::delete,
         onBack = onClose,
-        onMeasure = viewModel::setMeasure,
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * A library exercise only shows its drawing, name and video link (plus the favorite star); a custom
+ * one is fully editable and can be deleted.
+ */
 @Composable
 fun ExerciseEditorContent(
     state: ExerciseEditorUiState,
-    onName: (String) -> Unit,
-    onGroup: (MuscleGroup) -> Unit,
-    onMovement: (MovementType) -> Unit,
-    onNotes: (String) -> Unit,
-    onPickImage: () -> Unit,
-    onRemoveImage: () -> Unit,
-    onSave: () -> Unit,
-    onDelete: () -> Unit,
-    onBack: () -> Unit,
+    onName: (String) -> Unit = {},
+    onGroup: (MuscleGroup) -> Unit = {},
+    onMovement: (MovementType) -> Unit = {},
     onMeasure: (ExerciseMeasure) -> Unit = {},
+    onPickImage: () -> Unit = {},
+    onRemoveImage: () -> Unit = {},
+    onToggleFavorite: () -> Unit = {},
+    onSave: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     var confirmDelete by remember { mutableStateOf(false) }
@@ -109,9 +116,20 @@ fun ExerciseEditorContent(
         containerColor = c.background,
         topBar = {
             MyFitTopBar(
-                title = stringResource(if (state.isNew) R.string.exercise_editor_new else R.string.exercise_editor_edit),
+                title = stringResource(
+                    when {
+                        state.isLibrary -> R.string.exercise_detail_title
+                        state.isNew -> R.string.exercise_editor_new
+                        else -> R.string.exercise_editor_edit
+                    },
+                ),
                 onBack = onBack,
-                actions = { TextAction(stringResource(R.string.action_save), onClick = onSave, enabled = !state.isLoading && !state.isImporting) },
+                actions = {
+                    if (!state.isNew && !state.isLoading) FavoriteToggle(state.favorite, onToggleFavorite)
+                    if (!state.isLibrary) {
+                        TextAction(stringResource(R.string.action_save), onClick = onSave, enabled = !state.isLoading && !state.isImporting)
+                    }
+                },
             )
         },
     ) { padding ->
@@ -124,39 +142,11 @@ fun ExerciseEditorContent(
                     .padding(horizontal = Spacing.screen, vertical = Spacing.s),
                 verticalArrangement = Arrangement.spacedBy(Spacing.l),
             ) {
-                MyFitTextField(
-                    value = state.name,
-                    onValueChange = onName,
-                    label = stringResource(R.string.exercise_name),
-                    isError = state.nameError,
-                    supportingText = when {
-                        state.nameError -> stringResource(R.string.exercise_name_required)
-                        state.nameLocked -> stringResource(R.string.exercise_name_locked)
-                        else -> null
-                    },
-                    capitalization = KeyboardCapitalization.Sentences,
-                    enabled = !state.nameLocked,
-                )
-                SectionHeader(stringResource(R.string.exercise_group))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    MuscleGroup.entries.forEach { group ->
-                        MyFitChip(stringResource(group.labelRes), selected = state.muscleGroup == group, onClick = { onGroup(group) })
-                    }
+                if (state.isLibrary) {
+                    LibraryDetail(state)
+                } else {
+                    CustomFields(state, onName, onGroup, onMovement, onMeasure, onPickImage, onRemoveImage)
                 }
-                MuscleMap(state.muscleGroup, Modifier.fillMaxWidth().height(180.dp).padding(vertical = Spacing.xs))
-                SectionHeader(stringResource(R.string.exercise_movement))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    MovementType.entries.forEach { type ->
-                        MyFitChip(stringResource(type.labelRes), selected = state.movementType == type, onClick = { onMovement(type) })
-                    }
-                }
-                SectionHeader(stringResource(R.string.exercise_measure))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    MyFitChip(stringResource(R.string.exercise_measure_reps), selected = state.measure == ExerciseMeasure.REPS, onClick = { onMeasure(ExerciseMeasure.REPS) })
-                    MyFitChip(stringResource(R.string.exercise_measure_time), selected = state.measure == ExerciseMeasure.TIME, onClick = { onMeasure(ExerciseMeasure.TIME) })
-                }
-                SectionHeader(stringResource(R.string.exercise_image))
-                ImageBox(state, onPickImage, onRemoveImage)
                 if (state.name.isNotBlank()) {
                     val context = LocalContext.current
                     SecondaryButton(
@@ -166,14 +156,7 @@ fun ExerciseEditorContent(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                MyFitTextField(
-                    value = state.notes,
-                    onValueChange = onNotes,
-                    label = stringResource(R.string.exercise_notes),
-                    singleLine = false,
-                    minLines = 3,
-                )
-                if (!state.isNew) {
+                if (!state.isNew && !state.isLibrary) {
                     SecondaryButton(
                         stringResource(R.string.action_delete),
                         onClick = { confirmDelete = true },
@@ -198,7 +181,89 @@ fun ExerciseEditorContent(
 }
 
 @Composable
-private fun ImageBox(state: ExerciseEditorUiState, onPick: () -> Unit, onRemove: () -> Unit) {
+private fun FavoriteToggle(favorite: Boolean, onToggle: () -> Unit) {
+    val c = MyFitTheme.colors
+    IconToggleButton(checked = favorite, onCheckedChange = { onToggle() }) {
+        Icon(
+            if (favorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+            contentDescription = stringResource(R.string.exercise_favorite),
+            tint = if (favorite) c.accent else c.textSecondary,
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.LibraryDetail(state: ExerciseEditorUiState) {
+    val c = MyFitTheme.colors
+    ExerciseImage(state)
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Text(state.name, style = MyFitTheme.type.title, color = c.textPrimary)
+        Text(
+            stringResource(state.muscleGroup.labelRes) + " · " + stringResource(state.movementType.labelRes),
+            style = MyFitTheme.type.caption,
+            color = c.textSecondary,
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ColumnScope.CustomFields(
+    state: ExerciseEditorUiState,
+    onName: (String) -> Unit,
+    onGroup: (MuscleGroup) -> Unit,
+    onMovement: (MovementType) -> Unit,
+    onMeasure: (ExerciseMeasure) -> Unit,
+    onPickImage: () -> Unit,
+    onRemoveImage: () -> Unit,
+) {
+    MyFitTextField(
+        value = state.name,
+        onValueChange = onName,
+        label = stringResource(R.string.exercise_name),
+        isError = state.nameError,
+        supportingText = if (state.nameError) stringResource(R.string.exercise_name_required) else null,
+        capitalization = KeyboardCapitalization.Sentences,
+    )
+    SectionHeader(stringResource(R.string.exercise_group))
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        MuscleGroup.entries.forEach { group ->
+            MyFitChip(stringResource(group.labelRes), selected = state.muscleGroup == group, onClick = { onGroup(group) })
+        }
+    }
+    MuscleMap(state.muscleGroup, Modifier.fillMaxWidth().height(180.dp).padding(vertical = Spacing.xs))
+    SectionHeader(stringResource(R.string.exercise_movement))
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        MovementType.entries.forEach { type ->
+            MyFitChip(stringResource(type.labelRes), selected = state.movementType == type, onClick = { onMovement(type) })
+        }
+    }
+    SectionHeader(stringResource(R.string.exercise_measure))
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        MyFitChip(stringResource(R.string.exercise_measure_reps), selected = state.measure == ExerciseMeasure.REPS, onClick = { onMeasure(ExerciseMeasure.REPS) })
+        MyFitChip(stringResource(R.string.exercise_measure_time), selected = state.measure == ExerciseMeasure.TIME, onClick = { onMeasure(ExerciseMeasure.TIME) })
+    }
+    SectionHeader(stringResource(R.string.exercise_image))
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        ExerciseImage(state)
+        val c = MyFitTheme.colors
+        if (state.imageError) {
+            Text(stringResource(R.string.exercise_image_error), style = MyFitTheme.type.caption, color = c.danger)
+        }
+        val hasPhoto = localImageModel(state.imagePath) != null
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            TextAction(
+                stringResource(if (hasPhoto) R.string.exercise_image_replace else R.string.exercise_image_pick),
+                onClick = onPickImage,
+            )
+            if (hasPhoto) TextAction(stringResource(R.string.exercise_image_remove), onClick = onRemoveImage, color = c.textSecondary)
+        }
+    }
+}
+
+/** The photo the user picked, else the library drawing (with its credit), else a placeholder. */
+@Composable
+private fun ExerciseImage(state: ExerciseEditorUiState) {
     val c = MyFitTheme.colors
     val model = localImageModel(state.imagePath)
     val art = ExerciseArt.artFor(state.seedKey)
@@ -219,21 +284,7 @@ private fun ImageBox(state: ExerciseEditorUiState, onPick: () -> Unit, onRemove:
                 ArtSource.EVERKINETIC -> "Everkinetic"
                 ArtSource.WORKOUT_GUIDE -> "Bryl Lim / Workout Guide"
             }
-            Text(
-                stringResource(R.string.exercise_image_credit, source) + "\n" + stringResource(R.string.exercise_image_drawing_hint),
-                style = MyFitTheme.type.caption,
-                color = c.textTertiary,
-            )
-        }
-        if (state.imageError) {
-            Text(stringResource(R.string.exercise_image_error), style = MyFitTheme.type.caption, color = c.danger)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            TextAction(
-                stringResource(if (model == null) R.string.exercise_image_pick else R.string.exercise_image_replace),
-                onClick = onPick,
-            )
-            if (model != null) TextAction(stringResource(R.string.exercise_image_remove), onClick = onRemove, color = c.textSecondary)
+            Text(stringResource(R.string.exercise_image_credit, source), style = MyFitTheme.type.caption, color = c.textTertiary)
         }
     }
 }

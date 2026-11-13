@@ -46,7 +46,7 @@ data class BackupDataV1(
 data class ExerciseDto(
     val id: Long, val name: String, val muscleGroup: String, val movementType: String,
     val imagePath: String? = null, val notes: String? = null, val isCustom: Boolean, val archived: Boolean = false, val createdAtMs: Long,
-    val seedKey: String? = null, val measure: String = "REPS",
+    val seedKey: String? = null, val measure: String = "REPS", val favorite: Boolean = false,
 )
 
 @Serializable

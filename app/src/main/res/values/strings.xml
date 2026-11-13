@@ -89,20 +89,19 @@
     </plurals>
     <string name="exercise_editor_new">New exercise</string>
     <string name="exercise_editor_edit">Edit exercise</string>
+    <string name="exercise_detail_title">Exercise</string>
+    <string name="exercise_favorite">Favorite</string>
     <string name="exercise_name">Name</string>
     <string name="exercise_name_required">Give the exercise a name</string>
-    <string name="exercise_name_locked">Library exercises keep their name.</string>
     <string name="exercise_group">Muscle group</string>
     <string name="exercise_movement">Movement type</string>
     <string name="exercise_measure">Each set counts</string>
     <string name="exercise_measure_reps">Repetitions</string>
     <string name="exercise_measure_time">Time</string>
-    <string name="exercise_notes">Notes</string>
     <string name="exercise_image">Demo image</string>
     <string name="exercise_image_pick">Choose from gallery</string>
     <string name="exercise_image_replace">Replace image</string>
     <string name="exercise_image_remove">Remove image</string>
-    <string name="exercise_image_drawing_hint">Library drawing. Pick a photo to use your own instead.</string>
     <string name="exercise_image_credit">Illustration: %1$s · CC BY-SA</string>
     <string name="exercise_video">Watch how to do it</string>
     <string name="exercise_video_query">%1$s exercise proper form</string>

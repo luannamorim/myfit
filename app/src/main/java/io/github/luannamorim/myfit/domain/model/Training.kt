@@ -12,6 +12,8 @@ data class Exercise(
     val seedKey: String? = null,
     /** For [ExerciseMeasure.TIME], the "reps" of its sets are seconds. */
     val measure: ExerciseMeasure = ExerciseMeasure.REPS,
+    /** Starred by the user: listed first in the library. */
+    val favorite: Boolean = false,
 )
 
 data class RoutineItem(

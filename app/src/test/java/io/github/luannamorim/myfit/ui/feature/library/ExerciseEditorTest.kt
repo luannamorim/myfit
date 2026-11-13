@@ -19,6 +19,7 @@ import io.github.luannamorim.myfit.testutil.inMemoryDb
 import io.github.luannamorim.myfit.ui.navigation.ExerciseEditorRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -29,7 +30,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
-/** Library exercises can't be renamed; custom ones (and rows whose key the app no longer knows) can. */
+/**
+ * Library exercises open read-only (official name, no edits, no delete); custom ones (and rows whose key
+ * the app no longer knows) stay editable. Any existing exercise can be starred.
+ */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
 class ExerciseEditorTest {
@@ -42,23 +46,74 @@ class ExerciseEditorTest {
 
     @After fun tearDown() = db.close()
 
-    private suspend fun insert(name: String, seedKey: String?) = db.exerciseDao().insert(
+    private suspend fun insert(name: String, seedKey: String?, notes: String? = null) = db.exerciseDao().insert(
         ExerciseEntity(
             name = name, muscleGroup = MuscleGroup.CHEST, movementType = MovementType.PUSH, isCustom = seedKey == null, createdAtMs = 0,
-            seedKey = seedKey,
+            seedKey = seedKey, notes = notes,
         ),
     )
 
-    private fun editor(id: Long) =
+    private fun editor(id: Long?) =
         ExerciseEditorViewModel(SavedStateHandle(route = ExerciseEditorRoute(id)), repo, images, CoroutineScope(Dispatchers.Unconfined))
 
+    private fun favoriteOf(id: Long) = db.exerciseDao().observeActive().map { list -> list.single { it.id == id }.favorite }
+
     @Test
-    fun libraryExercise_nameLocked_customNot() = runBlocking {
+    fun libraryExercise_isReadOnly_customNot() = runBlocking {
         val library = editor(insert("Barbell bench press", "barbell-bench-press")).state.awaitUntil { !it.isLoading }
-        assertTrue(library.nameLocked)
+        assertTrue(library.isLibrary)
         assertEquals("Supino reto com barra", library.name)
 
-        assertFalse(editor(insert("Meu exercício", null)).state.awaitUntil { !it.isLoading }.nameLocked)
-        assertFalse(editor(insert("Antigo", "no-such-key")).state.awaitUntil { !it.isLoading }.nameLocked)
+        assertFalse(editor(insert("Meu exercício", null)).state.awaitUntil { !it.isLoading }.isLibrary)
+        assertFalse(editor(insert("Antigo", "no-such-key")).state.awaitUntil { !it.isLoading }.isLibrary)
+    }
+
+    @Test
+    fun libraryExercise_cannotBeSavedOrDeleted() = runBlocking {
+        val id = insert("Barbell bench press", "barbell-bench-press")
+        val before = db.exerciseDao().get(id)
+        val vm = editor(id)
+        vm.state.awaitUntil { !it.isLoading }
+        vm.setGroup(MuscleGroup.BACK)
+        assertFalse(vm.save())
+        vm.delete()
+        assertFalse(vm.state.value.done)
+        assertEquals(before, db.exerciseDao().get(id))
+    }
+
+    @Test
+    fun favorite_isSavedRightAway_forLibraryAndCustom() = runBlocking {
+        val library = insert("Barbell bench press", "barbell-bench-press")
+        val vm = editor(library)
+        assertFalse(vm.state.awaitUntil { !it.isLoading }.favorite)
+        vm.toggleFavorite()
+        favoriteOf(library).awaitUntil { it }
+        assertTrue(editor(library).state.awaitUntil { !it.isLoading }.favorite)
+        vm.toggleFavorite()
+        favoriteOf(library).awaitUntil { !it }
+
+        val custom = insert("Meu exercício", null)
+        val customVm = editor(custom)
+        customVm.state.awaitUntil { !it.isLoading }
+        customVm.toggleFavorite()
+        customVm.setName("Meu exercício novo")
+        assertTrue(customVm.save())
+        customVm.state.awaitUntil { it.done }
+        val saved = db.exerciseDao().get(custom)!!
+        assertTrue(saved.favorite)
+        assertEquals("Meu exercício novo", saved.name)
+    }
+
+    @Test
+    fun savingCustom_keepsNotesWrittenBefore() = runBlocking {
+        val id = insert("Meu exercício", null, notes = "pegada aberta")
+        val vm = editor(id)
+        vm.state.awaitUntil { !it.isLoading }
+        vm.setGroup(MuscleGroup.BACK)
+        assertTrue(vm.save())
+        vm.state.awaitUntil { it.done }
+        val saved = db.exerciseDao().get(id)!!
+        assertEquals(MuscleGroup.BACK, saved.muscleGroup)
+        assertEquals("pegada aberta", saved.notes)
     }
 }

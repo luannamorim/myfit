@@ -2,6 +2,8 @@ package io.github.luannamorim.myfit.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.core.time.FakeTimeSource
+import io.github.luannamorim.myfit.domain.model.Exercise
+import io.github.luannamorim.myfit.domain.model.MovementType
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.domain.model.Routine
 import io.github.luannamorim.myfit.domain.model.RoutineItem
@@ -75,17 +77,40 @@ class RoutineRepositoryTest {
         assertTrue(backOnly.isNotEmpty() && backOnly.all { it.muscleGroup == MuscleGroup.BACK })
     }
 
+    private suspend fun custom(name: String) =
+        exercises.save(Exercise(name = name, muscleGroup = MuscleGroup.BACK, movementType = MovementType.PULL))
+
     @Test
     fun deleteExerciseInUse_archivesInsteadOfDeleting() = runTest {
-        val a = byName("remada curvada")
-        db.insertRoutine("Costas", listOf(a.id))
-        assertEquals(ExerciseDeleteResult.ARCHIVED, exercises.delete(a.id))
-        assertTrue(exercises.observeLibrary("remada curvada").first().none { it.id == a.id })
-        assertEquals("Remada curvada", exercises.get(a.id)!!.name)
+        val a = custom("Remada no cabo baixo")
+        db.insertRoutine("Costas", listOf(a))
+        assertEquals(ExerciseDeleteResult.ARCHIVED, exercises.delete(a))
+        assertTrue(exercises.observeLibrary("remada no cabo").first().none { it.id == a })
+        assertEquals("Remada no cabo baixo", exercises.get(a)!!.name)
 
-        val free = byName("prancha")
-        assertEquals(ExerciseDeleteResult.DELETED, exercises.delete(free.id))
-        assertNull(exercises.get(free.id))
+        val free = custom("Pulldown com corda")
+        assertEquals(ExerciseDeleteResult.DELETED, exercises.delete(free))
+        assertNull(exercises.get(free))
+    }
+
+    @Test
+    fun deleteLibraryExercise_isRefused() = runTest {
+        val plank = byName("prancha")
+        assertNull(exercises.delete(plank.id))
+        assertEquals(plank, exercises.get(plank.id))
+    }
+
+    @Test
+    fun favorites_comeFirst_thenAlphabetical() = runTest {
+        val before = exercises.observeLibrary("prancha").first().map { it.name }
+        assertEquals(listOf("Prancha", "Prancha lateral"), before)
+        val side = byName("prancha lateral")
+        exercises.setFavorite(side.id, true)
+        val after = exercises.observeLibrary("prancha").first()
+        assertEquals(listOf("Prancha lateral", "Prancha"), after.map { it.name })
+        assertTrue(after.first().favorite)
+        exercises.setFavorite(side.id, false)
+        assertEquals(before, exercises.observeLibrary("prancha").first().map { it.name })
     }
 
     @Test

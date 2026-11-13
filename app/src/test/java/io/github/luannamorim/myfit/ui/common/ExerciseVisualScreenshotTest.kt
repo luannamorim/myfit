@@ -75,9 +75,22 @@ class ExerciseVisualScreenshotTest {
                 muscleGroup = MuscleGroup.CHEST,
                 movementType = MovementType.PUSH,
                 seedKey = "barbell-bench-press",
-                nameLocked = true,
+                isLibrary = true,
+                favorite = true,
             ),
-            {}, {}, {}, {}, {}, {}, {}, {}, {},
+        )
+    }
+
+    @Test
+    fun editor_customExercise() = compose.snapBothThemes("exercise_editor_custom") {
+        ExerciseEditorContent(
+            ExerciseEditorUiState(
+                isLoading = false,
+                isNew = false,
+                name = "Cable pulldown with rope",
+                muscleGroup = MuscleGroup.BACK,
+                movementType = MovementType.PULL,
+            ),
         )
     }
 

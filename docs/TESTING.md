@@ -28,10 +28,11 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Edit sets, reps, rest and load, typing "42,5" (comma). Reorder by dragging the handle.
 - [ ] Create a custom exercise with an image from the gallery. It shows up in the list and in the workout.
 - [ ] Duplicate the workout ("(copy)" appears) and delete the copy.
-- [ ] Predefined exercises: their name field is locked ("Exercícios da biblioteca mantêm o nome.") and the name follows the app language (switch Portuguese ↔ English: Library, routines, workout and History change with it). A custom exercise keeps its name and photo.
+- [ ] Predefined exercises open read-only ("Exercício"): drawing with its credit, name, group · movement, "Watch how to do it" and the star. No name field, group, movement type, set counting, photo, notes, Save or Delete. The name follows the app language (switch Portuguese ↔ English: Library, routines, workout and History change with it). A custom exercise keeps its name and photo, every field except notes, and Delete.
+- [ ] Tap the star (top-right) on a predefined and on a custom exercise, go back: both are at the top of the Library and the picker, with a green star on the row; tap again to unstar. A new exercise has no star until saved.
 - [ ] Activities: "Academia" / "Gym" is in the sport list (dumbbell icon), without distance.
-- [ ] The library shows a drawing next to every predefined exercise. Open one: start → end drawing, the body map with its group in green, and "Watch how to do it" opens a YouTube search.
-- [ ] In the exercise editor, change the muscle group: the body map updates at once. Pick a photo: it replaces the drawing; remove it: the drawing comes back.
+- [ ] The library shows a drawing next to every predefined exercise. Open one: start → end drawing, and "Watch how to do it" opens a YouTube search.
+- [ ] In a custom exercise, change the muscle group: the body map updates at once. Pick a photo: it shows; remove it: the placeholder comes back.
 - [ ] A custom exercise without a photo shows the body map in the list and during the workout.
 - [ ] *Settings → Image credits* lists the illustrations and their licenses; *About* shows "Developed by luannamorim".
 
@@ -84,7 +85,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Body cards always present once there is an assessment: without height BMI shows "—" and "Height missing"; without Sex body fat shows "—" and "Set your sex" (in Portuguese "Falta a altura" / "Defina o sexo"). Body fat and BMI cards always have the same height, even when a label wraps (bigger font).
 
 ### 6a. Reminders
-- [ ] Home: the bell in the top-right corner opens Reminders.
+- [ ] Home: the bell in the top-right corner (outline, gray, no background) opens Reminders.
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.
 - [ ] A one-off reminder with "Other activity" (tap "Swimming" to fill the name) on a date: it fires once and then shows as off.
 - [ ] Restart the phone: a weekly reminder still fires at its next time.
@@ -104,6 +105,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Install a new version over the existing one (`adb install -r`): the data is kept.
 - [ ] Updating from 1.2: workouts and history are intact, the library gains the new exercises and the existing predefined ones show their drawings (a predefined exercise you renamed keeps no drawing).
 - [ ] Updating from 1.3: history is intact (old sessions have no intensity), and a backup made with 1.3 still restores.
+- [ ] Updating from 1.6: no exercise is starred, the library and routines are intact, and a backup made with 1.6 still restores.
 - [ ] If you had changed any setting before 1.4, check *Settings → Rest end sound*: the new default (Always ring) only applies to settings never saved.
 
 ## Known issues

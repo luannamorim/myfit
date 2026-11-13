@@ -24,6 +24,8 @@ data class ExerciseEntity(
     val seedKey: String? = null,
     /** Since v5: timed exercises store seconds where others store reps. */
     @ColumnInfo(defaultValue = "REPS") val measure: ExerciseMeasure = ExerciseMeasure.REPS,
+    /** Since v7: starred by the user, listed first in the library. */
+    @ColumnInfo(defaultValue = "0") val favorite: Boolean = false,
 )
 
 @Entity(tableName = "routine")

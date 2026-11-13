@@ -107,20 +107,19 @@
     </plurals>
     <string name="exercise_editor_new">Novo exercício</string>
     <string name="exercise_editor_edit">Editar exercício</string>
+    <string name="exercise_detail_title">Exercício</string>
+    <string name="exercise_favorite">Favorito</string>
     <string name="exercise_name">Nome</string>
     <string name="exercise_name_required">Dê um nome ao exercício</string>
-    <string name="exercise_name_locked">Exercícios da biblioteca mantêm o nome.</string>
     <string name="exercise_group">Grupo muscular</string>
     <string name="exercise_movement">Tipo de movimento</string>
     <string name="exercise_measure">Cada série conta</string>
     <string name="exercise_measure_reps">Repetições</string>
     <string name="exercise_measure_time">Tempo</string>
-    <string name="exercise_notes">Observações</string>
     <string name="exercise_image">Imagem demonstrativa</string>
     <string name="exercise_image_pick">Escolher da galeria</string>
     <string name="exercise_image_replace">Trocar imagem</string>
     <string name="exercise_image_remove">Remover imagem</string>
-    <string name="exercise_image_drawing_hint">Desenho da biblioteca. Escolha uma foto para usar a sua.</string>
     <string name="exercise_image_credit">Ilustração: %1$s · CC BY-SA</string>
     <string name="exercise_video">Ver execução</string>
     <string name="exercise_video_query">%1$s execução correta</string>

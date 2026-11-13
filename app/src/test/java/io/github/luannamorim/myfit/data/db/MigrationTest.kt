@@ -231,6 +231,19 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate6To7_keepsExercises_noneFavorite() = runBlocking {
+        createVersion(6, "migration-v6-test.db") { db -> db.insertExercise("Agachamento livre", custom = false) }
+        val room = open("migration-v6-test.db")
+        val exercise = room.exerciseDao().getAll().single()
+        assertEquals("Agachamento livre", exercise.name)
+        assertEquals(false, exercise.favorite)
+        room.exerciseDao().setFavorite(exercise.id, true)
+        assertTrue(room.exerciseDao().get(exercise.id)!!.favorite)
+        assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
+        room.close()
+    }
+
+    @Test
     fun freshInstall_getsWholeLibrary_once_withKeys() = runBlocking {
         context.deleteDatabase("fresh-test.db")
         val room = open("fresh-test.db")

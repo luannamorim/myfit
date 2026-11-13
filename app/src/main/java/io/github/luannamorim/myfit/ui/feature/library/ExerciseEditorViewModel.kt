@@ -32,12 +32,15 @@ data class ExerciseEditorUiState(
     val muscleGroup: MuscleGroup = MuscleGroup.CHEST,
     val movementType: MovementType = MovementType.PUSH,
     val measure: ExerciseMeasure = ExerciseMeasure.REPS,
-    val notes: String = "",
     val imagePath: String? = null,
     /** Library entry of a predefined exercise (its bundled drawing); null for user-created ones. */
     val seedKey: String? = null,
-    /** Library exercises keep their official name (shown in the app's language): the field is read-only. */
-    val nameLocked: Boolean = false,
+    /**
+     * A predefined exercise: shown read-only (official name in the app's language, its drawing), can't be
+     * deleted; only the favorite star changes.
+     */
+    val isLibrary: Boolean = false,
+    val favorite: Boolean = false,
     val nameError: Boolean = false,
     val imageError: Boolean = false,
     val isImporting: Boolean = false,
@@ -60,11 +63,15 @@ class ExerciseEditorViewModel @Inject constructor(
     private var originalImage: String? = null
     private var isCustom = true
 
+    /** No longer editable here; kept so saving doesn't erase notes written before. */
+    private var notes: String? = null
+
     init {
         viewModelScope.launch {
             val existing = exerciseId?.let { repository.get(it) }
             originalImage = existing?.imagePath
             isCustom = existing?.isCustom ?: true
+            notes = existing?.notes
             _state.update { s ->
                 if (existing == null) s.copy(isLoading = false)
                 else s.copy(
@@ -73,10 +80,10 @@ class ExerciseEditorViewModel @Inject constructor(
                     muscleGroup = existing.muscleGroup,
                     movementType = existing.movementType,
                     measure = existing.measure,
-                    notes = existing.notes.orEmpty(),
                     imagePath = existing.imagePath,
                     seedKey = existing.seedKey,
-                    nameLocked = ExerciseSeed.nameFor(existing.seedKey) != null,
+                    isLibrary = ExerciseSeed.nameFor(existing.seedKey) != null,
+                    favorite = existing.favorite,
                 )
             }
         }
@@ -86,9 +93,16 @@ class ExerciseEditorViewModel @Inject constructor(
     fun setGroup(value: MuscleGroup) = _state.update { it.copy(muscleGroup = value) }
     fun setMovement(value: MovementType) = _state.update { it.copy(movementType = value) }
     fun setMeasure(value: ExerciseMeasure) = _state.update { it.copy(measure = value) }
-    fun setNotes(value: String) = _state.update { it.copy(notes = value) }
+    /** Saved right away (no Save needed); only for an exercise that already exists. */
+    fun toggleFavorite() {
+        val id = exerciseId ?: return
+        val favorite = !_state.value.favorite
+        _state.update { it.copy(favorite = favorite) }
+        viewModelScope.launch { repository.setFavorite(id, favorite) }
+    }
 
     fun pickImage(uri: Uri) {
+        if (_state.value.isLibrary) return
         _state.update { it.copy(isImporting = true, imageError = false) }
         viewModelScope.launch {
             val imported = runCatching { images.import(uri, ImageKind.EXERCISE) }.getOrNull()
@@ -110,6 +124,7 @@ class ExerciseEditorViewModel @Inject constructor(
 
     fun save(): Boolean {
         val s = _state.value
+        if (s.isLibrary) return false
         if (s.name.isBlank()) {
             _state.update { it.copy(nameError = true) }
             return false
@@ -123,9 +138,10 @@ class ExerciseEditorViewModel @Inject constructor(
                     movementType = s.movementType,
                     measure = s.measure,
                     imagePath = s.imagePath,
-                    notes = s.notes,
+                    notes = notes,
                     isCustom = isCustom,
                     seedKey = s.seedKey,
+                    favorite = s.favorite,
                 ),
             )
             if (originalImage != null && originalImage != s.imagePath) images.delete(originalImage)
@@ -137,8 +153,9 @@ class ExerciseEditorViewModel @Inject constructor(
 
     fun delete() {
         val id = exerciseId ?: return
+        if (_state.value.isLibrary) return
         viewModelScope.launch {
-            val result = repository.delete(id)
+            val result = repository.delete(id) ?: return@launch
             discardPendingImage()
             if (result == ExerciseDeleteResult.DELETED) images.delete(originalImage)
             originalImage = null

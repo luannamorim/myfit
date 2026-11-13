@@ -77,8 +77,8 @@ object SnapshotMapper {
     private fun Mark.toDto() = MarkDto(wallMs, elapsedMs, bootCount)
     private fun MarkDto.toMark() = Mark(wallMs, elapsedMs, bootCount)
 
-    private fun ExerciseEntity.toDto() = ExerciseDto(id, name, muscleGroup.name, movementType.name, imagePath, notes, isCustom, archived, createdAtMs, seedKey, measure.name)
-    private fun ExerciseDto.toEntity() = ExerciseEntity(id, name, enumOf(muscleGroup), enumOf(movementType), imagePath, notes, isCustom, archived, createdAtMs, seedKey, measureOf(measure))
+    private fun ExerciseEntity.toDto() = ExerciseDto(id, name, muscleGroup.name, movementType.name, imagePath, notes, isCustom, archived, createdAtMs, seedKey, measure.name, favorite)
+    private fun ExerciseDto.toEntity() = ExerciseEntity(id, name, enumOf(muscleGroup), enumOf(movementType), imagePath, notes, isCustom, archived, createdAtMs, seedKey, measureOf(measure), favorite)
 
     private fun RoutineEntity.toDto() = RoutineDto(id, name, description, position, createdAtMs, updatedAtMs)
     private fun RoutineDto.toEntity() = RoutineEntity(id, name, description, position, createdAtMs, updatedAtMs)

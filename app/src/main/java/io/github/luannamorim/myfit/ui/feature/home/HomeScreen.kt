@@ -18,11 +18,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Pool
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -95,11 +96,15 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
         subtitle = if (state.loading) null else Dates.long(state.today).replaceFirstChar { it.titlecase(appLocale) },
         modifier = modifier,
         actions = {
-            // Shortcut to Settings › Reminders, styled like the other tab headers' corner buttons.
-            FilledIconButton(
-                onClick = actions.onOpenReminders,
-                colors = IconButtonDefaults.filledIconButtonColors(containerColor = MyFitTheme.colors.surfaceRaised, contentColor = MyFitTheme.colors.textPrimary),
-            ) { Icon(Icons.Rounded.NotificationsActive, contentDescription = stringResource(R.string.reminders_title)) }
+            // Shortcut to Settings › Reminders, kept quiet: outline bell, no container, secondary color.
+            IconButton(onClick = actions.onOpenReminders) {
+                Icon(
+                    Icons.Rounded.NotificationsNone,
+                    contentDescription = stringResource(R.string.reminders_title),
+                    tint = MyFitTheme.colors.textSecondary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
         },
     ) {
         if (state.loading) return@TabScreen
