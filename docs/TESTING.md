@@ -47,7 +47,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Complete a set and **lock the screen** during the rest: at the end, the phone rings and vibrates, and the notification shows "Rest complete".
 - [ ] On the lock screen, the notification shows the timer and the "Skip rest" button works.
 - [ ] With the phone on **vibrate** and *Settings → Rest end sound → Always ring* (the default): the alert rings anyway, at the alarm volume.
-- [ ] The last 3 seconds of rest beep (also with the screen locked), then MyFit's own two-note sound plays, not the phone's notification sound. *Settings → Beep in the last 3 seconds* turns the beeps off.
+- [ ] The last 3 seconds of rest beep (also with the screen locked), then MyFit's own end sound plays, not the phone's notification sound. *Settings → Beep in the last 3 seconds* turns the beeps off.
 - [ ] With *Follow phone mode* and the phone on vibrate: the alert only vibrates.
 - [ ] Alarm icon in the status bar during the rest: expected (exact alarm).
 
