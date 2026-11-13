@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/screenshots/brand.png" alt="MyFit" width="420">
+  <img src="docs/screenshots/brand.png" alt="MyFit" width="480">
 </p>
 
 # MyFit
