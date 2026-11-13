@@ -82,6 +82,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Body cards always present once there is an assessment: without height BMI shows "—" and "Height missing"; without Sex body fat shows "—" and "Set your sex" (in Portuguese "Falta a altura" / "Defina o sexo"). Body fat and BMI cards always have the same height, even when a label wraps (bigger font).
 
 ### 6a. Reminders
+- [ ] Home: the bell in the top-right corner opens Reminders.
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.
 - [ ] A one-off reminder with "Other activity" (tap "Swimming" to fill the name) on a date: it fires once and then shows as off.
 - [ ] Restart the phone: a weekly reminder still fires at its next time.

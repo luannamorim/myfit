@@ -1,12 +1,17 @@
 package io.github.luannamorim.myfit.ui.feature.home
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
-import io.github.luannamorim.myfit.domain.history.HistoryCalculator
+import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.testutil.PHONE_TALL
 import io.github.luannamorim.myfit.testutil.snapBothThemes
+import io.github.luannamorim.myfit.ui.theme.MyFitTheme
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,6 +26,22 @@ import java.time.LocalTime
 class HomeScreenshotTest {
     @get:Rule val compose = createComposeRule()
     private val today = LocalDate.of(2026, 11, 12)
+
+    @Test
+    fun remindersButton_opensReminders() {
+        var opened = 0
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                HomeContent(
+                    HomeUiState(loading = false, greeting = Greeting.MORNING, today = today, week = week(emptySet(), 0, 0)),
+                    HomeActions(onOpenReminders = { opened++ }),
+                    body = { BodyEmptyCard {} },
+                )
+            }
+        }
+        compose.onNodeWithContentDescription("Reminders").performClick()
+        assertEquals(1, opened)
+    }
 
     @Test
     fun home_empty() = compose.snapBothThemes("home_empty") {

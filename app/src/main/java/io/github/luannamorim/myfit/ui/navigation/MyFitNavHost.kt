@@ -168,6 +168,7 @@ fun MyFitNavHost(
                             onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
                             onLogActivity = { navController.navigate(ActivityEditorRoute()) },
                             onOpenLiveActivity = { navController.navigate(LiveActivityRoute) { launchSingleTop = true } },
+                            onOpenReminders = { navController.navigate(RemindersRoute) },
                         ),
                     )
                 }

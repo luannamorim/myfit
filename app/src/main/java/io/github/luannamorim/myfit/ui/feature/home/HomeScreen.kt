@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Pool
 import androidx.compose.material3.FilledIconButton
@@ -67,6 +68,7 @@ data class HomeActions(
     val onOpenBody: () -> Unit = {},
     val onLogActivity: () -> Unit = {},
     val onOpenLiveActivity: () -> Unit = {},
+    val onOpenReminders: () -> Unit = {},
 )
 
 @Composable
@@ -92,6 +94,13 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
         title = greeting,
         subtitle = if (state.loading) null else Dates.long(state.today).replaceFirstChar { it.titlecase(appLocale) },
         modifier = modifier,
+        actions = {
+            // Shortcut to Settings › Reminders, styled like the other tab headers' corner buttons.
+            FilledIconButton(
+                onClick = actions.onOpenReminders,
+                colors = IconButtonDefaults.filledIconButtonColors(containerColor = MyFitTheme.colors.surfaceRaised, contentColor = MyFitTheme.colors.textPrimary),
+            ) { Icon(Icons.Rounded.NotificationsActive, contentDescription = stringResource(R.string.reminders_title)) }
+        },
     ) {
         if (state.loading) return@TabScreen
         val active = state.active
