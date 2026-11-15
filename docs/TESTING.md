@@ -63,6 +63,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 ### 5. History
 - [ ] The day is marked on the calendar. Tapping the day opens the session with sets, reps and loads.
 - [ ] Toggle Week/Month in the summaries. Workouts, total time and frequency match what was done.
+- [ ] With more than 10 hours in the period (Month) and a bigger system font: "Tempo total" stays on one line (a bit smaller) and its card is as tall as the others.
 - [ ] The session row shows the intensity; the session detail shows the photo, and intensity and photo can be changed or removed there.
 - [ ] "+ Activity" on a past day: log swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name. They appear on that day, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it.
 - [ ] Home: "Start activity" opens the same screen; the week counts the activity days and their time.

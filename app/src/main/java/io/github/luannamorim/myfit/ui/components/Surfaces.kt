@@ -10,21 +10,28 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -120,7 +127,21 @@ fun StatTile(
         LabelWithDot(label, indicatorColor, indicatorDescription)
         Spacer(Modifier.height(Spacing.s))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(value, style = valueStyle, color = c.textPrimary)
+            // Shrinks instead of wrapping (e.g. "12 h 30 min" in a half-width tile). Auto-size shrinks the line
+            // height too, so one full-size line is kept as the minimum height: tiles in a row keep one height.
+            val density = LocalDensity.current
+            val measurer = rememberTextMeasurer()
+            val minHeight = remember(valueStyle, density) {
+                with(density) { measurer.measure("0", valueStyle, maxLines = 1).size.height.toDp() }
+            }
+            BasicText(
+                text = value,
+                style = valueStyle.copy(color = c.textPrimary),
+                maxLines = 1,
+                softWrap = false,
+                autoSize = TextAutoSize.StepBased(minFontSize = 14.sp, maxFontSize = valueStyle.fontSize, stepSize = 1.sp),
+                modifier = Modifier.weight(1f, fill = false).heightIn(min = minHeight).wrapContentHeight(Alignment.Bottom),
+            )
             if (unit != null) {
                 Text(
                     " $unit",
