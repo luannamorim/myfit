@@ -85,6 +85,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Camera photos: the camera app writes to a temporary file in the cache (ui/common/PhotoSource). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.camera"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/camera_paths" />
+        </provider>
         <!-- WorkManager is initialized on demand through Configuration.Provider (Hilt workers). -->
         <provider
             android:name="androidx.startup.InitializationProvider"

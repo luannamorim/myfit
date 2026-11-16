@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.domain.session
 
 import io.github.luannamorim.myfit.core.time.Mark
 import io.github.luannamorim.myfit.core.time.millisUntil
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 
 /**
@@ -125,6 +126,13 @@ object SessionEngine {
     }
 
     fun isComplete(session: ActiveSession): Boolean = session.exercises.none { it.hasPending }
+
+    /** Weight lifted: reps × kg over the done sets of exercises counted in repetitions (timed sets have none). */
+    fun volumeKg(exercises: List<SessionExercise>): Double =
+        exercises.filter { it.measure == ExerciseMeasure.REPS }
+            .flatMap { it.sets }
+            .filter { it.status == ItemStatus.DONE }
+            .sumOf { (it.actualReps ?: 0) * (it.actualLoadKg ?: 0.0) }
 
     /** Share of the workout done, 0–100: completed sets over the sets not skipped; 100 once nothing is pending. */
     fun progressPercent(session: ActiveSession): Int {

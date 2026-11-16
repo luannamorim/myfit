@@ -169,6 +169,9 @@
     <string name="intensity_medium">Medium</string>
     <string name="intensity_high">High</string>
     <string name="workout_photo_add">Add a photo</string>
+    <string name="photo_take">Take photo</string>
+    <string name="photo_from_gallery">Choose from gallery</string>
+    <string name="photo_no_camera">No camera app found</string>
     <string name="workout_photo_change">Change photo</string>
     <string name="workout_photo_remove">Remove</string>
     <string name="workout_photo_a11y">Workout photo</string>

@@ -1,9 +1,5 @@
 package io.github.luannamorim.myfit.ui.feature.history
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,9 +33,11 @@ import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.Durations
+import io.github.luannamorim.myfit.core.format.formatThousands
 import io.github.luannamorim.myfit.domain.history.SessionDetail
 import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.ItemStatus
+import io.github.luannamorim.myfit.ui.common.rememberPhotoSource
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.domain.model.Intensity
@@ -57,15 +55,13 @@ fun SessionDetailScreen(onBack: () -> Unit, viewModel: SessionDetailViewModel = 
     LaunchedEffect(state.deleted, state.loading, state.detail) {
         if (state.deleted || (!state.loading && state.detail == null)) onBack()
     }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        if (uri != null) viewModel.setPhoto(uri)
-    }
+    val photo = rememberPhotoSource(viewModel::setPhoto)
     SessionDetailContent(
         state.detail,
         onBack,
         viewModel::delete,
         onIntensity = viewModel::setIntensity,
-        onPickPhoto = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+        onPickPhoto = photo::choose,
         onRemovePhoto = viewModel::removePhoto,
         photoError = state.photoError,
     )
@@ -110,6 +106,8 @@ fun SessionDetailContent(
                     StatTile(stringResource(R.string.summary_duration), Durations.clock(s.durationMs), Modifier.weight(1f))
                     StatTile(stringResource(R.string.summary_sets), s.setsDone.toString(), Modifier.weight(1f))
                 }
+                // Same total as the finish summary.
+                StatTile(stringResource(R.string.summary_volume), formatThousands(detail.volumeKg), Modifier.fillMaxWidth(), unit = stringResource(R.string.unit_kg))
                 IntensityPicker(s.intensity, onIntensity)
                 PhotoField(s.imagePath, onPick = onPickPhoto, onRemove = onRemovePhoto, error = photoError)
                 detail.exercises.forEach { ex ->

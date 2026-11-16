@@ -10,6 +10,7 @@ import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.SessionStatus
+import io.github.luannamorim.myfit.domain.session.SessionEngine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
@@ -33,9 +34,11 @@ class HistoryRepository @Inject constructor(
 
     fun observeDetail(sessionId: Long): Flow<SessionDetail?> = dao.observeSession(sessionId).map { row ->
         if (row == null || row.session.status != SessionStatus.FINISHED) return@map null
+        val exercises = row.toActive().exercises
         SessionDetail(
             summary = row.toSummary(),
-            exercises = row.toActive().exercises.map { SessionExerciseDetail(it.name, it.status, it.sets, it.measure) },
+            exercises = exercises.map { SessionExerciseDetail(it.name, it.status, it.sets, it.measure) },
+            volumeKg = SessionEngine.volumeKg(exercises),
         )
     }
 

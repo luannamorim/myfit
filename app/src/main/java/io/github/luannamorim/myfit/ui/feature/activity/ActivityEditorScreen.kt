@@ -2,10 +2,8 @@ package io.github.luannamorim.myfit.ui.feature.activity
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +61,7 @@ import io.github.luannamorim.myfit.ui.common.PhotoField
 import io.github.luannamorim.myfit.ui.common.SportFigure
 import io.github.luannamorim.myfit.ui.common.icon
 import io.github.luannamorim.myfit.ui.common.labelRes
+import io.github.luannamorim.myfit.ui.common.rememberPhotoSource
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.DateField
@@ -89,9 +88,7 @@ fun ActivityEditorScreen(
     val context = LocalContext.current
     LaunchedEffect(state.done) { if (state.done) onDone() }
     LaunchedEffect(state.started) { if (state.started) onStarted() }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        if (uri != null) viewModel.setPhoto(uri)
-    }
+    val photo = rememberPhotoSource(viewModel::setPhoto)
     fun granted(permission: String) = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
     // Notifications (the ongoing timer) and, for GPS distance, location while the app is in use.
     val permissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -124,7 +121,7 @@ fun ActivityEditorScreen(
             onDistance = viewModel::setDistance,
             onIntensity = viewModel::setIntensity,
             onNotes = viewModel::setNotes,
-            onPickPhoto = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+            onPickPhoto = photo::choose,
             onRemovePhoto = viewModel::removePhoto,
             onGps = viewModel::setGps,
             onStartNow = startNow,

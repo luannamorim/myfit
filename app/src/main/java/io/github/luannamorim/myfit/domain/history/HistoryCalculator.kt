@@ -50,7 +50,12 @@ data class SessionExerciseDetail(
     val measure: ExerciseMeasure = ExerciseMeasure.REPS,
 )
 
-data class SessionDetail(val summary: SessionSummary, val exercises: List<SessionExerciseDetail>)
+data class SessionDetail(
+    val summary: SessionSummary,
+    val exercises: List<SessionExerciseDetail>,
+    /** Weight lifted, as on the finish summary ([io.github.luannamorim.myfit.domain.session.SessionEngine.volumeKg]). */
+    val volumeKg: Double = 0.0,
+)
 
 object HistoryCalculator {
 

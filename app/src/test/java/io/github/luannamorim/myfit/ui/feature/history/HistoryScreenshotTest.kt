@@ -1,26 +1,30 @@
 package io.github.luannamorim.myfit.ui.feature.history
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.domain.activity.Activity
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.history.ExerciseFrequency
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.PeriodSummary
 import io.github.luannamorim.myfit.domain.history.SessionDetail
 import io.github.luannamorim.myfit.domain.history.SessionExerciseDetail
 import io.github.luannamorim.myfit.domain.history.SessionSummary
+import io.github.luannamorim.myfit.domain.history.SportFrequency
+import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
+import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.domain.session.SessionSet
 import io.github.luannamorim.myfit.testutil.PHONE_TALL
 import io.github.luannamorim.myfit.testutil.snapBothThemes
+import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import io.github.luannamorim.myfit.domain.activity.Activity
-import io.github.luannamorim.myfit.domain.activity.Sport
-import io.github.luannamorim.myfit.domain.history.SportFrequency
-import io.github.luannamorim.myfit.domain.model.Intensity
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -75,8 +79,20 @@ class HistoryScreenshotTest {
                         listOf(SessionSet(5, 12, 20.0, 12, 20.0, ItemStatus.DONE), SessionSet(6, 12, 20.0, 10, 20.0, ItemStatus.DONE), SessionSet(7, 12, 20.0, status = ItemStatus.SKIPPED)),
                     ),
                 ),
+                volumeKg = 3 * 12 * 42.5 + 12 * 20.0 + 10 * 20.0,
             ),
             {}, {},
         )
+    }
+
+    @Test
+    fun sessionDetail_showsTheVolumeLifted() {
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                SessionDetailContent(SessionDetail(s(1, 12, "Back day", 52, Intensity.HIGH), emptyList(), volumeKg = 1_970.0), {}, {})
+            }
+        }
+        compose.onNodeWithText("Volume").assertIsDisplayed()
+        compose.onNodeWithText("1,970", substring = true).assertIsDisplayed()
     }
 }

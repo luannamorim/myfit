@@ -76,4 +76,17 @@ class HistoryRepositoryTest {
         history.deleteSession(id)
         assertEquals(null, history.observeDetail(id).first())
     }
+
+    @Test
+    fun detail_keepsTheVolumeShownWhenFinishing() = runBlocking {
+        env.startWorkout(2, 1)
+        var s = env.repo.getActive()!!
+        s = SessionEngine.skipRest(SessionEngine.completeSet(s, 12, 40.0, env.time.now()))
+        s = SessionEngine.skipRest(SessionEngine.completeSet(s, 10, 42.5, env.time.now()))
+        s = SessionEngine.skipSet(s, env.time.now()) // no volume from skipped sets
+        val volume = SessionEngine.volumeKg(s.exercises)
+        assertEquals(12 * 40.0 + 10 * 42.5, volume, 0.0)
+        val id = env.repo.finish(s, env.time.now(), updateRoutineLoads = false)
+        assertEquals(volume, history.observeDetail(id).first()!!.volumeKg, 0.0)
+    }
 }

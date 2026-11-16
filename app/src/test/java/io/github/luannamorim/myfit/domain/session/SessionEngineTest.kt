@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.domain.session
 
 import io.github.luannamorim.myfit.core.time.FakeTimeSource
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.session.SessionEngine as E
 import org.junit.Assert.assertEquals
@@ -196,5 +197,16 @@ class SessionEngineTest {
         assertTrue(E.isComplete(s))
         assertEquals(100, E.progressPercent(s))
         assertEquals(100, E.progressPercent(E.skipExercise(sessionOf(now, 1), now))) // everything skipped
+    }
+
+    @Test
+    fun volume_repsTimesKg_onDoneSetsOfRepExercisesOnly() {
+        var s = sessionOf(now, 2, 1)
+        s = E.skipRest(E.completeSet(s, 10, 50.0, now))
+        s = E.skipRest(E.completeSet(s, 8, null, now)) // bodyweight: no kg
+        s = E.skipRest(E.completeSet(s, 60, 10.0, now))
+        assertEquals(500.0 + 600.0, E.volumeKg(s.exercises), 0.0)
+        val timed = s.copy(exercises = s.exercises.mapIndexed { i, ex -> if (i == 1) ex.copy(measure = ExerciseMeasure.TIME) else ex })
+        assertEquals(500.0, E.volumeKg(timed.exercises), 0.0) // 60 s × 10 kg is not volume
     }
 }

@@ -8,7 +8,6 @@ import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.data.images.ImageKind
 import io.github.luannamorim.myfit.data.images.ImageStore
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
-import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.session.SessionEngine
@@ -60,8 +59,6 @@ class SessionSummaryViewModel @Inject constructor(
         if (s == null) return@combine SessionSummaryUiState(loading = busy && done == null, hasSession = false, finishedSessionId = done)
         val sets = s.exercises.flatMap { it.sets }
         val doneSets = sets.filter { it.status == ItemStatus.DONE }
-        // Volume (reps × kg) only makes sense for exercises counted in repetitions.
-        val repSets = s.exercises.filter { it.measure == ExerciseMeasure.REPS }.flatMap { it.sets }.filter { it.status == ItemStatus.DONE }
         SessionSummaryUiState(
             loading = false,
             hasSession = true,
@@ -69,7 +66,7 @@ class SessionSummaryViewModel @Inject constructor(
             durationMs = SessionEngine.elapsedMs(s, time.now()),
             setsDone = doneSets.size,
             setsTotal = sets.size,
-            volumeKg = repSets.sumOf { (it.actualReps ?: 0) * (it.actualLoadKg ?: 0.0) },
+            volumeKg = SessionEngine.volumeKg(s.exercises),
             exercises = s.exercises.map { ex ->
                 SummaryExercise(
                     name = ex.name,

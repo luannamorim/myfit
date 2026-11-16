@@ -1,9 +1,5 @@
 package io.github.luannamorim.myfit.ui.feature.evolution
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -69,6 +65,7 @@ import io.github.luannamorim.myfit.ui.common.Sparkline
 import io.github.luannamorim.myfit.ui.common.ViewerPage
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.common.localImageModel
+import io.github.luannamorim.myfit.ui.common.rememberPhotoSource
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.DateField
 import io.github.luannamorim.myfit.ui.components.EmptyState
@@ -97,9 +94,7 @@ data class EvolutionActions(
 fun EvolutionScreen(actions: EvolutionActions, modifier: Modifier = Modifier, viewModel: EvolutionViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var pendingPose by remember { mutableStateOf(PhotoPose.FRONT) }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        if (uri != null) viewModel.addPhoto(uri, state.photoDate, pendingPose)
-    }
+    val photo = rememberPhotoSource { uri -> viewModel.addPhoto(uri, state.photoDate, pendingPose) }
     EvolutionContent(
         state = state,
         actions = actions,
@@ -109,7 +104,7 @@ fun EvolutionScreen(actions: EvolutionActions, modifier: Modifier = Modifier, vi
         onTogglePhoto = viewModel::togglePhoto,
         onAddPhoto = { pose ->
             pendingPose = pose
-            picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            photo.choose()
         },
         onDeletePhotos = viewModel::deleteSelectedPhotos,
         modifier = modifier,

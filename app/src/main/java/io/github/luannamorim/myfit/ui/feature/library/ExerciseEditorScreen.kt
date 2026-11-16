@@ -1,8 +1,5 @@
 package io.github.luannamorim.myfit.ui.feature.library
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +57,7 @@ import io.github.luannamorim.myfit.ui.common.MuscleMap
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.common.localImageModel
 import io.github.luannamorim.myfit.ui.common.openExerciseVideo
+import io.github.luannamorim.myfit.ui.common.rememberPhotoSource
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitChip
@@ -76,16 +74,14 @@ import io.github.luannamorim.myfit.ui.theme.Spacing
 fun ExerciseEditorScreen(onClose: () -> Unit, viewModel: ExerciseEditorViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.done) { if (state.done) onClose() }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) viewModel.pickImage(uri)
-    }
+    val photo = rememberPhotoSource(viewModel::pickImage)
     ExerciseEditorContent(
         state = state,
         onName = viewModel::setName,
         onGroup = viewModel::setGroup,
         onMovement = viewModel::setMovement,
         onMeasure = viewModel::setMeasure,
-        onPickImage = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+        onPickImage = photo::choose,
         onRemoveImage = viewModel::removeImage,
         onToggleFavorite = viewModel::toggleFavorite,
         onSave = { viewModel.save() },

@@ -1,9 +1,5 @@
 package io.github.luannamorim.myfit.ui.feature.workout
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +33,7 @@ import io.github.luannamorim.myfit.core.format.formatKg
 import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.ui.common.IntensityPicker
 import io.github.luannamorim.myfit.ui.common.PhotoField
+import io.github.luannamorim.myfit.ui.common.rememberPhotoSource
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.PrimaryButton
@@ -56,16 +53,14 @@ fun SessionSummaryScreen(
         val finished = state.finishedSessionId
         if (finished != null) onDone(finished) else if (!state.loading && !state.hasSession) onBack()
     }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        if (uri != null) viewModel.setPhoto(uri)
-    }
+    val photo = rememberPhotoSource(viewModel::setPhoto)
     SessionSummaryContent(
         state,
         onBack,
         viewModel::setUpdateLoads,
         viewModel::confirm,
         onIntensity = viewModel::setIntensity,
-        onPickPhoto = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+        onPickPhoto = photo::choose,
         onRemovePhoto = viewModel::removePhoto,
     )
 }
