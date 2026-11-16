@@ -151,6 +151,7 @@
     <string name="workout_hold_done">Concluir</string>
     <string name="workout_hold_running">Meta %1$s</string>
     <string name="workout_hold_extra">Meta de %1$s batida · continue</string>
+    <string name="workout_progress_a11y">%1$d%% do treino concluído</string>
     <string name="workout_rest">Descanso</string>
     <string name="workout_rest_over">Descanso concluído</string>
     <string name="workout_skip_rest">Pular descanso</string>
@@ -279,6 +280,7 @@
     <string name="home_evening">Boa noite</string>
     <string name="home_today_done">Treino de hoje concluído</string>
     <string name="home_next">Próximo treino</string>
+    <string name="home_next_at">%1$s às %2$s</string>
     <string name="home_start">Iniciar treino</string>
     <string name="home_your_routines">Seus treinos</string>
     <string name="home_see_all">Ver todos</string>

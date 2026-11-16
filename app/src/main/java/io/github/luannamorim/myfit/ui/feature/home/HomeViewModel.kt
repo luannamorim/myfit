@@ -16,7 +16,9 @@ import io.github.luannamorim.myfit.domain.body.BodyMetrics
 import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
+import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
+import io.github.luannamorim.myfit.domain.reminder.ReminderSchedule
 import io.github.luannamorim.myfit.domain.session.ActiveSession
 import io.github.luannamorim.myfit.platform.activity.LiveActivityController
 import io.github.luannamorim.myfit.platform.session.SessionController
@@ -28,6 +30,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 enum class Greeting { MORNING, AFTERNOON, EVENING;
@@ -54,6 +59,8 @@ data class HomeUiState(
     val live: LiveActivity? = null,
     val todaySessions: List<SessionSummary> = emptyList(),
     val suggested: RoutineOverview? = null,
+    /** When [suggested] comes from a workout reminder: that reminder's moment (local). */
+    val suggestedAt: LocalDateTime? = null,
     val routines: List<RoutineOverview> = emptyList(),
     val last: SessionSummary? = null,
     val body: BodySnapshot? = null,
@@ -66,6 +73,32 @@ fun suggestRoutine(routines: List<RoutineOverview>): RoutineOverview? =
         .filter { it.value.exerciseCount > 0 }
         .minWithOrNull(compareBy<IndexedValue<RoutineOverview>>({ it.value.lastDoneEpochDay != null }, { it.value.lastDoneEpochDay ?: 0 }, { it.index }))
         ?.value
+
+/** A routine with a reminder pointing to it, and the reminder's moment. */
+data class ScheduledRoutine(val routine: RoutineOverview, val at: LocalDateTime)
+
+/**
+ * The routine of the next workout reminder. Today's reminder still counts after its time until that
+ * routine is done today (missed in the morning, still today's workout); once done, its next slot counts.
+ * Disabled and free-text reminders, and routines that are gone or have no exercises, are skipped.
+ */
+fun scheduledRoutine(routines: List<RoutineOverview>, reminders: List<Reminder>, now: ZonedDateTime): ScheduledRoutine? {
+    val today = now.toLocalDate()
+    val byId = routines.filter { it.exerciseCount > 0 }.associateBy { it.id }
+    val beforeToday = today.atStartOfDay(now.zone).minusNanos(1)
+    val endOfToday = today.atTime(LocalTime.MAX).atZone(now.zone)
+    return reminders.asSequence()
+        .filter { it.enabled }
+        .mapNotNull { reminder ->
+            val routine = reminder.routineId?.let(byId::get) ?: return@mapNotNull null
+            val first = ReminderSchedule.nextTrigger(reminder, beforeToday) ?: return@mapNotNull null
+            val doneToday = first.toLocalDate() == today && routine.lastDoneEpochDay == today.toEpochDay()
+            val at = if (doneToday) ReminderSchedule.nextTrigger(reminder, endOfToday) else first
+            at?.let { ScheduledRoutine(routine, it.toLocalDateTime()) to it.toInstant() }
+        }
+        .minByOrNull { it.second }
+        ?.first
+}
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -82,24 +115,26 @@ class HomeViewModel @Inject constructor(
     private val week = HistoryCalculator.weekOf(today)
 
     val state: StateFlow<HomeUiState> = combine(
-        routines.observeOverviews(),
+        combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged()) { r, rem -> r to rem },
         combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
         history.observeLast(),
         combine(controller.active, liveActivity.live) { a, l -> a to l },
         combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
             BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(raw, sex)), sex)
         },
-    ) { list, (weekSessions, weekActivities), last, (active, live), bodySnapshot ->
-        val hour = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone()).hour
+    ) { (list, reminders), (weekSessions, weekActivities), last, (active, live), bodySnapshot ->
+        val now = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone())
+        val scheduled = scheduledRoutine(list, reminders, now)
         val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
         HomeUiState(
             loading = false,
-            greeting = Greeting.forHour(hour),
+            greeting = Greeting.forHour(now.hour),
             today = today,
             active = active,
             live = live,
             todaySessions = weekSessions.filter { it.startDate == today },
-            suggested = suggestRoutine(list),
+            suggested = scheduled?.routine ?: suggestRoutine(list),
+            suggestedAt = scheduled?.at,
             routines = list,
             last = last,
             body = bodySnapshot,

@@ -9,6 +9,7 @@ import io.github.luannamorim.myfit.core.time.millisUntil
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
+import io.github.luannamorim.myfit.domain.model.HoldCue
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.domain.model.TimedSets
@@ -47,6 +48,8 @@ data class WorkoutUiState(
     val sessionId: Long = 0,
     val routineName: String = "",
     val elapsedMs: Long = 0,
+    /** Share of the workout done, 0–100 ([SessionEngine.progressPercent]). */
+    val progressPercent: Int = 0,
     val isPaused: Boolean = false,
     val exerciseIndex: Int = 0,
     val exerciseName: String = "",
@@ -121,7 +124,7 @@ class WorkoutViewModel @Inject constructor(
         if (state.value.timed) it.copy(reps = TimedSets.step(it.reps, up = delta > 0)) else it.copy(reps = (it.reps + delta).coerceIn(0, 200))
     }
 
-    /** Starts holding a timed set: beeps in the last 3 seconds and the "go" sound at the target. */
+    /** Starts holding a timed set: beeps in the last 3 seconds, the "go" sound at the target, a beep each minute. */
     fun startHold() {
         val set = currentSession?.currentSet ?: return
         if (hold.value != null || !state.value.timed) return
@@ -152,19 +155,17 @@ class WorkoutViewModel @Inject constructor(
         hold.value = null
     }
 
+    /** Plays [TimedSets.holdCues] until the hold stops; a late beep is dropped, the target sound never. */
     private suspend fun holdCues(start: Mark, targetMs: Long) {
         val prefs = settings.current()
-        if (prefs.countdownBeeps) {
-            for (second in 3 downTo 1) {
-                if (targetMs <= second * 1000L) continue
-                val wait = targetMs - second * 1000L - start.millisUntil(time.now())
-                if (wait > 0) delay(wait)
-                if (wait > -LATE_CUE_MS) sounds.play(RestCue.TICK, prefs.restSound)
+        for ((at, cue) in TimedSets.holdCues(targetMs, prefs.countdownBeeps)) {
+            val wait = at - start.millisUntil(time.now())
+            if (wait > 0) delay(wait)
+            when {
+                cue == HoldCue.TARGET -> sounds.play(RestCue.GO, prefs.restSound)
+                wait > -LATE_CUE_MS -> sounds.play(RestCue.TICK, prefs.restSound)
             }
         }
-        val wait = targetMs - start.millisUntil(time.now())
-        if (wait > 0) delay(wait)
-        sounds.play(RestCue.GO, prefs.restSound)
     }
 
     fun changeLoad(deltaKg: Double) = editDraft { d ->
@@ -256,6 +257,7 @@ class WorkoutViewModel @Inject constructor(
             sessionId = session.id,
             routineName = session.routineName,
             elapsedMs = SessionEngine.elapsedMs(session, now),
+            progressPercent = SessionEngine.progressPercent(session),
             isPaused = session.isPaused,
             exerciseIndex = session.cursor.exerciseIndex,
             exerciseName = exercise?.name.orEmpty(),

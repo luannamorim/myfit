@@ -131,6 +131,8 @@
     <string name="workout_hold_done">Done</string>
     <string name="workout_hold_running">Target %1$s</string>
     <string name="workout_hold_extra">Target %1$s reached · keep going</string>
+    <string name="workout_progress" translatable="false">%1$d%%</string>
+    <string name="workout_progress_a11y">%1$d%% of the workout done</string>
     <string name="workout_rest">Rest</string>
     <string name="workout_rest_over">Rest complete</string>
     <string name="workout_skip_rest">Skip rest</string>
@@ -254,6 +256,7 @@
     <string name="home_evening">Good evening</string>
     <string name="home_today_done">Today\'s workout done</string>
     <string name="home_next">Next workout</string>
+    <string name="home_next_at">%1$s at %2$s</string>
     <string name="home_start">Start workout</string>
     <string name="home_your_routines">Your workouts</string>
     <string name="home_see_all">See all</string>

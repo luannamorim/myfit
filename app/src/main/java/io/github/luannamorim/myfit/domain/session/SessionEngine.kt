@@ -126,6 +126,14 @@ object SessionEngine {
 
     fun isComplete(session: ActiveSession): Boolean = session.exercises.none { it.hasPending }
 
+    /** Share of the workout done, 0–100: completed sets over the sets not skipped; 100 once nothing is pending. */
+    fun progressPercent(session: ActiveSession): Int {
+        val sets = session.exercises.flatMap { it.sets }
+        val counted = sets.count { it.status != ItemStatus.SKIPPED }
+        if (counted == 0) return if (isComplete(session)) 100 else 0
+        return sets.count { it.status == ItemStatus.DONE } * 100 / counted
+    }
+
     fun checkFinish(session: ActiveSession): FinishCheck =
         if (session.exercises.any { it.doneCount > 0 }) FinishCheck.Ok else FinishCheck.NothingCompleted
 

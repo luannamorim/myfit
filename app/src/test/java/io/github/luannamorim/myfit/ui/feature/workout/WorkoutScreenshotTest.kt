@@ -1,7 +1,12 @@
 package io.github.luannamorim.myfit.ui.feature.workout
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -31,6 +36,7 @@ class WorkoutScreenshotTest {
         sessionId = 1,
         routineName = "Back day",
         elapsedMs = 23 * 60_000L + 14_000,
+        progressPercent = 30,
         exerciseIndex = 1,
         exerciseName = "One-arm dumbbell row",
         exerciseNotes = "Keep the elbow close to the body",
@@ -75,6 +81,29 @@ class WorkoutScreenshotTest {
         "workout_hold",
         base.copy(exerciseName = "Plank", seedKey = "plank", muscleGroup = MuscleGroup.ABS, timed = true, reps = 45, loadKg = null, hold = HoldUi(32_000, 45_000)),
     )
+
+    @Test fun workout_hold_extra() = snap(
+        "workout_hold_extra",
+        base.copy(exerciseName = "Plank", seedKey = "plank", muscleGroup = MuscleGroup.ABS, timed = true, reps = 45, loadKg = null, hold = HoldUi(53_000, 45_000)),
+    )
+
+    @Test
+    fun hold_keepsTheExerciseDrawing() {
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                Content(base.copy(exerciseName = "Plank", seedKey = "plank", muscleGroup = MuscleGroup.ABS, timed = true, reps = 45, loadKg = null, hold = HoldUi(32_000, 45_000)))
+            }
+        }
+        compose.onNodeWithText("Done").assertIsDisplayed() // the timer is running
+        compose.onAllNodesWithContentDescription("Plank").onFirst().assertIsDisplayed()
+    }
+
+    @Test
+    fun topBar_showsTheWorkoutPercentageNextToTheClock() {
+        compose.setContent { MyFitTheme(ThemeMode.DARK) { Content(base) } }
+        compose.onNodeWithText("23:14").assertIsDisplayed()
+        compose.onNodeWithContentDescription("30% of the workout done").assertIsDisplayed()
+    }
 
     @Test fun workout_paused() = snap("workout_paused", base.copy(isPaused = true))
 

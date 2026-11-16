@@ -1,5 +1,6 @@
 package io.github.luannamorim.myfit.ui.feature.home
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,10 +55,14 @@ import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.feature.activity.LiveActivityBar
 import io.github.luannamorim.myfit.ui.feature.evolution.BodySnapshotTiles
 import io.github.luannamorim.myfit.ui.feature.history.SessionRow
+import io.github.luannamorim.myfit.ui.feature.reminders.reminderDayText
+import io.github.luannamorim.myfit.ui.feature.reminders.timeText
 import io.github.luannamorim.myfit.ui.navigation.ActiveSessionBar
 import io.github.luannamorim.myfit.ui.theme.MyFitShapes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class HomeActions(
     val onStart: (Long) -> Unit = {},
@@ -122,7 +128,7 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
                 action = { PrimaryButton(stringResource(R.string.routines_new), onClick = actions.onCreateRoutine, icon = Icons.Rounded.Add) },
             )
         } else {
-            state.suggested?.takeIf { active == null }?.let { NextWorkout(it, state.today.toEpochDay(), actions) }
+            state.suggested?.takeIf { active == null }?.let { NextWorkout(it, state.suggestedAt, state.today, actions) }
             SectionHeader(stringResource(R.string.home_your_routines), action = { TextAction(stringResource(R.string.home_see_all), onClick = actions.onSeeRoutines) })
             Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -175,10 +181,24 @@ private fun TodayDone(state: HomeUiState) {
 }
 
 @Composable
-private fun NextWorkout(routine: RoutineOverview, todayEpochDay: Long, actions: HomeActions) {
+private fun NextWorkout(routine: RoutineOverview, at: LocalDateTime?, today: LocalDate, actions: HomeActions) {
     val c = MyFitTheme.colors
+    val todayEpochDay = today.toEpochDay()
     MyFitCard(Modifier.fillMaxWidth(), contentPadding = Spacing.l) {
-        Text(stringResource(R.string.home_next).uppercase(), style = MyFitTheme.type.overline, color = c.textSecondary)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.home_next).uppercase(), style = MyFitTheme.type.overline, color = c.textSecondary, modifier = Modifier.weight(1f))
+            // From a reminder: when it is due ("Today at 18:00", "Thu at 07:00").
+            if (at != null) {
+                Icon(Icons.Rounded.NotificationsNone, contentDescription = null, tint = c.textSecondary, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.home_next_at, reminderDayText(at.toLocalDate(), today), timeText(at.hour * 60 + at.minute, DateFormat.is24HourFormat(LocalContext.current))),
+                    style = MyFitTheme.type.caption,
+                    color = c.textSecondary,
+                    maxLines = 1,
+                )
+            }
+        }
         Spacer(Modifier.height(Spacing.s))
         Text(routine.name, style = MyFitTheme.type.headline, color = c.textPrimary)
         Text(

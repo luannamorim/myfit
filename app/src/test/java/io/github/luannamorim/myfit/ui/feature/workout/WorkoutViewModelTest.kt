@@ -46,8 +46,9 @@ class WorkoutViewModelTest {
         env.time.advance(18_400) // held past the 15 s target
         vm.tick()
         assertTrue(vm.state.awaitUntil { it.hold?.reachedTarget == true }.hold!!.reachedTarget)
+        assertEquals(0, start.progressPercent)
         vm.finishHold()
-        vm.state.awaitUntil { it.hold == null && it.setNumber == 2 }
+        assertEquals(33, vm.state.awaitUntil { it.hold == null && it.setNumber == 2 }.progressPercent) // 1 of 3 sets
         val done = env.repo.getActive()!!.exercises.single().sets.first()
         assertEquals(18, done.actualReps) // seconds held
     }

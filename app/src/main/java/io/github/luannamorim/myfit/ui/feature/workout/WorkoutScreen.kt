@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -63,6 +64,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -274,7 +276,24 @@ private fun TopRow(
         }
         Column(Modifier.weight(1f)) {
             Text(state.routineName, style = MyFitTheme.type.label, color = c.textSecondary, maxLines = 1)
-            Text(Durations.clock(state.elapsedMs), style = MyFitTheme.type.numericLarge.copy(fontSize = MyFitTheme.type.title.fontSize), color = c.textPrimary)
+            Row {
+                Text(
+                    Durations.clock(state.elapsedMs),
+                    style = MyFitTheme.type.numericLarge.copy(fontSize = MyFitTheme.type.title.fontSize),
+                    color = c.textPrimary,
+                    modifier = Modifier.alignByBaseline(),
+                )
+                Spacer(Modifier.width(Spacing.s))
+                // Whole workout, not the current exercise.
+                val progressDescription = stringResource(R.string.workout_progress_a11y, state.progressPercent)
+                Text(
+                    stringResource(R.string.workout_progress, state.progressPercent),
+                    style = MyFitTheme.type.numeric,
+                    color = c.accent,
+                    maxLines = 1,
+                    modifier = Modifier.alignByBaseline().semantics { contentDescription = progressDescription },
+                )
+            }
         }
         IconButton(onClick = onTogglePause) {
             Icon(
@@ -432,15 +451,16 @@ private fun TimedSetPanel(
             Text(state.exerciseName, style = MyFitTheme.type.display, color = c.textPrimary)
             state.exerciseNotes?.let { Text(it, style = MyFitTheme.type.body, color = c.textSecondary) }
         }
+        // Stays while the timer runs: the drawing is the form reference during the hold.
+        ExerciseVisual(
+            imagePath = state.imagePath,
+            seedKey = state.seedKey,
+            muscleGroup = state.muscleGroup,
+            name = state.exerciseName,
+            modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp).aspectRatio(16f / 9f),
+            background = c.surface,
+        )
         if (hold == null) {
-            ExerciseVisual(
-                imagePath = state.imagePath,
-                seedKey = state.seedKey,
-                muscleGroup = state.muscleGroup,
-                name = state.exerciseName,
-                modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp).aspectRatio(16f / 9f),
-                background = c.surface,
-            )
             NumberStepper(
                 value = Durations.setTime(state.reps),
                 label = stringResource(R.string.item_time),
@@ -468,7 +488,7 @@ private fun TimedSetPanel(
                 progress = if (hold.reachedTarget) 1f else hold.elapsedMs.toFloat() / hold.targetMs.coerceAtLeast(1),
                 remainingText = if (over >= 0) "+" + Durations.countdown(over) else Durations.countdown(-over),
                 caption = stringResource(if (hold.reachedTarget) R.string.workout_hold_extra else R.string.workout_hold_running, Durations.setTime(state.reps)),
-                size = 260.dp,
+                size = 220.dp,
             )
             PrimaryButton(stringResource(R.string.workout_hold_done), onClick = onFinishHold, icon = Icons.Rounded.Check, minHeight = 64.dp, modifier = Modifier.fillMaxWidth())
             TextAction(stringResource(R.string.action_cancel), onClick = onCancelHold, color = c.textSecondary)

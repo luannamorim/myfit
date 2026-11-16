@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
@@ -42,7 +44,16 @@ fun RestRing(
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(remainingText, style = MyFitTheme.type.numericHero, color = c.textPrimary)
-            if (caption != null) Text(caption, style = MyFitTheme.type.label, color = c.textSecondary)
+            // Kept inside the circle's chord: a long caption wraps instead of crossing the ring.
+            if (caption != null) {
+                Text(
+                    caption,
+                    style = MyFitTheme.type.label,
+                    color = c.textSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = size * 0.12f),
+                )
+            }
         }
     }
 }

@@ -182,4 +182,19 @@ class SessionEngineTest {
         val s = E.completeSet(sessionOf(now, 3, restSeconds = 0), 12, 40.0, now)
         assertNull(s.rest)
     }
+
+    @Test
+    fun progress_countsDoneSetsOverTheOnesNotSkipped() {
+        var s = sessionOf(now, 3, 3, 4) // 10 sets
+        assertEquals(0, E.progressPercent(s))
+        s = E.completeSet(s, 12, 40.0, now)
+        assertEquals(10, E.progressPercent(s))
+        s = E.skipRest(s)
+        s = E.skipExercise(s, now) // 2 sets skipped: 1 of 8
+        assertEquals(12, E.progressPercent(s))
+        repeat(7) { s = E.skipRest(E.completeSet(s, 12, 40.0, now)) }
+        assertTrue(E.isComplete(s))
+        assertEquals(100, E.progressPercent(s))
+        assertEquals(100, E.progressPercent(E.skipExercise(sessionOf(now, 1), now))) // everything skipped
+    }
 }
