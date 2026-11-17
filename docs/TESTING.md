@@ -100,6 +100,10 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Meal: *Add meal*, describe it, tap *Ask AI*: the share sheet opens with the question ready; pick an AI app, read the answer, come back and type the calories, change the time, save. It shows in the list and the total; tap it to edit or delete.
 - [ ] Go to yesterday with ‹: its own meals and water; › never goes past today. A weigh-in today doesn't change yesterday's target.
 - [ ] Back up and restore: meals, water, birth date and goal come back.
+- [ ] Home: "Nutrition today" (before "Body") shows two rings with the percent of the water and calorie targets; tapping one opens the Nutrition tab. Past the target the ring is full and shows e.g. "108%" (amber for calories when the goal is Lose).
+- [ ] Bell on the Nutrition tab → *Nutrition reminders*: add a meal time 2 minutes ahead. At that time "Time to eat" arrives, even with the screen locked; *Log meal* opens the meal editor for today; tapping the notification opens the Nutrition tab.
+- [ ] Water: turn it on with a window that includes the next few minutes (e.g. every 1 h, from now). The notification shows today's progress; *+250 ml* logs it without opening the app and the notification goes away. Once the day's water target is reached, no more water reminders that day.
+- [ ] Restart the phone: meal and water reminders still fire. Turning them off stops them.
 
 ### 7. Backup
 - [ ] *Settings → Backup*: set the recovery password and store it in a password manager.
