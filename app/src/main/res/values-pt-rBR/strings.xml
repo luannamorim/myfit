@@ -523,6 +523,7 @@
     <string name="reminders_empty_title">Nenhum lembrete</string>
     <string name="reminders_empty_message">Escolha um treino e quando quer ser avisado.</string>
     <string name="reminders_every_day">Todos os dias</string>
+    <string name="reminders_yesterday">Ontem</string>
     <string name="reminders_today">Hoje</string>
     <string name="reminders_tomorrow">Amanhã</string>
     <string name="reminders_notifications_off">Desativadas: os lembretes não vão aparecer.</string>

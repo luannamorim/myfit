@@ -113,6 +113,68 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun scheduled_missedWorkoutLeavesAfterFourHours_orWhenAnotherRemindersTimeComes() {
+        val routines = listOf(routine(1), routine(2), routine(9))
+        val tomorrow = weekly(9, 9, 18 * 60, DayOfWeek.THURSDAY)
+        // 07:00 missed 3 h ago: still on the card.
+        assertEquals(
+            LocalDateTime.of(2026, 11, 18, 7, 0),
+            scheduledRoutine(routines, listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), tomorrow), wed)?.at,
+        )
+        // 06:00 missed 4 h ago: gone, tomorrow's is next; alone, its next week's slot.
+        assertEquals(9L, scheduledRoutine(routines, listOf(weekly(1, 1, 6 * 60, DayOfWeek.WEDNESDAY), tomorrow), wed)?.routine?.id)
+        assertEquals(
+            LocalDateTime.of(2026, 11, 25, 6, 0),
+            scheduledRoutine(routines, listOf(weekly(1, 1, 6 * 60, DayOfWeek.WEDNESDAY)), wed)?.at,
+        )
+        // 07:00 missed, but another reminder's time (09:00) came: that one.
+        val both = listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), weekly(2, 2, 9 * 60, DayOfWeek.WEDNESDAY), tomorrow)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 9, 0), scheduledRoutine(routines, both, wed)?.at)
+        // That one done (the 07:00 skipped for it): the next, not the 07:00 again.
+        assertEquals(9L, scheduledRoutine(listOf(routine(1), routine(2, last = todayDay), routine(9)), both, wed)?.routine?.id)
+        // Disabled and free-text reminders' times don't move it.
+        val others = listOf(
+            weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY),
+            weekly(2, 2, 9 * 60, DayOfWeek.WEDNESDAY, enabled = false),
+            weekly(3, null, 9 * 60, DayOfWeek.WEDNESDAY),
+            tomorrow,
+        )
+        assertEquals(1L, scheduledRoutine(routines, others, wed)?.routine?.id)
+        // Past midnight: last night's 22:00 still counts at 01:00.
+        val night = ZonedDateTime.of(2026, 11, 18, 1, 0, 0, 0, wed.zone)
+        assertEquals(
+            LocalDateTime.of(2026, 11, 17, 22, 0),
+            scheduledRoutine(routines, listOf(weekly(1, 1, 22 * 60, DayOfWeek.TUESDAY), tomorrow), night)?.at,
+        )
+    }
+
+    @Test
+    fun scheduled_routineDoneSinceItsPreviousSlot_skipsTheComingSlot() {
+        val reminders = listOf(weekly(1, 1, 18 * 60, DayOfWeek.THURSDAY), weekly(2, 2, 7 * 60, DayOfWeek.FRIDAY))
+        // Tomorrow's routine done ahead (today, or Monday after last Thursday's slot): Friday's comes first.
+        for (last in listOf(todayDay, todayDay - 2)) {
+            assertEquals(2L, scheduledRoutine(listOf(routine(1, last = last), routine(2)), reminders, wed)?.routine?.id)
+        }
+        // Done on its previous slot (last Thursday): tomorrow's still to do.
+        assertEquals(1L, scheduledRoutine(listOf(routine(1, last = todayDay - 6), routine(2)), reminders, wed)?.routine?.id)
+        // Only reminder and done ahead: the slot after tomorrow's.
+        assertEquals(
+            LocalDateTime.of(2026, 11, 26, 18, 0),
+            scheduledRoutine(listOf(routine(1, last = todayDay)), reminders.take(1), wed)?.at,
+        )
+        // Several days: Monday/Thursday, done Tuesday counts for Thursday; done Monday was Monday's.
+        val twice = listOf(weekly(1, 1, 18 * 60, DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
+        assertEquals(
+            LocalDateTime.of(2026, 11, 23, 18, 0),
+            scheduledRoutine(listOf(routine(1, last = todayDay - 1)), twice, wed)?.at,
+        )
+        assertEquals(
+            LocalDateTime.of(2026, 11, 19, 18, 0),
+            scheduledRoutine(listOf(routine(1, last = todayDay - 2)), twice, wed)?.at,
+        )
+    }
+
+    @Test
     fun scheduled_oneOffReminders() {
         fun once(id: Long, routineId: Long, date: LocalDate, minute: Int) = Reminder(id, routineId, "R$routineId", minute, dateEpochDay = date.toEpochDay())
         val routines = listOf(routine(1), routine(2))
@@ -120,9 +182,14 @@ class HomeViewModelTest {
             LocalDateTime.of(2026, 11, 20, 9, 0),
             scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60)), wed)?.at,
         )
-        // Yesterday's one-off is gone; earlier today still counts.
+        // Yesterday's one-off is gone; earlier today counts for 4 hours.
         assertNull(scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 17), 9 * 60)), wed))
-        assertEquals(1L, scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 6 * 60)), wed)?.routine?.id)
+        assertEquals(1L, scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 7 * 60)), wed)?.routine?.id)
+        assertNull(scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 6 * 60)), wed))
+        // Friday's one-off done ahead today is gone; done before today it still counts.
+        val friday = listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60))
+        assertNull(scheduledRoutine(listOf(routine(1, last = todayDay)), friday, wed))
+        assertEquals(1L, scheduledRoutine(listOf(routine(1, last = todayDay - 1)), friday, wed)?.routine?.id)
     }
 
     @Test

@@ -77,27 +77,40 @@ fun suggestRoutine(routines: List<RoutineOverview>): RoutineOverview? =
 /** A routine with a reminder pointing to it, and the reminder's moment. */
 data class ScheduledRoutine(val routine: RoutineOverview, val at: LocalDateTime)
 
+/** How long a missed workout stays the next workout after its reminder's time. */
+const val MISSED_WORKOUT_HOURS = 4L
+
 /**
- * The routine of the next workout reminder. Today's reminder still counts after its time until that
- * routine is done today (missed in the morning, still today's workout); once done, its next slot counts.
- * Disabled and free-text reminders, and routines that are gone or have no exercises, are skipped.
+ * The routine of the next workout reminder. A missed one stays for [MISSED_WORKOUT_HOURS] after its time,
+ * or until another workout reminder's time comes; then its slot after that counts. A slot is done once its
+ * routine was done after the reminder's previous day (a one-off: since today or its day), ahead of time
+ * included. Disabled and free-text reminders, and routines that are gone or have no exercises, are skipped.
  */
 fun scheduledRoutine(routines: List<RoutineOverview>, reminders: List<Reminder>, now: ZonedDateTime): ScheduledRoutine? {
     val today = now.toLocalDate()
     val byId = routines.filter { it.exerciseCount > 0 }.associateBy { it.id }
-    val beforeToday = today.atStartOfDay(now.zone).minusNanos(1)
-    val endOfToday = today.atTime(LocalTime.MAX).atZone(now.zone)
-    return reminders.asSequence()
-        .filter { it.enabled }
-        .mapNotNull { reminder ->
-            val routine = reminder.routineId?.let(byId::get) ?: return@mapNotNull null
-            val first = ReminderSchedule.nextTrigger(reminder, beforeToday) ?: return@mapNotNull null
-            val doneToday = first.toLocalDate() == today && routine.lastDoneEpochDay == today.toEpochDay()
-            val at = if (doneToday) ReminderSchedule.nextTrigger(reminder, endOfToday) else first
+    val workouts = reminders.filter { it.enabled }.mapNotNull { r -> r.routineId?.let(byId::get)?.let { r to it } }
+    // Another workout reminder's time came after [slot], up to now.
+    fun overtaken(reminder: Reminder, slot: ZonedDateTime) = workouts.any { (other, _) ->
+        other.id != reminder.id && ReminderSchedule.nextTrigger(other, slot)?.isAfter(now) == false
+    }
+    return workouts
+        .mapNotNull { (reminder, routine) ->
+            val slot = pendingSlot(reminder, routine, now.minusHours(MISSED_WORKOUT_HOURS), today) ?: return@mapNotNull null
+            val at = if (!slot.isAfter(now) && overtaken(reminder, slot)) pendingSlot(reminder, routine, slot, today) else slot
             at?.let { ScheduledRoutine(routine, it.toLocalDateTime()) to it.toInstant() }
         }
         .minByOrNull { it.second }
         ?.first
+}
+
+/** First slot of [reminder] after [after] whose [routine] isn't done yet (see [scheduledRoutine]). */
+private fun pendingSlot(reminder: Reminder, routine: RoutineOverview, after: ZonedDateTime, today: LocalDate): ZonedDateTime? {
+    val slot = ReminderSchedule.nextTrigger(reminder, after) ?: return null
+    val day = slot.toLocalDate()
+    val since = ReminderSchedule.previousDay(reminder, day) ?: minOf(day, today).minusDays(1)
+    val done = (routine.lastDoneEpochDay ?: Long.MIN_VALUE) > since.toEpochDay()
+    return if (done) ReminderSchedule.nextTrigger(reminder, day.atTime(LocalTime.MAX).atZone(after.zone)) else slot
 }
 
 @HiltViewModel

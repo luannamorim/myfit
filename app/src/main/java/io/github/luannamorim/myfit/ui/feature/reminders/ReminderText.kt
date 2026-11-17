@@ -62,9 +62,10 @@ internal fun scheduleText(reminder: Reminder, today: LocalDate): String {
     }
 }
 
-/** Day a reminder fires: "Today", "Tomorrow", the weekday within a week ("Thu"), else "Thu, Nov 26". */
+/** Day a reminder fires: "Yesterday" (a missed one past midnight), "Today", "Tomorrow", the weekday within a week ("Thu"), else "Thu, Nov 26". */
 @Composable
 internal fun reminderDayText(date: LocalDate, today: LocalDate): String = when {
+    date == today.minusDays(1) -> stringResource(R.string.reminders_yesterday)
     date == today -> stringResource(R.string.reminders_today)
     date == today.plusDays(1) -> stringResource(R.string.reminders_tomorrow)
     date.isAfter(today) && date.isBefore(today.plusDays(7)) -> dayShort(date.dayOfWeek)

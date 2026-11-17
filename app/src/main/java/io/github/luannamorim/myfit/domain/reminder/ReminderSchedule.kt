@@ -31,6 +31,10 @@ object ReminderSchedule {
             .firstOrNull { it.isAfter(now) }
     }
 
+    /** Last day before [day] a weekly [reminder] fires on; null for a one-off. */
+    fun previousDay(reminder: Reminder, day: LocalDate): LocalDate? =
+        (1L..7L).asSequence().map { day.minusDays(it) }.firstOrNull { it.dayOfWeek in reminder.days }
+
     /** A one-off reminder whose moment has passed: it will not fire again until edited. */
     fun isPast(reminder: Reminder, now: ZonedDateTime): Boolean = !reminder.isRepeating && nextTrigger(reminder, now) == null
 

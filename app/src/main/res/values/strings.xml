@@ -490,6 +490,7 @@
     <string name="reminders_empty_title">No reminders</string>
     <string name="reminders_empty_message">Choose a workout and when you want to be notified.</string>
     <string name="reminders_every_day">Every day</string>
+    <string name="reminders_yesterday">Yesterday</string>
     <string name="reminders_today">Today</string>
     <string name="reminders_tomorrow">Tomorrow</string>
     <string name="reminders_notifications_off">Off: reminders won\'t show up.</string>

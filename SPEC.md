@@ -169,4 +169,4 @@ Platform components: a foreground service for the workout session, an exact alar
 1. **Installing outside the Play Store in Brazil:** the verified developer requirement was scheduled for September 30, 2026. Before the release, confirm whether it is in effect and document the path (advanced flow, ADB or limited distribution account).
 2. **Document providers:** sync apps expose folders with different behaviors (renaming, listing). The fallback is to write directly to the final name; validate on the user's device.
 3. **Updating workout loads when finishing:** checked by default (option visible on the summary screen). Revisit after a few weeks of use.
-4. **Next workout suggestion:** follows the workout reminders (a reminder for today still counts after its time until that routine is done today); without one, "the one done longest ago".
+4. **Next workout suggestion:** follows the workout reminders (a missed one stays 4 hours after its time, or until another workout reminder's time comes; a slot counts as done once that routine was done after the reminder's previous day, ahead of time included); without one, "the one done longest ago".
