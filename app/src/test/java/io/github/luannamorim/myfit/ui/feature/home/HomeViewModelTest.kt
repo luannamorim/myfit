@@ -113,7 +113,7 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun scheduled_missedWorkoutLeavesAfterFourHours_orWhenAnotherRemindersTimeComes() {
+    fun scheduled_missedWorkoutStaysUntilMidnight_orUntilAnotherRemindersTimeComes() {
         val routines = listOf(routine(1), routine(2), routine(9))
         val tomorrow = weekly(9, 9, 18 * 60, DayOfWeek.THURSDAY)
         // 07:00 missed 3 h ago: still on the card.
@@ -121,12 +121,11 @@ class HomeViewModelTest {
             LocalDateTime.of(2026, 11, 18, 7, 0),
             scheduledRoutine(routines, listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), tomorrow), wed)?.at,
         )
-        // 06:00 missed 4 h ago: gone, tomorrow's is next; alone, its next week's slot.
-        assertEquals(9L, scheduledRoutine(routines, listOf(weekly(1, 1, 6 * 60, DayOfWeek.WEDNESDAY), tomorrow), wed)?.routine?.id)
-        assertEquals(
-            LocalDateTime.of(2026, 11, 25, 6, 0),
-            scheduledRoutine(routines, listOf(weekly(1, 1, 6 * 60, DayOfWeek.WEDNESDAY)), wed)?.at,
-        )
+        // 06:00 missed 4 h ago: still on the card, and still at 23:59.
+        val early = listOf(weekly(1, 1, 6 * 60, DayOfWeek.WEDNESDAY), tomorrow)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledRoutine(routines, early, wed)?.at)
+        val lateNight = ZonedDateTime.of(2026, 11, 18, 23, 59, 0, 0, wed.zone)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledRoutine(routines, early, lateNight)?.at)
         // 07:00 missed, but another reminder's time (09:00) came: that one.
         val both = listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), weekly(2, 2, 9 * 60, DayOfWeek.WEDNESDAY), tomorrow)
         assertEquals(LocalDateTime.of(2026, 11, 18, 9, 0), scheduledRoutine(routines, both, wed)?.at)
@@ -140,12 +139,11 @@ class HomeViewModelTest {
             tomorrow,
         )
         assertEquals(1L, scheduledRoutine(routines, others, wed)?.routine?.id)
-        // Past midnight: last night's 22:00 still counts at 01:00.
-        val night = ZonedDateTime.of(2026, 11, 18, 1, 0, 0, 0, wed.zone)
-        assertEquals(
-            LocalDateTime.of(2026, 11, 17, 22, 0),
-            scheduledRoutine(routines, listOf(weekly(1, 1, 22 * 60, DayOfWeek.TUESDAY), tomorrow), night)?.at,
-        )
+        // Past midnight it's gone: at 00:30, last night's 22:00 gives way to tomorrow's; alone, its next week's slot.
+        val night = ZonedDateTime.of(2026, 11, 18, 0, 30, 0, 0, wed.zone)
+        val lastNight = weekly(1, 1, 22 * 60, DayOfWeek.TUESDAY)
+        assertEquals(9L, scheduledRoutine(routines, listOf(lastNight, tomorrow), night)?.routine?.id)
+        assertEquals(LocalDateTime.of(2026, 11, 24, 22, 0), scheduledRoutine(routines, listOf(lastNight), night)?.at)
     }
 
     @Test
@@ -182,10 +180,10 @@ class HomeViewModelTest {
             LocalDateTime.of(2026, 11, 20, 9, 0),
             scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60)), wed)?.at,
         )
-        // Yesterday's one-off is gone; earlier today counts for 4 hours.
-        assertNull(scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 17), 9 * 60)), wed))
+        // Yesterday's one-off is gone; earlier today counts until midnight.
+        assertNull(scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 17), 23 * 60)), wed))
         assertEquals(1L, scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 7 * 60)), wed)?.routine?.id)
-        assertNull(scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 6 * 60)), wed))
+        assertEquals(1L, scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 0)), wed)?.routine?.id)
         // Friday's one-off done ahead today is gone; done before today it still counts.
         val friday = listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60))
         assertNull(scheduledRoutine(listOf(routine(1, last = todayDay)), friday, wed))

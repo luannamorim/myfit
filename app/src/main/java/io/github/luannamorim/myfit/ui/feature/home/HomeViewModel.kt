@@ -77,12 +77,9 @@ fun suggestRoutine(routines: List<RoutineOverview>): RoutineOverview? =
 /** A routine with a reminder pointing to it, and the reminder's moment. */
 data class ScheduledRoutine(val routine: RoutineOverview, val at: LocalDateTime)
 
-/** How long a missed workout stays the next workout after its reminder's time. */
-const val MISSED_WORKOUT_HOURS = 4L
-
 /**
- * The routine of the next workout reminder. A missed one stays for [MISSED_WORKOUT_HOURS] after its time,
- * or until another workout reminder's time comes; then its slot after that counts. A slot is done once its
+ * The routine of the next workout reminder. A missed one stays until midnight of its day (the user asked,
+ * 1.8.0; it was 4 hours), or until another workout reminder's time comes; then its slot after that counts. A slot is done once its
  * routine was done after the reminder's previous day (a one-off: since today or its day), ahead of time
  * included. Disabled and free-text reminders, and routines that are gone or have no exercises, are skipped.
  */
@@ -96,7 +93,8 @@ fun scheduledRoutine(routines: List<RoutineOverview>, reminders: List<Reminder>,
     }
     return workouts
         .mapNotNull { (reminder, routine) ->
-            val slot = pendingSlot(reminder, routine, now.minusHours(MISSED_WORKOUT_HOURS), today) ?: return@mapNotNull null
+            // Slots from the start of today on: a missed one stays until midnight.
+            val slot = pendingSlot(reminder, routine, today.atStartOfDay(now.zone).minusSeconds(1), today) ?: return@mapNotNull null
             val at = if (!slot.isAfter(now) && overtaken(reminder, slot)) pendingSlot(reminder, routine, slot, today) else slot
             at?.let { ScheduledRoutine(routine, it.toLocalDateTime()) to it.toInstant() }
         }
