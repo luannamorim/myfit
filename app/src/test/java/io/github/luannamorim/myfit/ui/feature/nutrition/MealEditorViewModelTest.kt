@@ -108,4 +108,15 @@ class MealEditorViewModelTest {
         assertEquals("610", restored.kcalText)
         assertEquals(13 * 60, restored.minuteOfDay)
     }
+
+    @Test
+    fun doubleTapOnSave_savesTheMealOnce() = runBlocking {
+        val vm = editor()
+        vm.state.awaitUntil { !it.loading }
+        vm.setKcal("320")
+        vm.save()
+        vm.save()
+        vm.state.awaitUntil { it.done }
+        assertEquals(1, repo.observeDay(day).first().meals.size)
+    }
 }

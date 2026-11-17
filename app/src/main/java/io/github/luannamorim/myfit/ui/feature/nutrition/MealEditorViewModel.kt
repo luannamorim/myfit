@@ -28,9 +28,11 @@ data class MealEditorState(
     val minuteOfDay: Int = 0,
     /** Saved or deleted: the screen closes. */
     val done: Boolean = false,
+    /** A save or delete is running: further taps are ignored (no duplicate meals). */
+    val busy: Boolean = false,
 ) {
     val kcal: Int? get() = kcalText.toIntOrNull()?.takeIf { it in Meal.MIN_KCAL..Meal.MAX_KCAL }
-    val canSave: Boolean get() = !loading && kcal != null
+    val canSave: Boolean get() = !loading && !busy && kcal != null
     val canAsk: Boolean get() = description.isNotBlank()
 }
 
@@ -85,7 +87,8 @@ class MealEditorViewModel @Inject constructor(
     fun save() {
         val s = _state.value
         val kcal = s.kcal ?: return
-        if (s.loading) return
+        if (s.loading || s.busy || s.done) return
+        _state.update { it.copy(busy = true) }
         viewModelScope.launch {
             val id = if (s.isNew) 0L else route.mealId
             repo.saveMeal(Meal(id = id, date = s.date, minuteOfDay = s.minuteOfDay, description = s.description, kcal = kcal))
@@ -94,7 +97,9 @@ class MealEditorViewModel @Inject constructor(
     }
 
     fun delete() {
-        if (_state.value.isNew) return
+        val s = _state.value
+        if (s.isNew || s.busy || s.done) return
+        _state.update { it.copy(busy = true) }
         viewModelScope.launch {
             repo.deleteMeal(route.mealId)
             _state.update { it.copy(done = true) }

@@ -95,7 +95,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 
 ### 6b. Nutrition
 - [ ] The tab bar shows Home, Workouts, History, Progress and Nutrition; the gear next to the bell on Home opens Settings, and back returns to Home.
-- [ ] *Settings → Profile*: set the birth date (no future dates; "Clear" removes it) and the goal. With weight, height, sex and birth date set, Nutrition shows a water target (35 ml per kg) and a calorie target; missing data shows "—" and "Fill in: …", which opens Progress or Settings.
+- [ ] *Settings → Profile*: set the birth date (no future dates; "Clear" removes it) and the goal. With weight, height, sex and birth date set, Nutrition shows a water target (35 ml per kg) and a calorie target; a card without a target shows only what was logged (e.g. "1.5 L", "1,240 kcal") and "Fill in: …", which opens Progress or Settings.
 - [ ] Water: +250 ml, +500 ml and *Other* (type an amount) add up; *Undo* removes the last one.
 - [ ] Meal: *Add meal*, describe it, tap *Ask AI*: the share sheet opens with the question ready; pick an AI app, read the answer, come back and type the calories, change the time, save. It shows in the list and the total; tap it to edit or delete.
 - [ ] Go to yesterday with ‹: its own meals and water; › never goes past today. A weigh-in today doesn't change yesterday's target.

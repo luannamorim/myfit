@@ -1,5 +1,6 @@
 package io.github.luannamorim.myfit.ui.feature.nutrition
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.core.time.today
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
@@ -20,6 +21,7 @@ import io.github.luannamorim.myfit.testutil.MainDispatcherRule
 import io.github.luannamorim.myfit.testutil.SessionEnv
 import io.github.luannamorim.myfit.testutil.awaitUntil
 import io.github.luannamorim.myfit.testutil.testSettings
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -43,7 +45,8 @@ class NutritionViewModelTest {
 
     @After fun tearDown() = env.close()
 
-    private fun viewModel(settings: SettingsRepository) = NutritionViewModel(
+    private fun viewModel(settings: SettingsRepository, handle: SavedStateHandle = SavedStateHandle()) = NutritionViewModel(
+        handle,
         nutrition,
         body,
         HistoryRepository(env.db, env.time, BackupTrigger { }),
@@ -111,5 +114,57 @@ class NutritionViewModelTest {
         vm.nextDay()
         val back = vm.state.awaitUntil { it.date == today && !it.loading }
         assertEquals(0, back.day.waterMl) // yesterday's water stayed on yesterday
+    }
+
+    private val dayMs = 24 * 60 * 60 * 1000L
+
+    @Test
+    fun showingToday_followsTheDateAfterMidnight_onResume() = runBlocking {
+        val vm = viewModel(profile())
+        vm.state.awaitUntil { !it.loading }
+        env.time.advance(dayMs) // the app stayed in the background overnight
+        vm.refreshToday()
+        val next = vm.state.awaitUntil { it.date == today.plusDays(1) && !it.loading }
+        assertEquals(today.plusDays(1), next.today)
+        assertFalse(next.canGoForward)
+        vm.addWater(250)
+        assertEquals(250, nutrition.observeDay(today.plusDays(1)).first().waterMl)
+        assertEquals(0, nutrition.observeDay(today).first().waterMl)
+    }
+
+    @Test
+    fun waterAddedAfterMidnight_withoutResume_goesToTheNewDay() = runBlocking {
+        val vm = viewModel(profile())
+        vm.state.awaitUntil { !it.loading }
+        env.time.advance(dayMs) // still on screen when midnight passes
+        vm.addWater(250)
+        assertEquals(250, nutrition.observeDay(today.plusDays(1)).first().waterMl)
+        assertEquals(today.plusDays(1), vm.state.awaitUntil { it.day.waterMl == 250 }.date)
+    }
+
+    @Test
+    fun aPastDayStaysShown_whenTheDateChanges() = runBlocking {
+        val vm = viewModel(profile())
+        vm.state.awaitUntil { !it.loading }
+        vm.previousDay()
+        env.time.advance(dayMs)
+        vm.refreshToday()
+        val s = vm.state.awaitUntil { it.today == today.plusDays(1) && !it.loading }
+        assertEquals(today.minusDays(1), s.date)
+        assertTrue(s.canGoForward)
+    }
+
+    @Test
+    fun shownDay_survivesTheProcessBeingKilled() = runBlocking {
+        val settings = profile()
+        val handle = SavedStateHandle()
+        val vm = viewModel(settings, handle)
+        vm.state.awaitUntil { !it.loading }
+        vm.previousDay()
+        vm.state.awaitUntil { it.date == today.minusDays(1) }
+
+        // Android recreates the tab with its saved state (e.g. after the AI app).
+        val restored = viewModel(settings, handle).state.awaitUntil { !it.loading }
+        assertEquals(today.minusDays(1), restored.date)
     }
 }
