@@ -7,6 +7,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
+import io.github.luannamorim.myfit.data.db.entity.MealEntity
+import io.github.luannamorim.myfit.data.db.entity.WaterEntryEntity
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
@@ -239,6 +241,20 @@ class MigrationTest {
         assertEquals(false, exercise.favorite)
         room.exerciseDao().setFavorite(exercise.id, true)
         assertTrue(room.exerciseDao().get(exercise.id)!!.favorite)
+        assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
+        room.close()
+    }
+
+    @Test
+    fun migrate7To8_keepsData_andAddsMealsAndWater() = runBlocking {
+        createVersion(7, "migration-v7-test.db") { db -> db.insertExercise("Agachamento livre", custom = false) }
+        val room = open("migration-v7-test.db")
+        assertEquals("Agachamento livre", room.exerciseDao().getAll().single().name)
+        val dao = room.nutritionDao()
+        dao.insertWater(WaterEntryEntity(dateEpochDay = 20_400, ml = 250, createdAtMs = 0))
+        dao.insertMeal(MealEntity(dateEpochDay = 20_400, minuteOfDay = 480, description = "Pão com ovo", kcal = 320, createdAtMs = 0))
+        assertEquals(250, dao.getAllWater().single().ml)
+        assertEquals(320, dao.getAllMeals().single().kcal)
         assertEquals(MyFitDatabase.VERSION, room.openHelper.readableDatabase.version)
         room.close()
     }

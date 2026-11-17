@@ -58,8 +58,24 @@ object Migrations {
         }
     }
 
+    /** v8: nutrition log, water entries and meals. */
+    val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `water_entry` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dateEpochDay` INTEGER NOT NULL, " +
+                    "`ml` INTEGER NOT NULL, `createdAtMs` INTEGER NOT NULL)",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_water_entry_dateEpochDay` ON `water_entry` (`dateEpochDay`)")
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `meal` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dateEpochDay` INTEGER NOT NULL, " +
+                    "`minuteOfDay` INTEGER NOT NULL, `description` TEXT, `kcal` INTEGER NOT NULL, `createdAtMs` INTEGER NOT NULL)",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_meal_dateEpochDay` ON `meal` (`dateEpochDay`)")
+        }
+    }
+
     /** Targets below this are taken as repetitions when an exercise becomes timed. */
     private const val REPS_LIKE_BELOW = 15
 
-    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+    val ALL: Array<Migration> = arrayOf(*ExerciseSeed.MIGRATIONS, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
 }

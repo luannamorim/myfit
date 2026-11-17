@@ -6,16 +6,19 @@ import io.github.luannamorim.myfit.data.db.dao.ActivityDao
 import io.github.luannamorim.myfit.data.db.dao.BackupDao
 import io.github.luannamorim.myfit.data.db.dao.BodyDao
 import io.github.luannamorim.myfit.data.db.dao.ExerciseDao
+import io.github.luannamorim.myfit.data.db.dao.NutritionDao
 import io.github.luannamorim.myfit.data.db.dao.RoutineDao
 import io.github.luannamorim.myfit.data.db.dao.SessionDao
 import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyAssessmentEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyPhotoEntity
 import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
+import io.github.luannamorim.myfit.data.db.entity.MealEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionSetEntity
+import io.github.luannamorim.myfit.data.db.entity.WaterEntryEntity
 import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
 
 @Database(
@@ -29,6 +32,8 @@ import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
         BodyAssessmentEntity::class,
         BodyPhotoEntity::class,
         ActivityEntity::class,
+        WaterEntryEntity::class,
+        MealEntity::class,
     ],
     version = MyFitDatabase.VERSION,
     exportSchema = true,
@@ -40,9 +45,10 @@ abstract class MyFitDatabase : RoomDatabase() {
     abstract fun bodyDao(): BodyDao
     abstract fun backupDao(): BackupDao
     abstract fun activityDao(): ActivityDao
+    abstract fun nutritionDao(): NutritionDao
 
     companion object {
-        const val VERSION = 7
+        const val VERSION = 8
         const val NAME = "myfit.db"
     }
 }
