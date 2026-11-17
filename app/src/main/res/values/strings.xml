@@ -522,6 +522,14 @@
     <string name="channel_reminders">Reminders</string>
     <string name="channel_reminders_desc">Workout reminders you scheduled</string>
     <string name="reminder_notif_title">Time to work out</string>
+    <string name="channel_nutrition">Nutrition</string>
+    <string name="channel_nutrition_desc">Meal and water reminders</string>
+    <string name="nutrition_notif_meal_title">Time to eat</string>
+    <string name="nutrition_notif_meal_text">Log what you ate.</string>
+    <string name="nutrition_notif_meal_action">Log meal</string>
+    <string name="nutrition_notif_water_title">Time to drink water</string>
+    <string name="nutrition_notif_water_progress">%1$s of %2$s L today</string>
+    <string name="nutrition_notif_water_total">%1$s L today</string>
 
     <!-- Nutrition -->
     <string name="nutrition_today">Today</string>

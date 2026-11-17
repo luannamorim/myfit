@@ -555,6 +555,14 @@
     <string name="channel_reminders">Lembretes</string>
     <string name="channel_reminders_desc">Lembretes de treino que você agendou</string>
     <string name="reminder_notif_title">Hora de treinar</string>
+    <string name="channel_nutrition">Nutrição</string>
+    <string name="channel_nutrition_desc">Lembretes de refeição e de água</string>
+    <string name="nutrition_notif_meal_title">Hora de comer</string>
+    <string name="nutrition_notif_meal_text">Registre o que você comeu.</string>
+    <string name="nutrition_notif_meal_action">Registrar refeição</string>
+    <string name="nutrition_notif_water_title">Hora de beber água</string>
+    <string name="nutrition_notif_water_progress">%1$s de %2$s L hoje</string>
+    <string name="nutrition_notif_water_total">%1$s L hoje</string>
 
     <!-- Nutrition -->
     <string name="nutrition_today">Hoje</string>

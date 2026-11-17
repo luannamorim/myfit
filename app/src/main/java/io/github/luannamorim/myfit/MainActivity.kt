@@ -26,6 +26,8 @@ class MainActivity : ComponentActivity() {
     private val openWorkoutRequest = mutableIntStateOf(0)
     private val openActivityRequest = mutableIntStateOf(0)
     private val openBackupRequest = mutableIntStateOf(0)
+    private val openNutritionRequest = mutableIntStateOf(0)
+    private val addMealRequest = mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -50,6 +52,8 @@ class MainActivity : ComponentActivity() {
                     openWorkoutRequest = openWorkoutRequest.intValue,
                     openActivityRequest = openActivityRequest.intValue,
                     openBackupRequest = openBackupRequest.intValue,
+                    openNutritionRequest = openNutritionRequest.intValue,
+                    addMealRequest = addMealRequest.intValue,
                     appViewModel = app,
                 )
             }
@@ -66,6 +70,8 @@ class MainActivity : ComponentActivity() {
             ACTION_OPEN_WORKOUT -> openWorkoutRequest.intValue++
             ACTION_OPEN_ACTIVITY -> openActivityRequest.intValue++
             ACTION_OPEN_BACKUP -> openBackupRequest.intValue++
+            ACTION_OPEN_NUTRITION -> openNutritionRequest.intValue++
+            ACTION_ADD_MEAL -> addMealRequest.intValue++
         }
     }
 
@@ -73,5 +79,9 @@ class MainActivity : ComponentActivity() {
         const val ACTION_OPEN_WORKOUT = "io.github.luannamorim.myfit.action.OPEN_WORKOUT"
         const val ACTION_OPEN_ACTIVITY = "io.github.luannamorim.myfit.action.OPEN_ACTIVITY"
         const val ACTION_OPEN_BACKUP = "io.github.luannamorim.myfit.action.OPEN_BACKUP"
+        /** Nutrition reminder tapped: the Nutrition tab. */
+        const val ACTION_OPEN_NUTRITION = "io.github.luannamorim.myfit.action.OPEN_NUTRITION"
+        /** "Log meal" on a meal reminder: the meal editor for today. */
+        const val ACTION_ADD_MEAL = "io.github.luannamorim.myfit.action.ADD_MEAL"
     }
 }

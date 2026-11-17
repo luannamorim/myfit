@@ -69,6 +69,8 @@ fun MyFitNavHost(
     openWorkoutRequest: Int = 0,
     openBackupRequest: Int = 0,
     openActivityRequest: Int = 0,
+    openNutritionRequest: Int = 0,
+    addMealRequest: Int = 0,
     appViewModel: AppViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(appViewModel) {
@@ -86,6 +88,12 @@ fun MyFitNavHost(
     val activeSession by appViewModel.activeSession.collectAsStateWithLifecycle()
     LaunchedEffect(openBackupRequest) {
         if (openBackupRequest > 0) navController.navigate(BackupRoute) { launchSingleTop = true }
+    }
+    LaunchedEffect(openNutritionRequest) {
+        if (openNutritionRequest > 0) navController.navigateToTopLevel(TopLevelDestination.NUTRITION)
+    }
+    LaunchedEffect(addMealRequest) {
+        if (addMealRequest > 0) navController.navigate(MealEditorRoute(dateEpochDay = java.time.LocalDate.now().toEpochDay())) { launchSingleTop = true }
     }
     LaunchedEffect(openActivityRequest) {
         if (openActivityRequest > 0) navController.navigate(LiveActivityRoute) { launchSingleTop = true }

@@ -85,6 +85,18 @@
             </intent-filter>
         </receiver>
 
+        <!-- Nutrition alarms, "+250 ml", and re-arming after boot, updates and clock changes. -->
+        <receiver
+            android:name=".platform.nutrition.NutritionReminderReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Camera photos: the camera app writes to a temporary file in the cache (ui/common/PhotoSource). -->
         <provider
             android:name="androidx.core.content.FileProvider"
