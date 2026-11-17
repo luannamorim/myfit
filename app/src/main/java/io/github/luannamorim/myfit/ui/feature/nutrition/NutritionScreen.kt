@@ -243,7 +243,7 @@ private fun MissingHint(missing: List<TargetMissing>, onFill: (TargetMissing) ->
     )
 }
 
-private fun missingName(missing: TargetMissing): Int = when (missing) {
+internal fun missingName(missing: TargetMissing): Int = when (missing) {
     TargetMissing.WEIGHT -> R.string.nutrition_missing_weight
     TargetMissing.HEIGHT -> R.string.nutrition_missing_height
     TargetMissing.SEX -> R.string.nutrition_missing_sex

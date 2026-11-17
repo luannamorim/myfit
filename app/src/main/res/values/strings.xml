@@ -266,6 +266,10 @@
     <string name="home_see_all">See all</string>
     <string name="home_last_activity">Last activity</string>
     <string name="home_body">Body</string>
+    <string name="home_nutrition">Nutrition today</string>
+    <string name="home_nutrition_percent">%1$d%%</string>
+    <string name="home_nutrition_water_detail">%1$s of\n%2$s L</string>
+    <string name="home_nutrition_kcal_detail">%1$s of\n%2$s kcal</string>
     <string name="home_body_empty">Log your weight and measurements to track your progress.</string>
     <string name="home_body_cta">New assessment</string>
     <string name="home_week">This week</string>

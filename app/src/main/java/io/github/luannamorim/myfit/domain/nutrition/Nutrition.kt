@@ -34,3 +34,6 @@ data class NutritionDay(val date: LocalDate, val meals: List<Meal>, val waterMl:
         const val MAX_WATER_ML = 5000
     }
 }
+
+/** A day's log with its targets and the goal they were computed for (Nutrition tab and Home). */
+data class NutritionStatus(val day: NutritionDay, val targets: DailyTargets, val goal: NutritionGoal)

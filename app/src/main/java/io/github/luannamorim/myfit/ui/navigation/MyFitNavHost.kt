@@ -172,6 +172,7 @@ fun MyFitNavHost(
                             onOpenLiveActivity = { navController.navigate(LiveActivityRoute) { launchSingleTop = true } },
                             onOpenReminders = { navController.navigate(RemindersRoute) },
                             onOpenSettings = { navController.navigate(SettingsRoute) { launchSingleTop = true } },
+                            onOpenNutrition = { navController.navigateToTopLevel(TopLevelDestination.NUTRITION) },
                         ),
                     )
                 }

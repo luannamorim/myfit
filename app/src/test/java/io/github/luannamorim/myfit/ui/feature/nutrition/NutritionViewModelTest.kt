@@ -9,6 +9,7 @@ import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.NutritionRepository
+import io.github.luannamorim.myfit.data.repository.NutritionTracker
 import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
@@ -48,10 +49,7 @@ class NutritionViewModelTest {
     private fun viewModel(settings: SettingsRepository, handle: SavedStateHandle = SavedStateHandle()) = NutritionViewModel(
         handle,
         nutrition,
-        body,
-        HistoryRepository(env.db, env.time, BackupTrigger { }),
-        activities,
-        settings,
+        NutritionTracker(nutrition, body, HistoryRepository(env.db, env.time, BackupTrigger { }), activities, settings),
         env.time,
     )
 

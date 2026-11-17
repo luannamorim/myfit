@@ -10,6 +10,11 @@ import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.model.ThemeMode
+import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
+import io.github.luannamorim.myfit.domain.nutrition.Meal
+import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
+import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import io.github.luannamorim.myfit.testutil.PHONE_TALL
 import io.github.luannamorim.myfit.testutil.snapBothThemes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
@@ -66,6 +71,11 @@ class HomeScreenshotTest {
                 routines = routines,
                 last = SessionSummary(9, "Chest & triceps", today.minusDays(1), LocalTime.of(19, 5), 61 * 60_000L, 14, listOf("Bench press")),
                 week = week(setOf(today.minusDays(3), today.minusDays(1)), 2, 113 * 60_000L),
+                nutrition = NutritionStatus(
+                    NutritionDay(today, listOf(Meal(1, today, 12 * 60, "Lunch", 1880)), 1500, 6),
+                    DailyTargets(2300, 2800, emptySet()),
+                    NutritionGoal.MAINTAIN,
+                ),
             ),
             HomeActions(),
             body = { BodyEmptyCard {} },

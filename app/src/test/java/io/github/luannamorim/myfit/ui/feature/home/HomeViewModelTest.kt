@@ -9,6 +9,12 @@ import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
+import io.github.luannamorim.myfit.domain.nutrition.Meal
+import io.github.luannamorim.myfit.domain.body.Sex
+import io.github.luannamorim.myfit.domain.body.Measure
+import io.github.luannamorim.myfit.domain.body.BodyAssessment
+import io.github.luannamorim.myfit.data.repository.NutritionTracker
+import io.github.luannamorim.myfit.data.repository.NutritionRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.Sport
@@ -236,9 +242,34 @@ class HomeViewModelTest {
                 scope,
             ),
             BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { }),
+            NutritionTracker(
+                NutritionRepository(env.db, env.time, BackupTrigger { }),
+                BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { }),
+                HistoryRepository(env.db, env.time, BackupTrigger { }),
+                activities,
+                settings,
+            ),
             settings,
             env.time,
         )
+    }
+
+    @Test
+    fun state_nutritionToday_showsTheLogAndTheTargets() = runBlocking {
+        val today = env.time.today()
+        BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { })
+            .save(BodyAssessment(date = today.minusDays(3), values = mapOf(Measure.WEIGHT to 80.0, Measure.HEIGHT to 178.0)))
+        val settings = testSettings().apply { update { it.copy(sex = Sex.MALE, birthEpochDay = today.minusYears(30).toEpochDay()) } }
+        val nutrition = NutritionRepository(env.db, env.time, BackupTrigger { })
+        nutrition.addWater(today, 500)
+        nutrition.saveMeal(Meal(date = today, minuteOfDay = 480, description = null, kcal = 320))
+
+        val state = homeViewModel(settings).state.awaitUntil { !it.loading && it.nutrition?.targets?.kcal != null && it.nutrition.day.kcal > 0 }
+        val n = state.nutrition!!
+        assertEquals(500, n.day.waterMl)
+        assertEquals(320, n.day.kcal)
+        assertEquals(2120, n.targets.kcal) // 80 kg, 178 cm, 30 years, no workouts
+        assertEquals(2800, n.targets.waterMl)
     }
 
     @Test

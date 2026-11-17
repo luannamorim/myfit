@@ -6,16 +6,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
-import io.github.luannamorim.myfit.data.prefs.SettingsRepository
-import io.github.luannamorim.myfit.data.repository.ActivityRepository
-import io.github.luannamorim.myfit.data.repository.BodyRepository
-import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.NutritionRepository
-import io.github.luannamorim.myfit.domain.history.HistoryCalculator
+import io.github.luannamorim.myfit.data.repository.NutritionTracker
 import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
 import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
-import io.github.luannamorim.myfit.domain.nutrition.NutritionTargets
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -51,10 +47,7 @@ data class NutritionUiState(
 class NutritionViewModel @Inject constructor(
     private val handle: SavedStateHandle,
     private val nutrition: NutritionRepository,
-    body: BodyRepository,
-    history: HistoryRepository,
-    activities: ActivityRepository,
-    settings: SettingsRepository,
+    tracker: NutritionTracker,
     private val time: TimeSource,
 ) : ViewModel() {
     private val today = MutableStateFlow(time.today())
@@ -63,22 +56,8 @@ class NutritionViewModel @Inject constructor(
     val state: StateFlow<NutritionUiState> = combine(shownDay, today) { day, t -> minOf(LocalDate.ofEpochDay(day), t) to t }
         .distinctUntilChanged()
         .flatMapLatest { (d, t) ->
-            val window = NutritionTargets.activityWindow(d)
-            combine(
-                nutrition.observeDay(d),
-                body.observeAssessments(),
-                combine(history.observeSummaries(window), activities.observe(window)) { s, a -> HistoryCalculator.activeDays(s, a) },
-                settings.settings,
-            ) { day, assessments, activeDays, s ->
-                val birth = s.birthEpochDay?.let(LocalDate::ofEpochDay)
-                NutritionUiState(
-                    loading = false,
-                    date = d,
-                    today = t,
-                    day = day,
-                    targets = NutritionTargets.forDay(d, assessments, activeDays, s.sex, birth, s.nutritionGoal),
-                    goal = s.nutritionGoal,
-                )
+            tracker.observe(d).map { status ->
+                NutritionUiState(loading = false, date = d, today = t, day = status.day, targets = status.targets, goal = status.goal)
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NutritionUiState())

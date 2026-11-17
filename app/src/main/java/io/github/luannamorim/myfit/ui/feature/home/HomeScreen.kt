@@ -55,6 +55,7 @@ import io.github.luannamorim.myfit.ui.components.TabScreen
 import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.feature.activity.LiveActivityBar
 import io.github.luannamorim.myfit.ui.feature.evolution.BodySnapshotTiles
+import io.github.luannamorim.myfit.ui.feature.nutrition.NutritionTodayCards
 import io.github.luannamorim.myfit.ui.feature.history.SessionRow
 import io.github.luannamorim.myfit.ui.feature.reminders.reminderDayText
 import io.github.luannamorim.myfit.ui.feature.reminders.timeText
@@ -78,6 +79,7 @@ data class HomeActions(
     val onOpenLiveActivity: () -> Unit = {},
     val onOpenReminders: () -> Unit = {},
     val onOpenSettings: () -> Unit = {},
+    val onOpenNutrition: () -> Unit = {},
 )
 
 @Composable
@@ -159,6 +161,11 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
         state.last?.let { last ->
             SectionHeader(stringResource(R.string.home_last_activity), Modifier.padding(top = Spacing.s))
             SessionRow(last, showDate = true, onClick = { actions.onOpenSession(last.id) })
+        }
+
+        state.nutrition?.let { nutrition ->
+            SectionHeader(stringResource(R.string.home_nutrition), Modifier.padding(top = Spacing.s))
+            NutritionTodayCards(nutrition, onOpen = actions.onOpenNutrition)
         }
 
         SectionHeader(stringResource(R.string.home_body), Modifier.padding(top = Spacing.s))

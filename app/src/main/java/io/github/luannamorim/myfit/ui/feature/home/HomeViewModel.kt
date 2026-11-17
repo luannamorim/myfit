@@ -9,6 +9,7 @@ import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BodyRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
+import io.github.luannamorim.myfit.data.repository.NutritionTracker
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.activity.LiveActivity
 import io.github.luannamorim.myfit.domain.body.BodyComparison
@@ -17,6 +18,7 @@ import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.Reminder
+import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.reminder.ReminderSchedule
 import io.github.luannamorim.myfit.domain.session.ActiveSession
@@ -64,6 +66,8 @@ data class HomeUiState(
     val routines: List<RoutineOverview> = emptyList(),
     val last: SessionSummary? = null,
     val body: BodySnapshot? = null,
+    /** Today's water and calories against their targets. */
+    val nutrition: NutritionStatus? = null,
     val week: WeekStrip = WeekStrip(emptyList(), 0, 0),
 )
 
@@ -119,6 +123,7 @@ class HomeViewModel @Inject constructor(
     controller: SessionController,
     liveActivity: LiveActivityController,
     body: BodyRepository,
+    nutrition: NutritionTracker,
     settings: SettingsRepository,
     time: TimeSource,
 ) : ViewModel() {
@@ -128,12 +133,12 @@ class HomeViewModel @Inject constructor(
     val state: StateFlow<HomeUiState> = combine(
         combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged()) { r, rem -> r to rem },
         combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
-        history.observeLast(),
+        combine(history.observeLast(), nutrition.observe(today)) { l, n -> l to n },
         combine(controller.active, liveActivity.live) { a, l -> a to l },
         combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
             BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(raw, sex)), sex)
         },
-    ) { (list, reminders), (weekSessions, weekActivities), last, (active, live), bodySnapshot ->
+    ) { (list, reminders), (weekSessions, weekActivities), (last, nutritionToday), (active, live), bodySnapshot ->
         val now = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone())
         val scheduled = scheduledRoutine(list, reminders, now)
         val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
@@ -149,6 +154,7 @@ class HomeViewModel @Inject constructor(
             routines = list,
             last = last,
             body = bodySnapshot,
+            nutrition = nutritionToday,
             week = WeekStrip(
                 days = (0L..6L).map { week.start.plusDays(it) }.map { DayMark(it, it in trainedDays, it == today) },
                 sessions = weekSessions.size,
