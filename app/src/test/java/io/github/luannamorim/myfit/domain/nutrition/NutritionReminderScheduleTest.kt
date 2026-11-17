@@ -40,6 +40,12 @@ class NutritionReminderScheduleTest {
     }
 
     @Test
+    fun outOfRangeTimes_fromBadSettings_neverThrow() {
+        assertEquals(at("2026-11-17T23:59"), NutritionReminderSchedule.nextMeal(MealReminder(1, 2000), at("2026-11-17T10:00")))
+        assertEquals(at("2026-11-17T00:00").plusDays(1), NutritionReminderSchedule.nextMeal(MealReminder(1, -5), at("2026-11-17T10:00")))
+    }
+
+    @Test
     fun defaults_areOff_everyTwoHours_from8To22() {
         val r = NutritionReminders()
         assertEquals(emptyList<MealReminder>(), r.meals)

@@ -85,7 +85,8 @@ private fun RingCard(
     modifier: Modifier,
 ) {
     val c = MyFitTheme.colors
-    val percent = target?.takeIf { it > 0 }?.let { (done * 100f / it).roundToInt() }
+    // Below the target it never reads 100 % (the water reminder still fires until the target is reached).
+    val percent = target?.takeIf { it > 0 }?.let { if (done < it) minOf((done * 100f / it).roundToInt(), 99) else (done * 100f / it).roundToInt() }
     MyFitCard(modifier, onClick = onOpen) {
         Text(label, style = MyFitTheme.type.caption, color = c.textSecondary)
         Spacer(Modifier.height(Spacing.m))

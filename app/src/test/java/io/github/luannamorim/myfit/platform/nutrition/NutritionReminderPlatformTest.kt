@@ -130,7 +130,12 @@ class NutritionReminderPlatformTest {
         assertEquals("Hora de comer", shadowOf(posted).contentTitle)
         val action = posted.actions.single()
         assertEquals("Registrar refeição", action.title)
-        assertEquals(MainActivity.ACTION_ADD_MEAL, shadowOf(action.actionIntent).savedIntent.action)
+        val logMeal = shadowOf(action.actionIntent).savedIntent
+        assertEquals(MainActivity.ACTION_ADD_MEAL, logMeal.action)
+        assertEquals(1L, logMeal.getLongExtra(NutritionNotifications.EXTRA_MEAL_NOTIFICATION, -1))
+        // Logging the meal from the notification clears it (action buttons don't auto-cancel).
+        notifications.cancelMeal(1)
+        assertTrue(notificationShadow.allNotifications.isEmpty())
         assertEquals(MainActivity.ACTION_OPEN_NUTRITION, shadowOf(posted.contentIntent).savedIntent.action)
         assertEquals(ms("2026-11-18T12:00"), mealAlarm(1)!!.triggerAtMs)
     }
@@ -161,6 +166,19 @@ class NutritionReminderPlatformTest {
         handler.onWaterAlarm(ms("2026-11-17T12:00"))
         assertTrue(notificationShadow.allNotifications.isEmpty())
         assertEquals(ms("2026-11-17T14:00"), waterAlarm()!!.triggerAtMs)
+    }
+
+    @Test
+    fun skippedSlot_clearsAnEarlierWaterNotification() = runBlocking {
+        store()
+        body.save(BodyAssessment(date = today.minusDays(2), values = mapOf(Measure.WEIGHT to 80.0)))
+        setNow("2026-11-17T12:00:01")
+        handler.onWaterAlarm(ms("2026-11-17T12:00"))
+        assertEquals(1, notificationShadow.allNotifications.size)
+        nutrition.addWater(today, 2800) // target reached in the app
+        setNow("2026-11-17T14:00:01")
+        handler.onWaterAlarm(ms("2026-11-17T14:00"))
+        assertTrue(notificationShadow.allNotifications.isEmpty()) // its "+250 ml" would over-log
     }
 
     @Test

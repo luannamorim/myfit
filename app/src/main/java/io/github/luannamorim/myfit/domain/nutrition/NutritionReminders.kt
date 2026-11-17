@@ -51,7 +51,8 @@ object NutritionReminderSchedule {
         if (minutes.isEmpty()) return null
         val today = now.toLocalDate()
         return (0L..1L).asSequence()
-            .flatMap { d -> minutes.sorted().asSequence().map { ZonedDateTime.of(today.plusDays(d), LocalTime.ofSecondOfDay(it * 60L), now.zone) } }
+            // Times are clamped to the day: a bad value from hand-edited settings must not crash the alarm sync.
+            .flatMap { d -> minutes.map { it.coerceIn(0, MINUTES_PER_DAY - 1) }.sorted().asSequence().map { ZonedDateTime.of(today.plusDays(d), LocalTime.ofSecondOfDay(it * 60L), now.zone) } }
             .firstOrNull { it.isAfter(now) }
     }
 }

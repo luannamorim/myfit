@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.luannamorim.myfit.MainActivity
 import io.github.luannamorim.myfit.R
@@ -30,11 +31,19 @@ class NutritionNotifications @Inject constructor(
 
     /** "Time to eat", with "Log meal" (opens the meal editor for today). False when notifications are off. */
     fun postMeal(mealId: Long, whenMs: Long): Boolean {
-        val action = NotificationCompat.Action(
-            0,
-            context.getString(R.string.nutrition_notif_meal_action),
-            activityIntent(MainActivity.ACTION_ADD_MEAL, REQ_ADD_MEAL),
+        // One PendingIntent per meal (data URI), carrying the id so MainActivity clears this notification:
+        // action buttons don't auto-cancel.
+        val logMeal = PendingIntent.getActivity(
+            context,
+            REQ_ADD_MEAL,
+            Intent(context, MainActivity::class.java)
+                .setAction(MainActivity.ACTION_ADD_MEAL)
+                .setData("myfit://nutrition/log-meal/$mealId".toUri())
+                .putExtra(EXTRA_MEAL_NOTIFICATION, mealId)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
+        val action = NotificationCompat.Action(0, context.getString(R.string.nutrition_notif_meal_action), logMeal)
         return post(TAG_MEAL, mealId.hashCode(), context.getString(R.string.nutrition_notif_meal_title), context.getString(R.string.nutrition_notif_meal_text), whenMs, action)
     }
 
@@ -56,6 +65,8 @@ class NutritionNotifications @Inject constructor(
     }
 
     fun cancelWater() = manager.cancel(TAG_WATER, WATER_ID)
+
+    fun cancelMeal(mealId: Long) = manager.cancel(TAG_MEAL, mealId.hashCode())
 
     private fun post(tag: String, id: Int, title: String, text: String, whenMs: Long, action: NotificationCompat.Action): Boolean {
         if (!manager.areNotificationsEnabled()) return false
@@ -91,6 +102,8 @@ class NutritionNotifications @Inject constructor(
         const val TAG_MEAL = "nutrition_meal"
         const val TAG_WATER = "nutrition_water"
         const val WATER_STEP_ML = 250
+        /** On "Log meal": the meal reminder whose notification to clear. */
+        const val EXTRA_MEAL_NOTIFICATION = "meal_notification"
         private const val WATER_ID = 1
         private const val REQ_OPEN = 40
         private const val REQ_ADD_MEAL = 41

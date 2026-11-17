@@ -17,10 +17,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.ui.navigation.AppViewModel
 import io.github.luannamorim.myfit.ui.navigation.MyFitNavHost
+import io.github.luannamorim.myfit.platform.nutrition.NutritionNotifications
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var nutritionNotifications: NutritionNotifications
 
     /** Incremented whenever an intent asks to show the running workout / the backup screen. */
     private val openWorkoutRequest = mutableIntStateOf(0)
@@ -71,7 +74,11 @@ class MainActivity : ComponentActivity() {
             ACTION_OPEN_ACTIVITY -> openActivityRequest.intValue++
             ACTION_OPEN_BACKUP -> openBackupRequest.intValue++
             ACTION_OPEN_NUTRITION -> openNutritionRequest.intValue++
-            ACTION_ADD_MEAL -> addMealRequest.intValue++
+            ACTION_ADD_MEAL -> {
+                addMealRequest.intValue++
+                // Action buttons don't auto-cancel their notification.
+                intent.getLongExtra(NutritionNotifications.EXTRA_MEAL_NOTIFICATION, -1L).takeIf { it > 0 }?.let(nutritionNotifications::cancelMeal)
+            }
         }
     }
 

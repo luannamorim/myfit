@@ -46,6 +46,9 @@ class NutritionReminderHandler @Inject constructor(
         val target = status.targets.waterMl
         if (target == null || status.day.waterMl < target) {
             notifications.postWater(status.day.waterMl, target, whenMs = if (triggerAtMs > 0) triggerAtMs else nowMs)
+        } else {
+            // Target reached: an earlier reminder still in the shade would over-log with its "+250 ml".
+            notifications.cancelWater()
         }
         scheduler.scheduleWaterNext(water, after(nowMs, triggerAtMs))
     }

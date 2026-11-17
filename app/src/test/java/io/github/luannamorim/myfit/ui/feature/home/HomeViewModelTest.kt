@@ -290,4 +290,17 @@ class HomeViewModelTest {
         assertEquals(1, state.week.days.count { it.trained })
         assertEquals(1, state.week.days.count { it.isToday })
     }
+
+    @Test
+    fun nutritionToday_followsTheDateAfterMidnight_onResume() = runBlocking {
+        val today = env.time.today()
+        NutritionRepository(env.db, env.time, BackupTrigger { }).addWater(today, 500)
+        val vm = homeViewModel()
+        vm.state.awaitUntil { it.nutrition?.day?.waterMl == 500 }
+
+        env.time.advance(24 * 60 * 60 * 1000L) // Home stayed alive overnight
+        vm.refreshToday()
+        val next = vm.state.awaitUntil { it.today == today.plusDays(1) && it.nutrition?.day?.date == today.plusDays(1) }
+        assertEquals(0, next.nutrition!!.day.waterMl)
+    }
 }

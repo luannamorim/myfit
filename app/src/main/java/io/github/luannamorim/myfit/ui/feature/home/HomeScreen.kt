@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
@@ -85,6 +86,11 @@ data class HomeActions(
 @Composable
 fun HomeScreen(actions: HomeActions, modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Home can stay alive overnight: coming back after midnight shows the new day (week, nutrition).
+    LifecycleResumeEffect(viewModel) {
+        viewModel.refreshToday()
+        onPauseOrDispose { }
+    }
     HomeContent(state, actions, modifier, body = {
         val snapshot = state.body
         if (snapshot == null) BodyEmptyCard(actions.onOpenBody) else BodySnapshotTiles(snapshot, onOpenWeight = actions.onOpenBody)

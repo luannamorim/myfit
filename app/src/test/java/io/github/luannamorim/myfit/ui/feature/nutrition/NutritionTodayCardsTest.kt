@@ -53,6 +53,12 @@ class NutritionTodayCardsTest {
     }
 
     @Test
+    fun almostThere_isNever100() {
+        show(status(kcal = 2290, waterMl = 2790)) // 99.6 % of each
+        assertEquals(2, compose.onAllNodesWithText("99%").fetchSemanticsNodes().size)
+    }
+
+    @Test
     fun overTheTarget_goesPast100() {
         show(status(kcal = 2484, goal = NutritionGoal.LOSE))
         compose.onNodeWithText("108%").assertIsDisplayed()

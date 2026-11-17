@@ -27,6 +27,10 @@ import io.github.luannamorim.myfit.platform.session.SessionController
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -116,51 +120,62 @@ private fun pendingSlot(reminder: Reminder, routine: RoutineOverview, after: Zon
 }
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel @Inject constructor(
-    routines: RoutineRepository,
-    history: HistoryRepository,
-    activities: ActivityRepository,
-    controller: SessionController,
-    liveActivity: LiveActivityController,
-    body: BodyRepository,
-    nutrition: NutritionTracker,
-    settings: SettingsRepository,
-    time: TimeSource,
+    private val routines: RoutineRepository,
+    private val history: HistoryRepository,
+    private val activities: ActivityRepository,
+    private val controller: SessionController,
+    private val liveActivity: LiveActivityController,
+    private val body: BodyRepository,
+    private val nutrition: NutritionTracker,
+    private val settings: SettingsRepository,
+    private val time: TimeSource,
 ) : ViewModel() {
-    private val today = time.today()
-    private val week = HistoryCalculator.weekOf(today)
+    /** Re-read on resume: Home can stay alive overnight, and "today" (week, nutrition) must follow. */
+    private val todayFlow = MutableStateFlow(time.today())
 
-    val state: StateFlow<HomeUiState> = combine(
-        combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged()) { r, rem -> r to rem },
-        combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
-        combine(history.observeLast(), nutrition.observe(today)) { l, n -> l to n },
-        combine(controller.active, liveActivity.live) { a, l -> a to l },
-        combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
-            BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(raw, sex)), sex)
-        },
-    ) { (list, reminders), (weekSessions, weekActivities), (last, nutritionToday), (active, live), bodySnapshot ->
-        val now = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone())
-        val scheduled = scheduledRoutine(list, reminders, now)
-        val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
-        HomeUiState(
-            loading = false,
-            greeting = Greeting.forHour(now.hour),
-            today = today,
-            active = active,
-            live = live,
-            todaySessions = weekSessions.filter { it.startDate == today },
-            suggested = scheduled?.routine ?: suggestRoutine(list),
-            suggestedAt = scheduled?.at,
-            routines = list,
-            last = last,
-            body = bodySnapshot,
-            nutrition = nutritionToday,
-            week = WeekStrip(
-                days = (0L..6L).map { week.start.plusDays(it) }.map { DayMark(it, it in trainedDays, it == today) },
-                sessions = weekSessions.size,
-                totalDurationMs = weekSessions.sumOf { it.durationMs } + weekActivities.sumOf { it.durationMs },
-                activities = weekActivities.size,
-            ),
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+    val state: StateFlow<HomeUiState> = todayFlow.flatMapLatest { today -> observe(today) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+
+    fun refreshToday() {
+        todayFlow.value = time.today()
+    }
+
+    private fun observe(today: LocalDate): Flow<HomeUiState> {
+        val week = HistoryCalculator.weekOf(today)
+        return combine(
+            combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged()) { r, rem -> r to rem },
+            combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
+            combine(history.observeLast(), nutrition.observe(today)) { l, n -> l to n },
+            combine(controller.active, liveActivity.live) { a, l -> a to l },
+            combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
+                BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(raw, sex)), sex)
+            },
+        ) { (list, reminders), (weekSessions, weekActivities), (last, nutritionToday), (active, live), bodySnapshot ->
+            val now = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone())
+            val scheduled = scheduledRoutine(list, reminders, now)
+            val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
+            HomeUiState(
+                loading = false,
+                greeting = Greeting.forHour(now.hour),
+                today = today,
+                active = active,
+                live = live,
+                todaySessions = weekSessions.filter { it.startDate == today },
+                suggested = scheduled?.routine ?: suggestRoutine(list),
+                suggestedAt = scheduled?.at,
+                routines = list,
+                last = last,
+                body = bodySnapshot,
+                nutrition = nutritionToday,
+                week = WeekStrip(
+                    days = (0L..6L).map { week.start.plusDays(it) }.map { DayMark(it, it in trainedDays, it == today) },
+                    sessions = weekSessions.size,
+                    totalDurationMs = weekSessions.sumOf { it.durationMs } + weekActivities.sumOf { it.durationMs },
+                    activities = weekActivities.size,
+                ),
+            )
+        }
+    }
 }
