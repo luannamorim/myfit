@@ -6,6 +6,7 @@ import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -16,6 +17,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.time.DayOfWeek
+import java.time.LocalDate
 
 class SettingsRepositoryTest {
     @get:Rule val tmp = TemporaryFolder()
@@ -66,6 +68,32 @@ class SettingsRepositoryTest {
         old.importJson("""{"themeMode":"LIGHT"}""")
         assertNull(old.current().sex)
         assertEquals(ThemeMode.LIGHT, old.current().themeMode)
+    }
+
+    @Test
+    fun birthDateAndGoal_setAndCleared_andTravelInExports() = runTest {
+        val r = repo()
+        assertNull(r.current().birthEpochDay)
+        assertEquals(NutritionGoal.MAINTAIN, r.current().nutritionGoal)
+
+        val born = LocalDate.of(1996, 5, 20).toEpochDay()
+        r.update { it.copy(birthEpochDay = born, nutritionGoal = NutritionGoal.LOSE) }
+        assertEquals(born, r.current().birthEpochDay)
+        assertEquals(NutritionGoal.LOSE, r.current().nutritionGoal)
+
+        val copy = repo(File(tmp.root, "copy.preferences_pb"))
+        copy.importJson(r.exportJson())
+        assertEquals(born, copy.current().birthEpochDay)
+        assertEquals(NutritionGoal.LOSE, copy.current().nutritionGoal)
+
+        r.update { it.copy(birthEpochDay = null) }
+        assertNull(r.current().birthEpochDay)
+
+        // Settings exported before 1.8.0: no birth date, maintain.
+        val old = repo(File(tmp.root, "old18.preferences_pb"))
+        old.importJson("""{"themeMode":"LIGHT"}""")
+        assertNull(old.current().birthEpochDay)
+        assertEquals(NutritionGoal.MAINTAIN, old.current().nutritionGoal)
     }
 
     private val reminders = listOf(

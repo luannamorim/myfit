@@ -463,7 +463,13 @@
     <string name="settings_sex_unset">Não informado</string>
     <string name="settings_sex_male">Masculino</string>
     <string name="settings_sex_female">Feminino</string>
-    <string name="settings_sex_hint">Usado para estimar a gordura corporal.</string>
+    <string name="settings_sex_hint">Usados para estimar a gordura corporal e suas metas de calorias e água.</string>
+    <string name="settings_birth_date">Data de nascimento</string>
+    <string name="settings_birth_date_unset">Não informada</string>
+    <string name="settings_goal">Objetivo</string>
+    <string name="settings_goal_lose">Perder gordura</string>
+    <string name="settings_goal_maintain">Manter peso</string>
+    <string name="settings_goal_gain">Ganhar massa</string>
     <string name="settings_appearance">Aparência</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_dark">Escuro</string>

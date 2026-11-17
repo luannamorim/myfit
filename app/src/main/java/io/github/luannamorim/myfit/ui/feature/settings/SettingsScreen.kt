@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -28,6 +29,9 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,13 +44,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
+import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.Durations
 import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import io.github.luannamorim.myfit.ui.components.MyFitCard
 import io.github.luannamorim.myfit.ui.components.MyFitChip
+import io.github.luannamorim.myfit.ui.components.MyFitDatePickerDialog
 import io.github.luannamorim.myfit.ui.components.NumberStepper
 import io.github.luannamorim.myfit.ui.components.SectionHeader
 import io.github.luannamorim.myfit.ui.components.TabScreen
@@ -54,6 +61,7 @@ import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.feature.routines.REST_STEP_SECONDS
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
+import java.time.LocalDate
 
 @Composable
 fun SettingsScreen(
@@ -92,6 +100,41 @@ fun SettingsScreen(
     )
 }
 
+/** "Birth date" with its value; tap opens the date picker (no future dates), "Clear" unsets it. */
+@Composable
+private fun BirthDateRow(date: LocalDate?, onDate: (LocalDate?) -> Unit) {
+    val c = MyFitTheme.colors
+    var picking by rememberSaveable { mutableStateOf(false) }
+    val today = LocalDate.now()
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            Modifier
+                .weight(1f)
+                .clickable(role = Role.Button, onClickLabel = stringResource(R.string.action_edit)) { picking = true }
+                .padding(vertical = Spacing.xs),
+        ) {
+            Text(stringResource(R.string.settings_birth_date), style = MyFitTheme.type.caption, color = c.textSecondary)
+            Text(
+                date?.let(Dates::medium) ?: stringResource(R.string.settings_birth_date_unset),
+                style = MyFitTheme.type.body,
+                color = if (date == null) c.textTertiary else c.textPrimary,
+            )
+        }
+        if (date != null) TextAction(stringResource(R.string.action_clear), onClick = { onDate(null) }, color = c.textSecondary)
+    }
+    if (picking) {
+        MyFitDatePickerDialog(
+            date = date ?: today.minusYears(DEFAULT_AGE_YEARS),
+            onDate = { onDate(it); picking = false },
+            onDismiss = { picking = false },
+            maxDate = today,
+        )
+    }
+}
+
+/** Where the birth date picker opens when none is set yet. */
+private const val DEFAULT_AGE_YEARS = 30L
+
 /** Chips that move to the next line whole when they don't fit (long Portuguese labels on small phones). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -121,6 +164,20 @@ fun SettingsContent(
             ChipGroup {
                 listOf(null to R.string.settings_sex_unset, Sex.MALE to R.string.settings_sex_male, Sex.FEMALE to R.string.settings_sex_female)
                     .forEach { (sex, label) -> MyFitChip(stringResource(label), selected = s.sex == sex, onClick = { onUpdate { it.copy(sex = sex) } }) }
+            }
+            Spacer(Modifier.height(Spacing.l))
+            BirthDateRow(s.birthEpochDay?.let(LocalDate::ofEpochDay), onDate = { date -> onUpdate { it.copy(birthEpochDay = date?.toEpochDay()) } })
+            Spacer(Modifier.height(Spacing.l))
+            Text(stringResource(R.string.settings_goal), style = MyFitTheme.type.caption, color = c.textSecondary)
+            Spacer(Modifier.height(Spacing.s))
+            ChipGroup {
+                listOf(
+                    NutritionGoal.LOSE to R.string.settings_goal_lose,
+                    NutritionGoal.MAINTAIN to R.string.settings_goal_maintain,
+                    NutritionGoal.GAIN to R.string.settings_goal_gain,
+                ).forEach { (goal, label) ->
+                    MyFitChip(stringResource(label), selected = s.nutritionGoal == goal, onClick = { onUpdate { it.copy(nutritionGoal = goal) } })
+                }
             }
             Spacer(Modifier.height(Spacing.s))
             Text(stringResource(R.string.settings_sex_hint), style = MyFitTheme.type.caption, color = c.textTertiary)

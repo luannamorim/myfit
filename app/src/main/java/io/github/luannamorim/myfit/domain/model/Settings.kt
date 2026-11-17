@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.domain.model
 
 import io.github.luannamorim.myfit.domain.body.Sex
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import kotlinx.serialization.Serializable
 
 enum class ThemeMode { DARK, LIGHT, SYSTEM }
@@ -24,6 +25,10 @@ data class AppSettings(
     val reminders: List<Reminder> = emptyList(),
     /** Only for the body-fat estimate; null = not set (no estimate). */
     val sex: Sex? = null,
+    /** Birth date as epoch day, for the calorie target (age); null = not set. */
+    val birthEpochDay: Long? = null,
+    /** What the calorie target aims for. */
+    val nutritionGoal: NutritionGoal = NutritionGoal.MAINTAIN,
 ) {
     companion object {
         const val MIN_REST_SECONDS = 15

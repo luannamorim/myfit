@@ -5,12 +5,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -34,6 +36,8 @@ class SettingsRepository @Inject constructor(
         val autoBackup = booleanPreferencesKey("auto_backup")
         val reminders = stringPreferencesKey("reminders")
         val sex = stringPreferencesKey("sex")
+        val birth = longPreferencesKey("birth_epoch_day")
+        val goal = stringPreferencesKey("nutrition_goal")
     }
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -57,6 +61,8 @@ class SettingsRepository @Inject constructor(
             prefs[Keys.autoBackup] = next.autoBackup
             prefs[Keys.reminders] = json.encodeToString(remindersSerializer, next.reminders)
             next.sex?.let { prefs[Keys.sex] = it.name } ?: prefs.remove(Keys.sex)
+            next.birthEpochDay?.let { prefs[Keys.birth] = it } ?: prefs.remove(Keys.birth)
+            prefs[Keys.goal] = next.nutritionGoal.name
         }
     }
 
@@ -79,6 +85,8 @@ class SettingsRepository @Inject constructor(
             autoBackup = this[Keys.autoBackup] ?: defaults.autoBackup,
             reminders = this[Keys.reminders]?.let { runCatching { json.decodeFromString(remindersSerializer, it) }.getOrNull() } ?: defaults.reminders,
             sex = this[Keys.sex]?.let { enumValueOrNull<Sex>(it) },
+            birthEpochDay = this[Keys.birth],
+            nutritionGoal = this[Keys.goal]?.let { enumValueOrNull<NutritionGoal>(it) } ?: defaults.nutritionGoal,
         )
     }
 }

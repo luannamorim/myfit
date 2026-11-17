@@ -432,7 +432,13 @@
     <string name="settings_sex_unset">Not set</string>
     <string name="settings_sex_male">Male</string>
     <string name="settings_sex_female">Female</string>
-    <string name="settings_sex_hint">Used to estimate body fat.</string>
+    <string name="settings_sex_hint">Used to estimate body fat and your calorie and water targets.</string>
+    <string name="settings_birth_date">Birth date</string>
+    <string name="settings_birth_date_unset">Not set</string>
+    <string name="settings_goal">Goal</string>
+    <string name="settings_goal_lose">Lose fat</string>
+    <string name="settings_goal_maintain">Maintain weight</string>
+    <string name="settings_goal_gain">Gain muscle</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_dark">Dark</string>
