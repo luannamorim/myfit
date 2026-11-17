@@ -15,8 +15,9 @@ A personal, offline Android app to plan workouts, run them with a reliable rest 
 - **Other sports:** log swimming, cycling, indoor cycling, running, treadmill, walking, soccer, volleyball, basketball, beach tennis, muay thai, jiu-jitsu, boxing, yoga, pilates, stretching, gym or a free activity you name, each with its figure, plus date, duration, distance, intensity, notes and a photo. Log them afterwards or time them live with *Start timer*: the clock survives a locked screen or a killed app, and outdoor sports (running, walking, cycling, free) can measure distance with the phone's GPS, offline and without storing the route. They show in History and in the week on Home.
 - **History:** monthly calendar with training days, per-day workouts and activities, per-set details, intensity, and weekly/monthly summaries (workouts, activities, total time, frequency, exercises and sports).
 - **Progress:** assessments with weight, height, body fat and 14 circumferences; BMI is calculated, and when body fat isn't typed it is estimated from neck, abdomen or waist, and hips (US Navy method, using the sex set in Settings). A small green, amber or red dot in the corner of the BMI and body-fat cards tells whether they are in a healthy range. Also comparison between two dates (signed differences), per-measure charts (or *All* at once) and dated photos, including older ones, that open full screen like a gallery (swipe, pinch to zoom) and can be compared side by side.
+- **Nutrition:** a tab to log water and meals day by day. Water and calorie targets come from your weight, height, sex, birth date and goal (lose fat, maintain, gain muscle), and from how often you trained in the last 4 weeks. Each meal is free text plus its calories; *Ask AI* opens your AI app of choice with the question ready, and you type back the number. The app stays offline.
 - **Backup:** an encrypted file (AES-256-GCM streaming, key derived from your recovery password) written to a folder you pick and keep in sync with Google Drive (or any cloud) through a sync app. Runs daily and after changes, keeps the last 7, and supports export and restore with integrity checks.
-- **Settings:** dark (default), light or system theme, default rest, rest sound, workout reminders (date and time, or repeating on weekdays), keep screen on, notification and battery status.
+- **Settings** (gear on Home): profile (sex, birth date, nutrition goal), dark (default), light or system theme, default rest, rest sound, workout reminders (date and time, or repeating on weekdays), keep screen on, notification and battery status.
 
 ## Screenshots
 
@@ -34,6 +35,7 @@ A personal, offline Android app to plan workouts, run them with a reliable rest 
 </p>
 <p>
   <img src="docs/screenshots/evolution_measures_dark.png" width="200" alt="Measurements">
+  <img src="docs/screenshots/nutrition_dark.png" width="200" alt="Nutrition">
   <img src="docs/screenshots/backup_dark.png" width="200" alt="Backup">
   <img src="docs/screenshots/settings_light.png" width="200" alt="Settings (light theme)">
   <img src="docs/screenshots/exercise_editor_dark.png" width="200" alt="Exercise with drawing and body map">

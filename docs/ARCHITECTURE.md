@@ -24,7 +24,7 @@ Dependency rule: `domain` knows nothing about Android, except for the Tink libra
 | `domain/activity` | `Sport`, `Activity` (other sports logged after the fact) |
 | `domain/body` | `Measure`, `BodyComparison` (differences, series, snapshot), `BodyMetrics` (BMI and the Navy body-fat estimate) |
 | `domain/backup` | v1 DTOs, header and encryption, zip + manifest, retention |
-| `data/db` | entities, DAOs, `MyFitDatabase` (v7), `Migrations`, library seed |
+| `data/db` | entities, DAOs, `MyFitDatabase` (v8), `Migrations`, library seed |
 | `data/repository` | workouts, exercises, session, history, activities, body |
 | `data/backup` | `BackupManager`, `BackupKeyStore`, destinations (SAF/file), `FolderBackupWriter` |
 | `platform/session` | `SessionController`, `WorkoutService`, alarm, receivers, notifications |
@@ -51,6 +51,7 @@ body_assessment   body_photo   activity
 - Database version 5 adds `measure` (REPS or TIME) to `exercise` and to the `session_exercise` snapshot. For timed exercises the `reps` columns hold seconds (targets and what was done), so sessions, the engine and backups need no other change. Migration 4 → 5 makes the library planks and cardio timed and gives their workout targets below 15 a time default (30 s, or 10 min for cardio); past sessions keep what was recorded.
 - Database version 6 adds `heightCm` to `body_assessment`. Migration 5 → 6 only adds the column; existing assessments have no height.
 - Database version 7 adds `favorite` to `exercise`. Migration 6 → 7 only adds the column (nothing starred). Favorites are listed first in the library and picker. Library exercises (a `seedKey` the app knows) are read-only: the editor shows each section with only their own value (no choices), except how sets count (reps or time), which they can still change and which is saved right away like the star and `ExerciseRepository.delete` refuses them; their old `notes`/`imagePath`, if any, stay as they were.
+- Database version 8 adds `water_entry` (day, ml) and `meal` (day, minute of day, optional description, kcal). Migration 7 → 8 only creates them. Water is one row per glass so the last one can be undone.
 - BMI and an estimated body fat are never stored: `BodyMetrics.derive` adds them when Progress, Home, Compare and the assessment editor read the assessments. BMI uses the assessment's height, else the latest one recorded before it, else the first one after it; heights outside 100–250 cm are ignored. When body fat wasn't typed and Sex is set in Settings, the US Navy formula (neck and abdomen for men, with waist as a fallback; neck, waist and hips for women) estimates it; results outside 2–60 % are dropped. Estimated values are flagged (`BodyAssessment.estimated`) so they are never stored, but the screens do not label them (the user asked to drop the word).
 - `MigrationTest` builds real version-1, 2 and 3 databases from `app/schemas/.../<n>.json` and opens them with the current app (`Migrations.ALL`).
 
@@ -60,6 +61,12 @@ body_assessment   body_photo   activity
 - Figures: every `Sport` has a Material icon; indoor cycling and treadmill reuse the Workout Guide drawings (`wg-cycling`, `wg-running`).
 - Distance is stored in km; swimming is typed and shown in meters.
 - **Live timing:** `LiveActivity` (marks, pauses, GPS distance) is kept in memory and in its own DataStore (`live_activity`, not backed up), written on every action and at most every 10 s for GPS updates. `ActivityTrackingService` (foreground, types `health` and `location`) shows the chronometer and pause/resume and, for outdoor sports with location permission, asks `LocationManager` for GPS fixes every 2 s. `GpsDistance` drops fixes worse than 30 m, steps under 4 m and jumps faster than the sport allows; pausing clears the anchor so a paused stretch never counts. *Finish* pauses the timer and opens the "activity done" step (`ActivityEditorRoute(review = true)`); only its *Save* calls `finish(intensity, notes, photo)`, which saves the `Activity` (minutes rounded up, km) and stops timing. Only the distance is kept, never the route.
+
+## Nutrition
+
+- `NutritionTargets.forDay` (pure) computes the day's targets as they were on that day: last known weight and height up to the date (the first ones when the day is before any assessment; heights outside 100–250 cm ignored), age on the date from `AppSettings.birthEpochDay`, and the distinct active days (`HistoryCalculator.activeDays`) in the 28 days before it. Calories = Mifflin-St Jeor × activity factor (1.2 / 1.375 / 1.55 / 1.725 for < 1, < 3, < 5, ≥ 5 days a week) + goal delta (−500 / 0 / +300), never below the basal rate, rounded to 10 kcal. Water = 35 ml/kg rounded to 50 ml. Missing inputs come back as `TargetMissing`, so the cards say what to fill in.
+- `NutritionViewModel` switches days with `flatMapLatest`; no future days. The meal editor keeps its fields in `SavedStateHandle`, because the user leaves for an AI app and Android may kill MyFit meanwhile.
+- *Ask AI* is an `ACTION_SEND` text/plain chooser (`askAiIntent`): any installed AI app can take the prompt. The app has no INTERNET permission and keeps it that way.
 
 ## Reminders
 
@@ -118,7 +125,7 @@ streaming AES-256-GCM-HKDF (Tink, 1 MiB segments, entire header as associated da
 - **Storage**: the derived key is stored wrapped by an Android Keystore AES key that doesn't require unlocking, so the worker can run with the screen locked. If that key disappears (reinstall or cleared data), the state becomes LOCKED and the app asks for the password again.
 - **Third-party files**: weak parameters from an imported file are never adopted.
 
-Exercise and session DTOs carry an optional `seedKey`; restoring a backup made before version 3 links library rows by name inside the same transaction. Exercise DTOs carry an optional `favorite`, session DTOs optional `intensity` and `imagePath`, assessment DTOs an optional `heightCm`, and `activities` is a new optional list. The settings JSON carries an optional `sex`. Its count goes into the manifest only when there are activities, so backups made by earlier versions still pass the exact count check.
+Exercise and session DTOs carry an optional `seedKey`; restoring a backup made before version 3 links library rows by name inside the same transaction. Exercise DTOs carry an optional `favorite`, session DTOs optional `intensity` and `imagePath`, assessment DTOs an optional `heightCm`, and `activities` is a new optional list. `waterEntries` and `meals` are optional lists too (1.8.0). The settings JSON carries optional `sex`, `birthEpochDay` and `nutritionGoal`. Their counts go into the manifest only when the lists aren't empty, so backups made by earlier versions still pass the exact count check.
 
 **Restore** (`BackupManager.restore`):
 1. Refuses if a workout is in progress. Reads the header, gets the key (the device's, or the one derived from the typed password) and checks the verifier.
@@ -138,6 +145,7 @@ If the app dies at any point, the database stays whole (either the old one or th
 
 ## Navigation and UI
 
+- Five tabs: Home, Workouts, History, Progress and Nutrition. Settings is a sub-screen opened from the gear on Home (since 1.8.0).
 - Navigation Compose with type-safe routes, in a `NavigationSuiteScaffold`: bottom bar on phones and rail on large screens, hidden on full-screen screens. Content is capped at 640 dp.
 - Workout execution is immersive, always in the dark theme, with the screen kept on.
 - The theme comes from the settings (dark by default). Color tokens, typography (Geist with tabular figures) and components are in `docs/BRAND.md`.

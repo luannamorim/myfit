@@ -21,8 +21,8 @@ android {
         applicationId = "io.github.luannamorim.myfit"
         minSdk = 26
         targetSdk = 37
-        versionCode = 35
-        versionName = "1.7.6"
+        versionCode = 36
+        versionName = "1.8.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

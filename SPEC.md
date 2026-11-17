@@ -20,10 +20,10 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 
 ## Non-goals
 
-- Not a social network: no sharing, rankings, friends or feed.
+- Not a social network: no sharing, rankings, friends or feed. (Handing a meal description to an AI app through the Android share sheet is not social sharing.)
 - No gamification: no badges, points or streaks that pressure you not to "break" them.
 - No account, login or server: data lives on the device and in the user's backup files.
-- Not a coach: it doesn't generate workouts, prescribe loads or give health or nutrition advice.
+- Not a coach: it doesn't generate workouts, prescribe loads, build diets or give health advice. Daily calorie and water targets are estimates from well-known formulas (Mifflin-St Jeor, 35 ml/kg), shown as a reference.
 - No integration with wearables, Health Connect or heart-rate sensors.
 
 ## Success criteria
@@ -99,6 +99,12 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 26. MUST show progress charts over time for each metric, with selection of the metrics displayed (including all at once).
 27. MUST allow logging body photos by date (front/side/back), including past dates for older photos, browsing by date and comparing two photos side by side.
 
+### Nutrition
+
+27a. MUST log, per day, water (quick +250/+500 ml or another amount, with undo of the last one) and meals (free-text description, calories, time), browsing past days but not future ones.
+27b. MUST show daily targets for water (35 ml per kg) and calories (Mifflin-St Jeor basal rate × an activity factor from the days with workouts or activities in the previous 4 weeks, adjusted by the goal: lose −500, maintain, gain +300, never below the basal rate), computed as they were on the shown day, and say what is missing (weight, height, sex, birth date) when a target can't be computed.
+27c. SHOULD offer an *Ask AI* button that hands the meal description to any AI app through the Android share sheet, so the user can type back the calories it estimates. The app itself never goes online.
+
 ### Backup and data
 
 28. MUST generate a single, compressed backup with all data (workouts, custom library, full sessions, measurements, photos, exercise images, settings), including the format version and metadata.
@@ -111,7 +117,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 
 ### Settings
 
-35. MUST allow choosing the theme (Dark, default; Light; System), the default rest, the rest sound behavior and keeping the screen on during workouts.
+35. MUST allow setting the profile (sex, birth date, nutrition goal) and choosing the theme (Dark, default; Light; System), the default rest, the rest sound behavior and keeping the screen on during workouts.
 35a. SHOULD allow scheduling workout reminders (a workout or activity, a time, and either a date or weekly days) that notify at that time.
 36. MUST bring together backup management (folder, password, automatic, manual, restore) and exercise library management.
 37. SHOULD guide the user to remove battery optimization for the app (relevant on Samsung devices).
