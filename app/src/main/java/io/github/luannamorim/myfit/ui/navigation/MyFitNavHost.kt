@@ -47,6 +47,7 @@ import io.github.luannamorim.myfit.ui.feature.home.HomeScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseEditorScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseLibraryScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
+import io.github.luannamorim.myfit.ui.feature.nutrition.MealEditorScreen
 import io.github.luannamorim.myfit.ui.feature.nutrition.NutritionScreen
 import io.github.luannamorim.myfit.ui.feature.reminders.ReminderEditorScreen
 import io.github.luannamorim.myfit.ui.feature.reminders.RemindersScreen
@@ -227,12 +228,13 @@ fun MyFitNavHost(
                 composable<PhotoCompareRoute> { PhotoCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<NutritionRoute> {
                     NutritionScreen(
-                        onAddMeal = { },
-                        onOpenMeal = { },
+                        onAddMeal = { date -> navController.navigate(MealEditorRoute(dateEpochDay = date.toEpochDay())) },
+                        onOpenMeal = { id, date -> navController.navigate(MealEditorRoute(mealId = id, dateEpochDay = date.toEpochDay())) },
                         onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
                         onOpenSettings = { navController.navigate(SettingsRoute) { launchSingleTop = true } },
                     )
                 }
+                composable<MealEditorRoute> { MealEditorScreen(onClose = { navController.popBackStack() }) }
                 composable<SettingsRoute> {
                     SettingsScreen(
                         onOpenBackup = { navController.navigate(BackupRoute) },

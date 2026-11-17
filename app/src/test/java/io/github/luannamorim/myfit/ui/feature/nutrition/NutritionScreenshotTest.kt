@@ -52,4 +52,14 @@ class NutritionScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun mealEditor() {
+        compose.snapBothThemes("meal_editor") {
+            MealEditorContent(
+                MealEditorState(loading = false, isNew = true, date = today, description = "Rice, beans, grilled chicken and salad", kcalText = "610", minuteOfDay = 12 * 60 + 30),
+                MealEditorActions(),
+            )
+        }
+    }
 }

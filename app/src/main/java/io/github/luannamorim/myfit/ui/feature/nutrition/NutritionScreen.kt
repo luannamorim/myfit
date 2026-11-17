@@ -66,7 +66,7 @@ data class NutritionActions(
 @Composable
 fun NutritionScreen(
     onAddMeal: (LocalDate) -> Unit,
-    onOpenMeal: (Long) -> Unit,
+    onOpenMeal: (Long, LocalDate) -> Unit,
     onOpenBody: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -81,7 +81,7 @@ fun NutritionScreen(
             onAddWater = viewModel::addWater,
             onUndoWater = viewModel::undoWater,
             onAddMeal = { onAddMeal(state.date) },
-            onOpenMeal = onOpenMeal,
+            onOpenMeal = { id -> onOpenMeal(id, state.date) },
             onFillMissing = { missing ->
                 when (missing) {
                     TargetMissing.WEIGHT, TargetMissing.HEIGHT -> onOpenBody()

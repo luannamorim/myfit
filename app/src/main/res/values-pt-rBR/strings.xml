@@ -580,4 +580,15 @@
     <string name="nutrition_meal_untitled">Refeição</string>
     <string name="nutrition_meals_empty">Nada registrado neste dia.</string>
     <string name="nutrition_add_meal">Adicionar refeição</string>
+    <string name="meal_new">Nova refeição</string>
+    <string name="meal_edit">Refeição</string>
+    <string name="meal_description">O que você comeu?</string>
+    <string name="meal_description_hint">ex.: arroz, feijão, frango grelhado e salada</string>
+    <string name="meal_ask_ai">Perguntar à IA</string>
+    <string name="meal_ask_ai_hint">Abre um app de IA com a pergunta pronta. Volte e digite as calorias que ele responder.</string>
+    <string name="meal_ai_prompt">Quantas calorias tem esta refeição: \"%1$s\"? Responda só com o total estimado em kcal.</string>
+    <string name="meal_kcal">Calorias</string>
+    <string name="meal_time">Horário</string>
+    <string name="meal_delete_title">Excluir refeição?</string>
+    <string name="meal_delete_message">Ela sai do total deste dia.</string>
 </resources>
