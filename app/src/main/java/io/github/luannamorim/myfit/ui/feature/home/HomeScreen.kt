@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Pool
@@ -76,6 +77,7 @@ data class HomeActions(
     val onLogActivity: () -> Unit = {},
     val onOpenLiveActivity: () -> Unit = {},
     val onOpenReminders: () -> Unit = {},
+    val onOpenSettings: () -> Unit = {},
 )
 
 @Composable
@@ -107,6 +109,15 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
                 Icon(
                     Icons.Rounded.NotificationsNone,
                     contentDescription = stringResource(R.string.reminders_title),
+                    tint = MyFitTheme.colors.textSecondary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            // Settings left the tab bar for Nutrition (1.8.0): same quiet style as the bell.
+            IconButton(onClick = actions.onOpenSettings) {
+                Icon(
+                    Icons.Outlined.Settings,
+                    contentDescription = stringResource(R.string.nav_settings),
                     tint = MyFitTheme.colors.textSecondary,
                     modifier = Modifier.size(22.dp),
                 )

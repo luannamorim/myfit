@@ -1,11 +1,13 @@
 package io.github.luannamorim.myfit.ui.navigation
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -44,7 +46,7 @@ class NavigationTest {
     fun eachTab_showsItsScreen_andBackReturnsHome() {
         homeHeading().assertIsDisplayed()
 
-        listOf("Treinos", "Histórico", "Evolução", "Ajustes").forEach { tab ->
+        listOf("Treinos", "Histórico", "Evolução", "Nutrição").forEach { tab ->
             compose.onAllNodesWithText(tab).onFirst().performClick()
             heading(tab).assertIsDisplayed()
         }
@@ -55,9 +57,22 @@ class NavigationTest {
     }
 
     @Test
+    fun homeGear_opensSettings_withoutTheTabBar_andBackReturnsHome() {
+        homeHeading().assertIsDisplayed()
+        compose.onAllNodesWithText("Ajustes").assertCountEquals(0) // no longer a tab
+        compose.onNodeWithContentDescription("Ajustes").performClick()
+        compose.onNodeWithText("Ajustes").assertIsDisplayed() // top bar title
+        compose.onNodeWithText("Data de nascimento").assertExists()
+        compose.onAllNodesWithText("Nutrição").assertCountEquals(0) // sub-screen: no tab bar
+
+        compose.onNodeWithContentDescription("Voltar").performClick()
+        homeHeading().assertIsDisplayed()
+    }
+
+    @Test
     @Config(qualifiers = "w840dp-h1200dp-xhdpi")
     fun expandedWidth_usesNavigationRail_inEnglish_screenshot() {
-        compose.onNodeWithText("Settings").assertIsDisplayed()
+        compose.onNodeWithText("Nutrition").assertIsDisplayed()
         compose.onNode(isHeading() and (hasText("Good morning") or hasText("Good afternoon") or hasText("Good evening"))).assertIsDisplayed()
         compose.onRoot().captureRoboImage("$SCREENSHOT_DIR/nav_expanded_dark.png")
     }

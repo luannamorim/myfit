@@ -9,6 +9,7 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -58,7 +59,7 @@ class RemindersFlowTest {
 
     @Test
     fun createOtherActivityReminder_fromSettings() {
-        compose.onAllNodesWithText("Ajustes").onFirst().performClick()
+        compose.onNodeWithContentDescription("Ajustes").performClick()
         compose.onNodeWithText("Lembretes").performScrollTo().performClick()
         waitFor("Nenhum lembrete")
 

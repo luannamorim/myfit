@@ -8,6 +8,7 @@
     <string name="nav_history">Histórico</string>
     <string name="nav_evolution">Evolução</string>
     <string name="nav_settings">Ajustes</string>
+    <string name="nav_nutrition">Nutrição</string>
 
     <!-- Comum -->
     <string name="action_save">Salvar</string>

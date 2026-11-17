@@ -47,6 +47,7 @@ import io.github.luannamorim.myfit.ui.feature.home.HomeScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseEditorScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseLibraryScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
+import io.github.luannamorim.myfit.ui.feature.nutrition.NutritionScreen
 import io.github.luannamorim.myfit.ui.feature.reminders.ReminderEditorScreen
 import io.github.luannamorim.myfit.ui.feature.reminders.RemindersScreen
 import io.github.luannamorim.myfit.ui.feature.routines.RoutineEditorScreen
@@ -169,6 +170,7 @@ fun MyFitNavHost(
                             onLogActivity = { navController.navigate(ActivityEditorRoute()) },
                             onOpenLiveActivity = { navController.navigate(LiveActivityRoute) { launchSingleTop = true } },
                             onOpenReminders = { navController.navigate(RemindersRoute) },
+                            onOpenSettings = { navController.navigate(SettingsRoute) { launchSingleTop = true } },
                         ),
                     )
                 }
@@ -223,10 +225,12 @@ fun MyFitNavHost(
                 }
                 composable<AssessmentCompareRoute> { AssessmentCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<PhotoCompareRoute> { PhotoCompareScreen(onBack = { navController.popBackStack() }) }
+                composable<NutritionRoute> { NutritionScreen() }
                 composable<SettingsRoute> {
                     SettingsScreen(
                         onOpenBackup = { navController.navigate(BackupRoute) },
                         onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
+                        onBack = { navController.popBackStack() },
                         onOpenCredits = { navController.navigate(CreditsRoute) },
                         onOpenReminders = { navController.navigate(RemindersRoute) },
                     )

@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object HistoryRoute
 @Serializable data object EvolutionRoute
 @Serializable data object SettingsRoute
+@Serializable data object NutritionRoute
 
 @Serializable data class RoutineEditorRoute(val routineId: Long? = null)
 @Serializable data object ExercisePickerRoute

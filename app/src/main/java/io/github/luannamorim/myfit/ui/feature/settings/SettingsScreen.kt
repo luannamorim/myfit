@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -24,6 +28,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -56,7 +61,8 @@ import io.github.luannamorim.myfit.ui.components.MyFitChip
 import io.github.luannamorim.myfit.ui.components.MyFitDatePickerDialog
 import io.github.luannamorim.myfit.ui.components.NumberStepper
 import io.github.luannamorim.myfit.ui.components.SectionHeader
-import io.github.luannamorim.myfit.ui.components.TabScreen
+import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
+import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.feature.routines.REST_STEP_SECONDS
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
@@ -67,6 +73,7 @@ import java.time.LocalDate
 fun SettingsScreen(
     onOpenBackup: () -> Unit,
     onOpenLibrary: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenCredits: () -> Unit = {},
     onOpenReminders: () -> Unit = {},
@@ -97,6 +104,7 @@ fun SettingsScreen(
         modifier = modifier,
         onOpenCredits = onOpenCredits,
         onOpenReminders = onOpenReminders,
+        onBack = onBack,
     )
 }
 
@@ -153,107 +161,122 @@ fun SettingsContent(
     modifier: Modifier = Modifier,
     onOpenCredits: () -> Unit = {},
     onOpenReminders: () -> Unit = {},
+    onBack: (() -> Unit)? = null,
 ) {
     val c = MyFitTheme.colors
     val s = state.settings
-    TabScreen(title = stringResource(R.string.nav_settings), modifier = modifier) {
-        SectionHeader(stringResource(R.string.settings_profile))
-        MyFitCard(Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.settings_sex), style = MyFitTheme.type.caption, color = c.textSecondary)
-            Spacer(Modifier.height(Spacing.s))
-            ChipGroup {
-                listOf(null to R.string.settings_sex_unset, Sex.MALE to R.string.settings_sex_male, Sex.FEMALE to R.string.settings_sex_female)
-                    .forEach { (sex, label) -> MyFitChip(stringResource(label), selected = s.sex == sex, onClick = { onUpdate { it.copy(sex = sex) } }) }
-            }
-            Spacer(Modifier.height(Spacing.l))
-            BirthDateRow(s.birthEpochDay?.let(LocalDate::ofEpochDay), onDate = { date -> onUpdate { it.copy(birthEpochDay = date?.toEpochDay()) } })
-            Spacer(Modifier.height(Spacing.l))
-            Text(stringResource(R.string.settings_goal), style = MyFitTheme.type.caption, color = c.textSecondary)
-            Spacer(Modifier.height(Spacing.s))
-            ChipGroup {
-                listOf(
-                    NutritionGoal.LOSE to R.string.settings_goal_lose,
-                    NutritionGoal.MAINTAIN to R.string.settings_goal_maintain,
-                    NutritionGoal.GAIN to R.string.settings_goal_gain,
-                ).forEach { (goal, label) ->
-                    MyFitChip(stringResource(label), selected = s.nutritionGoal == goal, onClick = { onUpdate { it.copy(nutritionGoal = goal) } })
+    Scaffold(
+        modifier = modifier,
+        containerColor = c.background,
+        topBar = { MyFitTopBar(stringResource(R.string.nav_settings), onBack = onBack) },
+    ) { padding ->
+        Column(
+            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Column(
+                Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().padding(horizontal = Spacing.screen).padding(top = Spacing.s, bottom = Spacing.xxl),
+                verticalArrangement = Arrangement.spacedBy(Spacing.m),
+            ) {
+                SectionHeader(stringResource(R.string.settings_profile))
+                MyFitCard(Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.settings_sex), style = MyFitTheme.type.caption, color = c.textSecondary)
+                    Spacer(Modifier.height(Spacing.s))
+                    ChipGroup {
+                        listOf(null to R.string.settings_sex_unset, Sex.MALE to R.string.settings_sex_male, Sex.FEMALE to R.string.settings_sex_female)
+                            .forEach { (sex, label) -> MyFitChip(stringResource(label), selected = s.sex == sex, onClick = { onUpdate { it.copy(sex = sex) } }) }
+                    }
+                    Spacer(Modifier.height(Spacing.l))
+                    BirthDateRow(s.birthEpochDay?.let(LocalDate::ofEpochDay), onDate = { date -> onUpdate { it.copy(birthEpochDay = date?.toEpochDay()) } })
+                    Spacer(Modifier.height(Spacing.l))
+                    Text(stringResource(R.string.settings_goal), style = MyFitTheme.type.caption, color = c.textSecondary)
+                    Spacer(Modifier.height(Spacing.s))
+                    ChipGroup {
+                        listOf(
+                            NutritionGoal.LOSE to R.string.settings_goal_lose,
+                            NutritionGoal.MAINTAIN to R.string.settings_goal_maintain,
+                            NutritionGoal.GAIN to R.string.settings_goal_gain,
+                        ).forEach { (goal, label) ->
+                            MyFitChip(stringResource(label), selected = s.nutritionGoal == goal, onClick = { onUpdate { it.copy(nutritionGoal = goal) } })
+                        }
+                    }
+                    Spacer(Modifier.height(Spacing.s))
+                    Text(stringResource(R.string.settings_sex_hint), style = MyFitTheme.type.caption, color = c.textTertiary)
                 }
+
+                SectionHeader(stringResource(R.string.settings_appearance), Modifier.padding(top = Spacing.s))
+                MyFitCard(Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.settings_theme), style = MyFitTheme.type.caption, color = c.textSecondary)
+                    Spacer(Modifier.height(Spacing.s))
+                    ChipGroup {
+                        listOf(ThemeMode.DARK to R.string.settings_theme_dark, ThemeMode.LIGHT to R.string.settings_theme_light, ThemeMode.SYSTEM to R.string.settings_theme_system)
+                            .forEach { (mode, label) -> MyFitChip(stringResource(label), selected = s.themeMode == mode, onClick = { onUpdate { it.copy(themeMode = mode) } }) }
+                    }
+                }
+
+                SectionHeader(stringResource(R.string.settings_workout), Modifier.padding(top = Spacing.s))
+                MyFitCard(Modifier.fillMaxWidth()) {
+                    NumberStepper(
+                        value = Durations.rest(s.defaultRestSeconds),
+                        label = stringResource(R.string.settings_default_rest),
+                        onDecrement = { onUpdate { it.copy(defaultRestSeconds = it.defaultRestSeconds - REST_STEP_SECONDS) } },
+                        onIncrement = { onUpdate { it.copy(defaultRestSeconds = it.defaultRestSeconds + REST_STEP_SECONDS) } },
+                    )
+                    Spacer(Modifier.height(Spacing.l))
+                    Text(stringResource(R.string.settings_rest_sound), style = MyFitTheme.type.caption, color = c.textSecondary)
+                    Spacer(Modifier.height(Spacing.s))
+                    ChipGroup {
+                        MyFitChip(stringResource(R.string.settings_rest_sound_follow), selected = s.restSound == RestSound.FOLLOW_RINGER, onClick = { onUpdate { it.copy(restSound = RestSound.FOLLOW_RINGER) } })
+                        MyFitChip(stringResource(R.string.settings_rest_sound_always), selected = s.restSound == RestSound.ALWAYS, onClick = { onUpdate { it.copy(restSound = RestSound.ALWAYS) } })
+                    }
+                    Spacer(Modifier.height(Spacing.m))
+                    SwitchRow(stringResource(R.string.settings_countdown), stringResource(R.string.settings_countdown_hint), s.countdownBeeps) { v ->
+                        onUpdate { it.copy(countdownBeeps = v) }
+                    }
+                    SwitchRow(stringResource(R.string.settings_keep_screen), null, s.keepScreenOn) { v -> onUpdate { it.copy(keepScreenOn = v) } }
+                    SwitchRow(stringResource(R.string.settings_update_loads), stringResource(R.string.settings_update_loads_hint), s.updateRoutineLoadsOnFinish) { v ->
+                        onUpdate { it.copy(updateRoutineLoadsOnFinish = v) }
+                    }
+                }
+                val activeReminders = s.reminders.count { it.enabled }
+                NavRow(
+                    Icons.Rounded.NotificationsActive,
+                    stringResource(R.string.reminders_title),
+                    if (activeReminders > 0) pluralStringResource(R.plurals.reminders_active_count, activeReminders, activeReminders) else stringResource(R.string.reminders_hint),
+                    onOpenReminders,
+                )
+
+                SectionHeader(stringResource(R.string.settings_data), Modifier.padding(top = Spacing.s))
+                NavRow(Icons.Rounded.Backup, stringResource(R.string.backup_title), stringResource(R.string.settings_backup_hint), onOpenBackup, error = state.backup.lastError != null)
+                NavRow(Icons.AutoMirrored.Rounded.LibraryBooks, stringResource(R.string.routines_library), stringResource(R.string.routines_library_hint), onOpenLibrary)
+
+                SectionHeader(stringResource(R.string.settings_system), Modifier.padding(top = Spacing.s))
+                StatusRow(
+                    title = stringResource(R.string.settings_notifications),
+                    ok = state.system.notificationsEnabled,
+                    okText = stringResource(R.string.settings_notifications_on),
+                    problemText = stringResource(R.string.settings_notifications_off),
+                    actionText = stringResource(R.string.settings_open),
+                    onAction = onOpenNotifications,
+                )
+                StatusRow(
+                    title = stringResource(R.string.settings_battery),
+                    ok = state.system.batteryUnrestricted,
+                    okText = stringResource(R.string.settings_battery_ok),
+                    problemText = stringResource(R.string.settings_battery_restricted),
+                    actionText = stringResource(R.string.settings_battery_allow),
+                    onAction = onAllowBattery,
+                )
+
+                SectionHeader(stringResource(R.string.settings_about), Modifier.padding(top = Spacing.s))
+                MyFitCard(Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.settings_version, state.versionName), style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
+                    Text(stringResource(R.string.settings_developed_by), style = MyFitTheme.type.body, color = c.textSecondary)
+                    Text(stringResource(R.string.settings_licenses), style = MyFitTheme.type.caption, color = c.textTertiary)
+                }
+                NavRow(Icons.Rounded.Image, stringResource(R.string.credits_title), stringResource(R.string.credits_hint), onOpenCredits)
             }
-            Spacer(Modifier.height(Spacing.s))
-            Text(stringResource(R.string.settings_sex_hint), style = MyFitTheme.type.caption, color = c.textTertiary)
         }
-
-        SectionHeader(stringResource(R.string.settings_appearance), Modifier.padding(top = Spacing.s))
-        MyFitCard(Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.settings_theme), style = MyFitTheme.type.caption, color = c.textSecondary)
-            Spacer(Modifier.height(Spacing.s))
-            ChipGroup {
-                listOf(ThemeMode.DARK to R.string.settings_theme_dark, ThemeMode.LIGHT to R.string.settings_theme_light, ThemeMode.SYSTEM to R.string.settings_theme_system)
-                    .forEach { (mode, label) -> MyFitChip(stringResource(label), selected = s.themeMode == mode, onClick = { onUpdate { it.copy(themeMode = mode) } }) }
-            }
-        }
-
-        SectionHeader(stringResource(R.string.settings_workout), Modifier.padding(top = Spacing.s))
-        MyFitCard(Modifier.fillMaxWidth()) {
-            NumberStepper(
-                value = Durations.rest(s.defaultRestSeconds),
-                label = stringResource(R.string.settings_default_rest),
-                onDecrement = { onUpdate { it.copy(defaultRestSeconds = it.defaultRestSeconds - REST_STEP_SECONDS) } },
-                onIncrement = { onUpdate { it.copy(defaultRestSeconds = it.defaultRestSeconds + REST_STEP_SECONDS) } },
-            )
-            Spacer(Modifier.height(Spacing.l))
-            Text(stringResource(R.string.settings_rest_sound), style = MyFitTheme.type.caption, color = c.textSecondary)
-            Spacer(Modifier.height(Spacing.s))
-            ChipGroup {
-                MyFitChip(stringResource(R.string.settings_rest_sound_follow), selected = s.restSound == RestSound.FOLLOW_RINGER, onClick = { onUpdate { it.copy(restSound = RestSound.FOLLOW_RINGER) } })
-                MyFitChip(stringResource(R.string.settings_rest_sound_always), selected = s.restSound == RestSound.ALWAYS, onClick = { onUpdate { it.copy(restSound = RestSound.ALWAYS) } })
-            }
-            Spacer(Modifier.height(Spacing.m))
-            SwitchRow(stringResource(R.string.settings_countdown), stringResource(R.string.settings_countdown_hint), s.countdownBeeps) { v ->
-                onUpdate { it.copy(countdownBeeps = v) }
-            }
-            SwitchRow(stringResource(R.string.settings_keep_screen), null, s.keepScreenOn) { v -> onUpdate { it.copy(keepScreenOn = v) } }
-            SwitchRow(stringResource(R.string.settings_update_loads), stringResource(R.string.settings_update_loads_hint), s.updateRoutineLoadsOnFinish) { v ->
-                onUpdate { it.copy(updateRoutineLoadsOnFinish = v) }
-            }
-        }
-        val activeReminders = s.reminders.count { it.enabled }
-        NavRow(
-            Icons.Rounded.NotificationsActive,
-            stringResource(R.string.reminders_title),
-            if (activeReminders > 0) pluralStringResource(R.plurals.reminders_active_count, activeReminders, activeReminders) else stringResource(R.string.reminders_hint),
-            onOpenReminders,
-        )
-
-        SectionHeader(stringResource(R.string.settings_data), Modifier.padding(top = Spacing.s))
-        NavRow(Icons.Rounded.Backup, stringResource(R.string.backup_title), stringResource(R.string.settings_backup_hint), onOpenBackup, error = state.backup.lastError != null)
-        NavRow(Icons.AutoMirrored.Rounded.LibraryBooks, stringResource(R.string.routines_library), stringResource(R.string.routines_library_hint), onOpenLibrary)
-
-        SectionHeader(stringResource(R.string.settings_system), Modifier.padding(top = Spacing.s))
-        StatusRow(
-            title = stringResource(R.string.settings_notifications),
-            ok = state.system.notificationsEnabled,
-            okText = stringResource(R.string.settings_notifications_on),
-            problemText = stringResource(R.string.settings_notifications_off),
-            actionText = stringResource(R.string.settings_open),
-            onAction = onOpenNotifications,
-        )
-        StatusRow(
-            title = stringResource(R.string.settings_battery),
-            ok = state.system.batteryUnrestricted,
-            okText = stringResource(R.string.settings_battery_ok),
-            problemText = stringResource(R.string.settings_battery_restricted),
-            actionText = stringResource(R.string.settings_battery_allow),
-            onAction = onAllowBattery,
-        )
-
-        SectionHeader(stringResource(R.string.settings_about), Modifier.padding(top = Spacing.s))
-        MyFitCard(Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.settings_version, state.versionName), style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
-            Text(stringResource(R.string.settings_developed_by), style = MyFitTheme.type.body, color = c.textSecondary)
-            Text(stringResource(R.string.settings_licenses), style = MyFitTheme.type.caption, color = c.textTertiary)
-        }
-        NavRow(Icons.Rounded.Image, stringResource(R.string.credits_title), stringResource(R.string.credits_hint), onOpenCredits)
     }
 }
 
