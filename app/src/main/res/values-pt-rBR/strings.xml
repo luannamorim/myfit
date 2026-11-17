@@ -551,4 +551,33 @@
     <string name="channel_reminders">Lembretes</string>
     <string name="channel_reminders_desc">Lembretes de treino que você agendou</string>
     <string name="reminder_notif_title">Hora de treinar</string>
+
+    <!-- Nutrition -->
+    <string name="nutrition_today">Hoje</string>
+    <string name="nutrition_yesterday">Ontem</string>
+    <string name="nutrition_previous_day">Dia anterior</string>
+    <string name="nutrition_next_day">Próximo dia</string>
+    <string name="nutrition_water">Água</string>
+    <string name="nutrition_calories">Calorias</string>
+    <string name="nutrition_liters_of">%1$s / %2$s L</string>
+    <string name="nutrition_liters">%1$s L</string>
+    <string name="nutrition_kcal_of">%1$s / %2$s kcal</string>
+    <string name="nutrition_kcal">%1$s kcal</string>
+    <string name="nutrition_add_ml">+%1$d ml</string>
+    <string name="nutrition_water_other">Outro</string>
+    <string name="nutrition_water_undo">Desfazer</string>
+    <string name="nutrition_water_amount">Quantidade</string>
+    <string name="nutrition_add">Adicionar</string>
+    <string name="nutrition_left">%1$s · faltam %2$s kcal</string>
+    <string name="nutrition_over">%1$s · %2$s kcal acima da meta</string>
+    <string name="nutrition_on_target">%1$s · meta atingida</string>
+    <string name="nutrition_fill">Preencha: %1$s</string>
+    <string name="nutrition_missing_weight">peso</string>
+    <string name="nutrition_missing_height">altura</string>
+    <string name="nutrition_missing_sex">sexo</string>
+    <string name="nutrition_missing_birth">data de nascimento</string>
+    <string name="nutrition_meals">Refeições</string>
+    <string name="nutrition_meal_untitled">Refeição</string>
+    <string name="nutrition_meals_empty">Nada registrado neste dia.</string>
+    <string name="nutrition_add_meal">Adicionar refeição</string>
 </resources>

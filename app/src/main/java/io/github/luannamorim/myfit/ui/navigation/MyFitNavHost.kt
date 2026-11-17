@@ -225,7 +225,14 @@ fun MyFitNavHost(
                 }
                 composable<AssessmentCompareRoute> { AssessmentCompareScreen(onBack = { navController.popBackStack() }) }
                 composable<PhotoCompareRoute> { PhotoCompareScreen(onBack = { navController.popBackStack() }) }
-                composable<NutritionRoute> { NutritionScreen() }
+                composable<NutritionRoute> {
+                    NutritionScreen(
+                        onAddMeal = { },
+                        onOpenMeal = { },
+                        onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
+                        onOpenSettings = { navController.navigate(SettingsRoute) { launchSingleTop = true } },
+                    )
+                }
                 composable<SettingsRoute> {
                     SettingsScreen(
                         onOpenBackup = { navController.navigate(BackupRoute) },
