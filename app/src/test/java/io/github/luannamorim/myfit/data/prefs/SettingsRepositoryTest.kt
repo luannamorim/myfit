@@ -6,7 +6,10 @@ import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
+import io.github.luannamorim.myfit.domain.nutrition.MealReminder
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
+import io.github.luannamorim.myfit.domain.nutrition.NutritionReminders
+import io.github.luannamorim.myfit.domain.nutrition.WaterReminder
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -94,6 +97,27 @@ class SettingsRepositoryTest {
         old.importJson("""{"themeMode":"LIGHT"}""")
         assertNull(old.current().birthEpochDay)
         assertEquals(NutritionGoal.MAINTAIN, old.current().nutritionGoal)
+    }
+
+    @Test
+    fun nutritionReminders_persist_andTravelInExports() = runTest {
+        val r = repo()
+        assertEquals(NutritionReminders(), r.current().nutritionReminders)
+        val set = NutritionReminders(
+            meals = listOf(MealReminder(1, 7 * 60), MealReminder(2, 12 * 60, enabled = false)),
+            water = WaterReminder(enabled = true, everyMinutes = 90, fromMinute = 9 * 60, untilMinute = 21 * 60),
+        )
+        r.update { it.copy(nutritionReminders = set) }
+        assertEquals(set, r.current().nutritionReminders)
+
+        val copy = repo(File(tmp.root, "nutri.preferences_pb"))
+        copy.importJson(r.exportJson())
+        assertEquals(set, copy.current().nutritionReminders)
+
+        // Settings exported before 1.9.0: none, water off.
+        val old = repo(File(tmp.root, "old19.preferences_pb"))
+        old.importJson("""{"themeMode":"LIGHT"}""")
+        assertEquals(NutritionReminders(), old.current().nutritionReminders)
     }
 
     private val reminders = listOf(

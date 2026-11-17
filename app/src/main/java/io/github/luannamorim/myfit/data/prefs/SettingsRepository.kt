@@ -13,6 +13,7 @@ import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
+import io.github.luannamorim.myfit.domain.nutrition.NutritionReminders
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -38,6 +39,7 @@ class SettingsRepository @Inject constructor(
         val sex = stringPreferencesKey("sex")
         val birth = longPreferencesKey("birth_epoch_day")
         val goal = stringPreferencesKey("nutrition_goal")
+        val nutritionReminders = stringPreferencesKey("nutrition_reminders")
     }
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -63,6 +65,7 @@ class SettingsRepository @Inject constructor(
             next.sex?.let { prefs[Keys.sex] = it.name } ?: prefs.remove(Keys.sex)
             next.birthEpochDay?.let { prefs[Keys.birth] = it } ?: prefs.remove(Keys.birth)
             prefs[Keys.goal] = next.nutritionGoal.name
+            prefs[Keys.nutritionReminders] = json.encodeToString(NutritionReminders.serializer(), next.nutritionReminders)
         }
     }
 
@@ -87,6 +90,9 @@ class SettingsRepository @Inject constructor(
             sex = this[Keys.sex]?.let { enumValueOrNull<Sex>(it) },
             birthEpochDay = this[Keys.birth],
             nutritionGoal = this[Keys.goal]?.let { enumValueOrNull<NutritionGoal>(it) } ?: defaults.nutritionGoal,
+            nutritionReminders = this[Keys.nutritionReminders]
+                ?.let { runCatching { json.decodeFromString(NutritionReminders.serializer(), it) }.getOrNull() }
+                ?: defaults.nutritionReminders,
         )
     }
 }
