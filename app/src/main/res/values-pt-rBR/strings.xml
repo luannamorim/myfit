@@ -603,4 +603,20 @@
     <string name="meal_time">Horário</string>
     <string name="meal_delete_title">Excluir refeição?</string>
     <string name="meal_delete_message">Ela sai do total deste dia.</string>
+    <string name="nutrition_reminders_title">Lembretes de nutrição</string>
+    <string name="nutrition_reminders_meals">Refeições</string>
+    <string name="nutrition_reminders_meals_empty">Nenhum horário de refeição.</string>
+    <string name="nutrition_reminders_add_time">Adicionar horário</string>
+    <string name="nutrition_reminders_water_on">Lembrar de beber água</string>
+    <string name="nutrition_reminders_every">A cada</string>
+    <string name="nutrition_reminders_from">De</string>
+    <string name="nutrition_reminders_until">Até</string>
+    <string name="nutrition_reminders_meal_at">Refeição às %1$s</string>
+    <string name="nutrition_reminders_delete">Excluir %1$s</string>
+    <string name="nutrition_reminders_notifications_off">Notificações desligadas: os lembretes não vão aparecer.</string>
+    <plurals name="nutrition_reminders_water_count">
+        <item quantity="one">%1$d aviso por dia. Para quando você bate a meta de água.</item>
+        <item quantity="many">%1$d avisos por dia. Param quando você bate a meta de água.</item>
+        <item quantity="other">%1$d avisos por dia. Param quando você bate a meta de água.</item>
+    </plurals>
 </resources>

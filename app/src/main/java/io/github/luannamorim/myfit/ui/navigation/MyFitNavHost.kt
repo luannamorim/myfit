@@ -48,6 +48,7 @@ import io.github.luannamorim.myfit.ui.feature.library.ExerciseEditorScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExerciseLibraryScreen
 import io.github.luannamorim.myfit.ui.feature.library.ExercisePickerScreen
 import io.github.luannamorim.myfit.ui.feature.nutrition.MealEditorScreen
+import io.github.luannamorim.myfit.ui.feature.nutrition.NutritionRemindersScreen
 import io.github.luannamorim.myfit.ui.feature.nutrition.NutritionScreen
 import io.github.luannamorim.myfit.ui.feature.reminders.ReminderEditorScreen
 import io.github.luannamorim.myfit.ui.feature.reminders.RemindersScreen
@@ -241,8 +242,10 @@ fun MyFitNavHost(
                         onOpenMeal = { id, date -> navController.navigate(MealEditorRoute(mealId = id, dateEpochDay = date.toEpochDay())) },
                         onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
                         onOpenSettings = { navController.navigate(SettingsRoute) { launchSingleTop = true } },
+                        onOpenReminders = { navController.navigate(NutritionRemindersRoute) { launchSingleTop = true } },
                     )
                 }
+                composable<NutritionRemindersRoute> { NutritionRemindersScreen(onBack = { navController.popBackStack() }) }
                 composable<MealEditorRoute> { MealEditorScreen(onClose = { navController.popBackStack() }) }
                 composable<SettingsRoute> {
                     SettingsScreen(

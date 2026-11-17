@@ -570,4 +570,19 @@
     <string name="meal_time">Time</string>
     <string name="meal_delete_title">Delete meal?</string>
     <string name="meal_delete_message">It leaves this day\'s total.</string>
+    <string name="nutrition_reminders_title">Nutrition reminders</string>
+    <string name="nutrition_reminders_meals">Meals</string>
+    <string name="nutrition_reminders_meals_empty">No meal times.</string>
+    <string name="nutrition_reminders_add_time">Add time</string>
+    <string name="nutrition_reminders_water_on">Remind me to drink water</string>
+    <string name="nutrition_reminders_every">Every</string>
+    <string name="nutrition_reminders_from">From</string>
+    <string name="nutrition_reminders_until">Until</string>
+    <string name="nutrition_reminders_meal_at">Meal at %1$s</string>
+    <string name="nutrition_reminders_delete">Delete %1$s</string>
+    <string name="nutrition_reminders_notifications_off">Notifications off: the reminders won\'t show.</string>
+    <plurals name="nutrition_reminders_water_count">
+        <item quantity="one">%1$d reminder a day. Stops once you hit your water target.</item>
+        <item quantity="other">%1$d reminders a day. Stops once you hit your water target.</item>
+    </plurals>
 </resources>

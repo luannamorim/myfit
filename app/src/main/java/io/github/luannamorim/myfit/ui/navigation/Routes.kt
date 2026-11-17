@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object EvolutionRoute
 @Serializable data object SettingsRoute
 @Serializable data object NutritionRoute
+@Serializable data object NutritionRemindersRoute
 @Serializable data class MealEditorRoute(val mealId: Long = 0, val dateEpochDay: Long)
 
 @Serializable data class RoutineEditorRoute(val routineId: Long? = null)

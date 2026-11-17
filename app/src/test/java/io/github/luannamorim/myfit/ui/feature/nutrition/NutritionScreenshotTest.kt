@@ -4,6 +4,9 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
 import io.github.luannamorim.myfit.domain.nutrition.Meal
+import io.github.luannamorim.myfit.domain.nutrition.MealReminder
+import io.github.luannamorim.myfit.domain.nutrition.NutritionReminders
+import io.github.luannamorim.myfit.domain.nutrition.WaterReminder
 import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import io.github.luannamorim.myfit.domain.nutrition.TargetMissing
@@ -59,6 +62,23 @@ class NutritionScreenshotTest {
             MealEditorContent(
                 MealEditorState(loading = false, isNew = true, date = today, description = "Rice, beans, grilled chicken and salad", kcalText = "610", minuteOfDay = 12 * 60 + 30),
                 MealEditorActions(),
+            )
+        }
+    }
+
+    @Test
+    fun nutritionReminders() {
+        compose.snapBothThemes("nutrition_reminders") {
+            NutritionRemindersContent(
+                NutritionRemindersUiState(
+                    loading = false,
+                    reminders = NutritionReminders(
+                        meals = listOf(MealReminder(1, 7 * 60), MealReminder(2, 12 * 60 + 30), MealReminder(3, 20 * 60, enabled = false)),
+                        water = WaterReminder(enabled = true, everyMinutes = 120, fromMinute = 8 * 60, untilMinute = 22 * 60),
+                    ),
+                ),
+                NutritionRemindersActions(),
+                is24Hour = false,
             )
         }
     }

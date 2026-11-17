@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -27,7 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,6 +66,7 @@ data class NutritionActions(
     val onOpenMeal: (Long) -> Unit = {},
     /** Opens where the missing value is filled in: Progress (weight, height) or Settings (sex, birth date). */
     val onFillMissing: (TargetMissing) -> Unit = {},
+    val onOpenReminders: () -> Unit = {},
 )
 
 @Composable
@@ -71,6 +76,7 @@ fun NutritionScreen(
     onOpenBody: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenReminders: () -> Unit = {},
     viewModel: NutritionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -94,6 +100,7 @@ fun NutritionScreen(
                     TargetMissing.SEX, TargetMissing.BIRTH_DATE -> onOpenSettings()
                 }
             },
+            onOpenReminders = onOpenReminders,
         ),
         modifier = modifier,
     )
@@ -104,9 +111,20 @@ fun NutritionContent(state: NutritionUiState, actions: NutritionActions, modifie
     TabScreen(
         title = stringResource(R.string.nav_nutrition),
         modifier = modifier,
-        actions = { if (!state.loading) DaySwitcher(state, actions) },
+        actions = {
+            // Same quiet bell as Home's: opens the meal and water reminders.
+            IconButton(onClick = actions.onOpenReminders) {
+                Icon(
+                    Icons.Rounded.NotificationsNone,
+                    contentDescription = stringResource(R.string.nutrition_reminders_title),
+                    tint = MyFitTheme.colors.textSecondary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        },
     ) {
         if (state.loading) return@TabScreen
+        DaySwitcher(state, actions)
         WaterCard(state, actions)
         CaloriesCard(state, actions)
         SectionHeader(stringResource(R.string.nutrition_meals), Modifier.padding(top = Spacing.s))
@@ -118,19 +136,28 @@ fun NutritionContent(state: NutritionUiState, actions: NutritionActions, modifie
     }
 }
 
+/** "‹ Today ›" on its own row under the title (the header keeps room for the big title and the bell). */
 @Composable
 private fun DaySwitcher(state: NutritionUiState, actions: NutritionActions) {
     val c = MyFitTheme.colors
-    IconButton(onClick = actions.onPreviousDay) {
-        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = stringResource(R.string.nutrition_previous_day), tint = c.textSecondary)
-    }
-    Text(dayLabel(state.date, state.today), style = MyFitTheme.type.label, color = c.textPrimary)
-    IconButton(onClick = actions.onNextDay, enabled = state.canGoForward) {
-        Icon(
-            Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-            contentDescription = stringResource(R.string.nutrition_next_day),
-            tint = if (state.canGoForward) c.textSecondary else c.textTertiary.copy(alpha = 0.4f),
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = actions.onPreviousDay) {
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = stringResource(R.string.nutrition_previous_day), tint = c.textSecondary)
+        }
+        Text(
+            dayLabel(state.date, state.today),
+            style = MyFitTheme.type.bodyStrong,
+            color = c.textPrimary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f),
         )
+        IconButton(onClick = actions.onNextDay, enabled = state.canGoForward) {
+            Icon(
+                Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                contentDescription = stringResource(R.string.nutrition_next_day),
+                tint = if (state.canGoForward) c.textSecondary else c.textTertiary.copy(alpha = 0.4f),
+            )
+        }
     }
 }
 
