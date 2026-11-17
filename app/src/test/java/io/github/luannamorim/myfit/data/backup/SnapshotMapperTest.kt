@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.data.backup
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.luannamorim.myfit.domain.backup.ActivityDto
 import io.github.luannamorim.myfit.domain.backup.AssessmentDto
 import io.github.luannamorim.myfit.domain.backup.BackupArchive
 import io.github.luannamorim.myfit.domain.backup.BackupDataV1
@@ -29,6 +30,9 @@ class SnapshotMapperTest {
         val exported = SnapshotMapper.export(env.db)
         assertTrue(exported.counts().values.all { it > 0 })
         assertEquals(1, exported.counts()["activities"])
+        assertEquals(2, exported.counts()["waterEntries"])
+        assertEquals(1, exported.counts()["meals"])
+        assertEquals("Pão com ovo", exported.meals.single().description)
         assertEquals("HIGH", exported.sessions.first { it.status == "FINISHED" }.intensity)
         assertEquals(178.0, exported.assessments.single().heightCm!!, 0.0)
 
@@ -44,6 +48,13 @@ class SnapshotMapperTest {
         // Older manifests have no "activities" key; the check compares maps exactly.
         val before = setOf("exercises", "routines", "routineExercises", "sessions", "sessionExercises", "sessionSets", "assessments", "photos")
         assertEquals(before, BackupDataV1().counts().keys)
+    }
+
+    @Test
+    fun counts_ofBackupsWithoutNutrition_matchManifestsWrittenBeforeVersion8() {
+        // Backups made before 1.8.0 have no "waterEntries"/"meals" keys in their manifest.
+        val withActivity = BackupDataV1(activities = listOf(ActivityDto(id = 1, sport = "SWIMMING", dateEpochDay = 1, durationMinutes = 30, createdAtMs = 0)))
+        assertEquals(setOf("activities"), withActivity.counts().keys - BackupDataV1().counts().keys)
     }
 
     @Test

@@ -7,10 +7,12 @@ import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyAssessmentEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyPhotoEntity
 import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
+import io.github.luannamorim.myfit.data.db.entity.MealEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionSetEntity
+import io.github.luannamorim.myfit.data.db.entity.WaterEntryEntity
 import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
 import io.github.luannamorim.myfit.data.db.seed.ExerciseSeed
 import io.github.luannamorim.myfit.domain.backup.ActivityDto
@@ -18,12 +20,14 @@ import io.github.luannamorim.myfit.domain.backup.AssessmentDto
 import io.github.luannamorim.myfit.domain.backup.BackupDataV1
 import io.github.luannamorim.myfit.domain.backup.ExerciseDto
 import io.github.luannamorim.myfit.domain.backup.MarkDto
+import io.github.luannamorim.myfit.domain.backup.MealDto
 import io.github.luannamorim.myfit.domain.backup.PhotoDto
 import io.github.luannamorim.myfit.domain.backup.RoutineDto
 import io.github.luannamorim.myfit.domain.backup.RoutineExerciseDto
 import io.github.luannamorim.myfit.domain.backup.SessionDto
 import io.github.luannamorim.myfit.domain.backup.SessionExerciseDto
 import io.github.luannamorim.myfit.domain.backup.SessionSetDto
+import io.github.luannamorim.myfit.domain.backup.WaterEntryDto
 import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.Intensity
 
@@ -41,6 +45,8 @@ object SnapshotMapper {
             assessments = db.bodyDao().getAllAssessments().map { it.toDto() },
             photos = db.bodyDao().getAllPhotos().map { it.toDto() },
             activities = db.activityDao().getAll().map { it.toDto() },
+            waterEntries = db.nutritionDao().getAllWater().map { it.toDto() },
+            meals = db.nutritionDao().getAllMeals().map { it.toDto() },
         )
     }
 
@@ -60,6 +66,8 @@ object SnapshotMapper {
             dao.clearPhotos()
             dao.clearAssessments()
             dao.clearActivities()
+            dao.clearWater()
+            dao.clearMeals()
 
             dao.insertExercises(data.exercises.map { it.toEntity() })
             dao.insertRoutines(data.routines.map { it.toEntity() })
@@ -70,6 +78,8 @@ object SnapshotMapper {
             dao.insertAssessments(data.assessments.map { it.toEntity() })
             dao.insertPhotos(data.photos.map { it.toEntity() })
             dao.insertActivities(data.activities.map { it.toEntity() })
+            dao.insertWater(data.waterEntries.map { it.toEntity() })
+            dao.insertMeals(data.meals.map { it.toEntity() })
             ExerciseSeed.linkKeys(db.openHelper.writableDatabase)
         }
     }
@@ -130,6 +140,12 @@ object SnapshotMapper {
         id, enumOf(sport), name, dateEpochDay, durationMinutes, distanceKm,
         intensity?.let { name -> Intensity.entries.firstOrNull { it.name == name } }, notes, imagePath, createdAtMs,
     )
+
+    private fun WaterEntryEntity.toDto() = WaterEntryDto(id, dateEpochDay, ml, createdAtMs)
+    private fun WaterEntryDto.toEntity() = WaterEntryEntity(id, dateEpochDay, ml, createdAtMs)
+
+    private fun MealEntity.toDto() = MealDto(id, dateEpochDay, minuteOfDay, description, kcal, createdAtMs)
+    private fun MealDto.toEntity() = MealEntity(id, dateEpochDay, minuteOfDay, description, kcal, createdAtMs)
 
     /** Unknown values (a newer app) fall back to repetitions instead of failing the restore. */
     private fun measureOf(name: String) = ExerciseMeasure.entries.firstOrNull { it.name == name } ?: ExerciseMeasure.REPS

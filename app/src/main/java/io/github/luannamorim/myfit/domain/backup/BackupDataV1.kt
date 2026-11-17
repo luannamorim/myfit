@@ -17,6 +17,8 @@ data class BackupDataV1(
     val assessments: List<AssessmentDto> = emptyList(),
     val photos: List<PhotoDto> = emptyList(),
     val activities: List<ActivityDto> = emptyList(),
+    val waterEntries: List<WaterEntryDto> = emptyList(),
+    val meals: List<MealDto> = emptyList(),
 ) {
     fun counts(): Map<String, Int> = mapOf(
         "exercises" to exercises.size,
@@ -30,6 +32,11 @@ data class BackupDataV1(
     ) + (
         // Only when present, so backups made before activities existed still match their manifest.
         if (activities.isEmpty()) emptyMap() else mapOf("activities" to activities.size)
+    ) + (
+        // Same for the nutrition log (since 1.8.0).
+        if (waterEntries.isEmpty()) emptyMap() else mapOf("waterEntries" to waterEntries.size)
+    ) + (
+        if (meals.isEmpty()) emptyMap() else mapOf("meals" to meals.size)
     )
 
     /** Every image path referenced by the data (relative to filesDir). */
@@ -101,3 +108,9 @@ data class ActivityDto(
     val distanceKm: Double? = null, val intensity: String? = null, val notes: String? = null, val imagePath: String? = null,
     val createdAtMs: Long,
 )
+
+@Serializable
+data class WaterEntryDto(val id: Long, val dateEpochDay: Long, val ml: Int, val createdAtMs: Long)
+
+@Serializable
+data class MealDto(val id: Long, val dateEpochDay: Long, val minuteOfDay: Int, val description: String? = null, val kcal: Int, val createdAtMs: Long)

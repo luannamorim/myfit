@@ -3,12 +3,14 @@ package io.github.luannamorim.myfit.testutil
 import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyAssessmentEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyPhotoEntity
+import io.github.luannamorim.myfit.data.db.entity.MealEntity
+import io.github.luannamorim.myfit.data.db.entity.WaterEntryEntity
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Intensity
 import io.github.luannamorim.myfit.domain.model.PhotoPose
 import io.github.luannamorim.myfit.domain.session.SessionEngine
 
-/** Fills every table: routine + finished session + active session + assessment + photo. */
+/** Fills every table: routine + finished session + active session + assessment + photo + activity + meal + water. */
 suspend fun SessionEnv.populateEverything(imagePaths: List<String> = emptyList(), sessionImage: String? = null, activityImage: String? = null) {
     startWorkout(2, 1)
     var s = repo.getActive()!!
@@ -25,4 +27,7 @@ suspend fun SessionEnv.populateEverything(imagePaths: List<String> = emptyList()
             intensity = Intensity.MEDIUM, notes = "piscina", imagePath = activityImage, createdAtMs = 4,
         ),
     )
+    db.nutritionDao().insertWater(WaterEntryEntity(dateEpochDay = 20_401, ml = 250, createdAtMs = 5))
+    db.nutritionDao().insertWater(WaterEntryEntity(dateEpochDay = 20_401, ml = 500, createdAtMs = 6))
+    db.nutritionDao().insertMeal(MealEntity(dateEpochDay = 20_401, minuteOfDay = 480, description = "Pão com ovo", kcal = 320, createdAtMs = 7))
 }

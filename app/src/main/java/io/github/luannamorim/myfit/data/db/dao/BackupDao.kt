@@ -7,10 +7,12 @@ import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyAssessmentEntity
 import io.github.luannamorim.myfit.data.db.entity.BodyPhotoEntity
 import io.github.luannamorim.myfit.data.db.entity.ExerciseEntity
+import io.github.luannamorim.myfit.data.db.entity.MealEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineEntity
 import io.github.luannamorim.myfit.data.db.entity.RoutineExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionExerciseEntity
 import io.github.luannamorim.myfit.data.db.entity.SessionSetEntity
+import io.github.luannamorim.myfit.data.db.entity.WaterEntryEntity
 import io.github.luannamorim.myfit.data.db.entity.WorkoutSessionEntity
 
 /** Bulk operations used only by backup/restore (always inside a transaction). */
@@ -25,6 +27,8 @@ interface BackupDao {
     @Query("DELETE FROM body_photo") suspend fun clearPhotos()
     @Query("DELETE FROM body_assessment") suspend fun clearAssessments()
     @Query("DELETE FROM activity") suspend fun clearActivities()
+    @Query("DELETE FROM water_entry") suspend fun clearWater()
+    @Query("DELETE FROM meal") suspend fun clearMeals()
 
     @Insert suspend fun insertExercises(items: List<ExerciseEntity>)
     @Insert suspend fun insertRoutines(items: List<RoutineEntity>)
@@ -35,4 +39,6 @@ interface BackupDao {
     @Insert suspend fun insertAssessments(items: List<BodyAssessmentEntity>)
     @Insert suspend fun insertPhotos(items: List<BodyPhotoEntity>)
     @Insert suspend fun insertActivities(items: List<ActivityEntity>)
+    @Insert suspend fun insertWater(items: List<WaterEntryEntity>)
+    @Insert suspend fun insertMeals(items: List<MealEntity>)
 }
