@@ -135,20 +135,21 @@ class HistoryContentTest {
     }
 
     @Test
-    fun summary_showsWeightLifted_insteadOfFrequency() {
+    fun summary_keepsFrequency_noWeightLiftedTile() {
         compose.setContent {
             MyFitTheme(ThemeMode.DARK) {
                 HistoryContent(
                     state = HistoryUiState(
                         month = YearMonth.of(2026, 11), today = day, selected = day, summaryRange = week, isLoading = false,
-                        summary = PeriodSummary(3, 120 * 60_000L, 3.0, emptyList(), volumeKg = 12480.0),
+                        summary = PeriodSummary(3, 120 * 60_000L, 3.0, emptyList()),
                     ),
                     onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
                 )
             }
         }
-        compose.onNodeWithText("Peso levantado").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("12.480").assertIsDisplayed()
-        compose.onNodeWithText("Frequência").assertDoesNotExist()
+        // User's call: "Frequency" stays; the weight-lifted tile tried in its place was dropped.
+        compose.onNodeWithText("Frequência").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("3,0×/sem").assertIsDisplayed()
+        compose.onNodeWithText("Peso levantado").assertDoesNotExist()
     }
 }

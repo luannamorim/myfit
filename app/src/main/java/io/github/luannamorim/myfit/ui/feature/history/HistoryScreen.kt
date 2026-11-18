@@ -19,7 +19,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.dp
 import io.github.luannamorim.myfit.R
-import io.github.luannamorim.myfit.core.format.formatThousands
+import io.github.luannamorim.myfit.core.format.formatOneDecimal
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
@@ -107,8 +107,11 @@ fun HistoryContent(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
             StatTile(stringResource(R.string.history_total_time), Durations.human(s.totalDurationMs), Modifier.weight(1f))
-            // Replaces "Frequency" (user request, 1.15.0): kg × reps of the sets done in the period.
-            StatTile(stringResource(R.string.history_volume), formatThousands(s.volumeKg), Modifier.weight(1f), unit = "kg")
+            StatTile(
+                stringResource(R.string.history_frequency),
+                stringResource(R.string.history_frequency_value, formatOneDecimal(s.avgPerWeek)),
+                Modifier.weight(1f),
+            )
         }
         // Food and water days on target in the period (user-approved mockup, 1.15.0), in the kinds' colors.
         if (state.periodFood != null && state.periodWater != null) {

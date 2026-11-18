@@ -647,5 +647,6 @@
         <item quantity="many">dias</item>
         <item quantity="other">dias</item>
     </plurals>
-    <string name="history_volume">Peso levantado</string>
+    <string name="history_frequency">Frequência</string>
+    <string name="history_frequency_value">%1$s×/sem</string>
 </resources>

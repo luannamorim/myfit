@@ -41,12 +41,6 @@ class HistoryRepositoryTest {
     }
 
     @Test
-    fun summary_carriesTheWeightLifted_ofTheSetsDone() = runBlocking {
-        finishedWorkout() // one set of 12 × 40 kg done, one skipped
-        assertEquals(480.0, history.observeSummaries(today()..today()).first().single().volumeKg, 0.0)
-    }
-
-    @Test
     fun summaries_filteredByRange() = runBlocking {
         finishedWorkout()
         assertEquals(1, history.observeSummaries(today()..today()).first().size)

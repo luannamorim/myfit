@@ -612,5 +612,6 @@
         <item quantity="one">day</item>
         <item quantity="other">days</item>
     </plurals>
-    <string name="history_volume">Weight lifted</string>
+    <string name="history_frequency">Frequency</string>
+    <string name="history_frequency_value">%1$s×/wk</string>
 </resources>
