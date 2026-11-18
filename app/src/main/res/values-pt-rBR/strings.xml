@@ -642,11 +642,8 @@
     <string name="history_food_on_target">Comida na meta</string>
     <string name="history_water_on_target">Água na meta</string>
     <string name="history_days_on_target">%1$d/%2$d</string>
-    <plurals name="history_days_unit">
-        <item quantity="one">dia</item>
-        <item quantity="many">dias</item>
-        <item quantity="other">dias</item>
-    </plurals>
     <string name="history_frequency">Frequência</string>
     <string name="history_frequency_value">%1$s×/sem</string>
+    <string name="history_day_unit">dia</string>
+    <string name="history_days_unit">dias</string>
 </resources>

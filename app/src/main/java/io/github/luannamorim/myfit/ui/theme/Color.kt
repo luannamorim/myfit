@@ -26,6 +26,8 @@ data class MyFitColors(
     /** Kind colors (user request, 1.14.0): calorie target hit (orange) and water target hit (blue); workouts use [accent]. */
     val food: Color,
     val water: Color,
+    /** BMI / body-fat "caution" dot: yellow, told apart from [food] orange and [warning] amber (user request, 1.15.0). */
+    val caution: Color,
     val isDark: Boolean,
 )
 
@@ -45,6 +47,7 @@ val DarkColors = MyFitColors(
     warning = Color(0xFFF5A524),
     food = Color(0xFFFF8A3D),
     water = Color(0xFF4DA3FF),
+    caution = Color(0xFFFACC15),
     isDark = true,
 )
 
@@ -64,6 +67,7 @@ val LightColors = MyFitColors(
     warning = Color(0xFFB45309),
     food = Color(0xFFC2410C),
     water = Color(0xFF1D6FD1),
+    caution = Color(0xFFA16207),
     isDark = false,
 )
 

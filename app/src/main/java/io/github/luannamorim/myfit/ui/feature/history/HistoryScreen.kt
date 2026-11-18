@@ -20,7 +20,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.dp
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.formatOneDecimal
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.outlined.WaterDrop
@@ -180,7 +179,8 @@ private fun DaysOnTargetTile(label: String, icon: ImageVector, tint: Color, valu
     StatTile(
         label = label,
         value = stringResource(R.string.history_days_on_target, value.hit, value.days),
-        unit = pluralStringResource(R.plurals.history_days_unit, value.days),
+        // Two plain strings: a Portuguese plural without the number is a lint error ("one" also covers 0).
+        unit = stringResource(if (value.days == 1) R.string.history_day_unit else R.string.history_days_unit),
         icon = icon,
         iconTint = tint,
         modifier = modifier,

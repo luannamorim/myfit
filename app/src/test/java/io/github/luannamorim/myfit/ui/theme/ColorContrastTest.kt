@@ -33,6 +33,8 @@ class ColorContrastTest {
         assertContrast("$p water/surface", colors.water, colors.surface, 3.0)
         assertContrast("$p onAccent/food", colors.onAccent, colors.food, 4.5)
         assertContrast("$p onAccent/water", colors.onAccent, colors.water, 4.5)
+        // Caution status dot (BMI, body fat): yellow, told apart from the food orange (user request, 1.15.0).
+        assertContrast("$p caution/surface", colors.caution, colors.surface, 3.0)
     }
 
     @Test

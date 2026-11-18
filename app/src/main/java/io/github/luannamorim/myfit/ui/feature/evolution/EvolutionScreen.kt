@@ -262,7 +262,7 @@ private const val EMPTY_VALUE = "—"
 @Composable
 internal fun BodyStatus.color(): Color = when (this) {
     BodyStatus.GOOD -> MyFitTheme.colors.accent
-    BodyStatus.CAUTION -> MyFitTheme.colors.warning
+    BodyStatus.CAUTION -> MyFitTheme.colors.caution
     BodyStatus.POOR -> MyFitTheme.colors.danger
 }
 
