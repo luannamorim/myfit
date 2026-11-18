@@ -116,22 +116,16 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun nutrition_ofTheSelectedDay_andOfEachDayInThePeriod() = runBlocking {
+    fun nutrition_ofTheSelectedDay_andTheCalendarDaysOnTarget() = runBlocking {
         val today = env.time.today()
         body.save(BodyAssessment(date = today.minusDays(10), values = mapOf(Measure.WEIGHT to 80.0)))
         nutrition.addWater(today, 3000) // 2.8 L target: hit
         nutrition.addWater(today.minusDays(1), 1000) // missed
 
         val vm = viewModel()
-        val state = vm.state.awaitUntil { !it.isLoading && it.dayNutrition?.day?.waterMl == 3000 && it.periodNutrition.isNotEmpty() }
+        val state = vm.state.awaitUntil { !it.isLoading && it.dayNutrition?.day?.waterMl == 3000 && today in it.waterOnTarget }
         assertEquals(2800, state.dayNutrition!!.targets.waterMl)
-        assertEquals(HistoryCalculator.weekOf(today).let { (it.start.toEpochDay()..it.endInclusive.toEpochDay()).count() }, state.periodNutrition.size)
-        val byDate = state.periodNutrition.associateBy { it.day.date }
-        assertEquals(3000, byDate[today]!!.day.waterMl)
-        if (today.minusDays(1) in HistoryCalculator.weekOf(today)) assertEquals(1000, byDate[today.minusDays(1)]!!.day.waterMl)
-
-        vm.setPeriod(SummaryPeriod.MONTH)
-        val month = vm.state.awaitUntil { it.period == SummaryPeriod.MONTH && it.periodNutrition.size >= 28 }
-        assertEquals(HistoryCalculator.monthOf(java.time.YearMonth.from(today)).start, month.periodNutrition.first().day.date)
+        assertTrue(today.minusDays(1) !in state.waterOnTarget) // 1 L of 2.8: missed
+        assertTrue(state.foodOnTarget.isEmpty()) // no meals logged
     }
 }

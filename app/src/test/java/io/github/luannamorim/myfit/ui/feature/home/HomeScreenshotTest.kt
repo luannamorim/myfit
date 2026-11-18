@@ -117,6 +117,13 @@ class HomeScreenshotTest {
 
     private fun week(trained: Set<LocalDate>, sessions: Int, ms: Long): WeekStrip {
         val range = HistoryCalculator.weekOf(today)
-        return WeekStrip((0L..6L).map { range.start.plusDays(it) }.map { DayMark(it, it in trained, it == today) }, sessions, ms)
+        // Food and water on target on most past days, so the screenshot shows the three rows.
+        return WeekStrip(
+            (0L..6L).map { range.start.plusDays(it) }.map {
+                DayMark(it, it in trained, it == today, ateOnTarget = !it.isAfter(today) && it.dayOfMonth % 3 != 0, drankOnTarget = !it.isAfter(today) && it.dayOfMonth % 2 == 0)
+            },
+            sessions,
+            ms,
+        )
     }
 }

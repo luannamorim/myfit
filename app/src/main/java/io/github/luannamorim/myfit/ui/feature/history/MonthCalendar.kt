@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -44,7 +49,10 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 
-/** Monday-first month grid. Trained days get an accent dot; swipe or arrows change month. */
+/**
+ * Monday-first month grid. Up to three accent dots per day, always in the same order: workout or activity,
+ * calorie target hit, water target hit (legend below). Swipe or arrows change month.
+ */
 @Composable
 fun MonthCalendar(
     month: YearMonth,
@@ -54,6 +62,8 @@ fun MonthCalendar(
     onSelect: (LocalDate) -> Unit,
     onMonthChange: (YearMonth) -> Unit,
     modifier: Modifier = Modifier,
+    foodDays: Set<LocalDate> = emptySet(),
+    waterDays: Set<LocalDate> = emptySet(),
 ) {
     val c = MyFitTheme.colors
     var drag by remember { mutableFloatStateOf(0f) }
@@ -99,13 +109,35 @@ fun MonthCalendar(
                         inMonth = YearMonth.from(date) == month,
                         isSelected = date == selected,
                         isToday = date == today,
-                        hasSession = date in marked,
+                        workout = date in marked,
+                        food = date in foodDays,
+                        water = date in waterDays,
                         onClick = { onSelect(date) },
                         modifier = Modifier.weight(1f),
                     )
                     day = day.plusDays(1)
                 }
             }
+        }
+        CalendarLegend()
+    }
+}
+
+@Composable
+private fun CalendarLegend() {
+    val c = MyFitTheme.colors
+    Row(Modifier.fillMaxWidth().padding(top = Spacing.s), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        listOf(
+            Icons.Outlined.FitnessCenter to R.string.calendar_legend_workout,
+            Icons.Outlined.Restaurant to R.string.calendar_legend_food,
+            Icons.Outlined.WaterDrop to R.string.calendar_legend_water,
+        ).forEachIndexed { i, (icon, label) ->
+            if (i > 0) Spacer(Modifier.width(Spacing.m))
+            Box(Modifier.size(5.dp).clip(MyFitShapes.pill).background(c.accent))
+            Spacer(Modifier.width(4.dp))
+            Icon(icon, contentDescription = null, tint = c.textTertiary, modifier = Modifier.size(14.dp))
+            Spacer(Modifier.width(3.dp))
+            Text(stringResource(label), style = MyFitTheme.type.caption, color = c.textTertiary)
         }
     }
 }
@@ -116,12 +148,21 @@ private fun DayCell(
     inMonth: Boolean,
     isSelected: Boolean,
     isToday: Boolean,
-    hasSession: Boolean,
+    workout: Boolean,
+    food: Boolean,
+    water: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val c = MyFitTheme.colors
-    val description = if (hasSession) stringResource(R.string.calendar_has_workout, Dates.long(date)) else Dates.long(date)
+    val description = (
+        listOf(Dates.long(date)) +
+            listOfNotNull(
+                stringResource(R.string.calendar_part_workout).takeIf { workout },
+                stringResource(R.string.calendar_part_food).takeIf { food },
+                stringResource(R.string.calendar_part_water).takeIf { water },
+            )
+        ).joinToString(", ")
     Box(
         modifier
             .aspectRatio(1f)
@@ -146,13 +187,17 @@ private fun DayCell(
                     else -> c.textPrimary
                 },
             )
-            Box(
-                Modifier
-                    .padding(top = 3.dp)
-                    .size(5.dp)
-                    .clip(MyFitShapes.pill)
-                    .background(if (hasSession) (if (isSelected) c.background else c.accent) else androidx.compose.ui.graphics.Color.Transparent),
-            )
+            // Fixed slots, so a dot's place says what it is (see the legend).
+            Row(Modifier.padding(top = 3.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                listOf(workout, food, water).forEach { on ->
+                    Box(
+                        Modifier
+                            .size(5.dp)
+                            .clip(MyFitShapes.pill)
+                            .background(if (on) (if (isSelected) c.background else c.accent) else androidx.compose.ui.graphics.Color.Transparent),
+                    )
+                }
+            }
         }
     }
 }

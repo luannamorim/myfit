@@ -19,6 +19,7 @@ import io.github.luannamorim.myfit.domain.body.BodySnapshot
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.Reminder
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoals
 import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.reminder.ReminderSchedule
@@ -52,7 +53,14 @@ enum class Greeting { MORNING, AFTERNOON, EVENING;
     }
 }
 
-data class DayMark(val date: LocalDate, val trained: Boolean, val isToday: Boolean)
+/** A day of Home's week: a workout or activity done, and the calorie and water targets hit. */
+data class DayMark(
+    val date: LocalDate,
+    val trained: Boolean,
+    val isToday: Boolean,
+    val ateOnTarget: Boolean = false,
+    val drankOnTarget: Boolean = false,
+)
 
 /** [totalDurationMs] counts workouts and logged activities. */
 data class WeekStrip(val days: List<DayMark>, val sessions: Int, val totalDurationMs: Long, val activities: Int = 0)
@@ -150,12 +158,12 @@ class HomeViewModel @Inject constructor(
         return combine(
             combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged()) { r, rem -> r to rem },
             combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
-            nutrition.observe(today),
+            combine(nutrition.observe(today), nutrition.observeRange(week)) { n, days -> n to days.associateBy { it.day.date } },
             combine(controller.active, liveActivity.live) { a, l -> a to l },
             combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
                 BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(raw, sex)), sex)
             },
-        ) { (list, reminders), (weekSessions, weekActivities), nutritionToday, (active, live), bodySnapshot ->
+        ) { (list, reminders), (weekSessions, weekActivities), (nutritionToday, weekNutrition), (active, live), bodySnapshot ->
             val now = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone())
             val scheduled = scheduledRoutine(list, reminders, now)
             val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
@@ -173,7 +181,16 @@ class HomeViewModel @Inject constructor(
                 body = bodySnapshot,
                 nutrition = nutritionToday,
                 week = WeekStrip(
-                    days = (0L..6L).map { week.start.plusDays(it) }.map { DayMark(it, it in trainedDays, it == today) },
+                    days = (0L..6L).map { week.start.plusDays(it) }.map { d ->
+                        val n = weekNutrition[d]
+                        DayMark(
+                            date = d,
+                            trained = d in trainedDays,
+                            isToday = d == today,
+                            ateOnTarget = n != null && NutritionGoals.kcalHit(n.day, n.targets, n.goal) == true,
+                            drankOnTarget = n != null && NutritionGoals.waterHit(n.day, n.targets) == true,
+                        )
+                    },
                     sessions = weekSessions.size,
                     totalDurationMs = weekSessions.sumOf { it.durationMs } + weekActivities.sumOf { it.durationMs },
                     activities = weekActivities.size,

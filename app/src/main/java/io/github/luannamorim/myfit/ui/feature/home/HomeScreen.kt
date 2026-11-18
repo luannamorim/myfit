@@ -42,6 +42,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.alpha
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.annotation.StringRes
 import io.github.luannamorim.myfit.ui.common.activityTitle
 import java.time.LocalTime
 import androidx.compose.ui.semantics.Role
@@ -285,28 +294,26 @@ private fun RoutineTile(routine: RoutineOverview, todayEpochDay: Long, actions: 
 @Composable
 private fun WeekCard(state: HomeUiState, onClick: () -> Unit) {
     val c = MyFitTheme.colors
+    val days = state.week.days
     MyFitCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            state.week.days.forEach { day ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // One row per kind (icon at the start), one green check per day done (user-approved mockup, 1.13.0).
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.width(WEEK_ICON_COLUMN))
+            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceBetween) {
+                days.forEach { day ->
                     Text(
                         Dates.weekdayNarrow(day.date.dayOfWeek).uppercase(),
                         style = MyFitTheme.type.overline,
                         color = if (day.isToday) c.textPrimary else c.textTertiary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(WEEK_CHECK),
                     )
-                    Box(
-                        Modifier
-                            .size(28.dp)
-                            .clip(MyFitShapes.pill)
-                            .background(if (day.trained) c.accent else c.surfaceRaised)
-                            .then(if (day.isToday && !day.trained) Modifier.border(BorderStroke(1.dp, c.outlineStrong), MyFitShapes.pill) else Modifier),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (day.trained) Icon(Icons.Rounded.Check, contentDescription = null, tint = c.onAccent, modifier = Modifier.size(16.dp))
-                    }
                 }
             }
         }
+        WeekRow(Icons.Outlined.FitnessCenter, days, R.string.home_week_workout, state.today) { it.trained }
+        WeekRow(Icons.Outlined.Restaurant, days, R.string.home_week_food, state.today) { it.ateOnTarget }
+        WeekRow(Icons.Outlined.WaterDrop, days, R.string.home_week_water, state.today) { it.drankOnTarget }
         Spacer(Modifier.height(Spacing.m))
         Text(
             stringResource(
@@ -324,6 +331,38 @@ private fun WeekCard(state: HomeUiState, onClick: () -> Unit) {
         )
     }
 }
+
+@Composable
+private fun WeekRow(icon: ImageVector, days: List<DayMark>, @StringRes doneLabel: Int, today: LocalDate, done: (DayMark) -> Boolean) {
+    val c = MyFitTheme.colors
+    Row(Modifier.fillMaxWidth().padding(top = Spacing.s), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.width(WEEK_ICON_COLUMN)) {
+            Icon(icon, contentDescription = null, tint = c.textSecondary, modifier = Modifier.size(18.dp))
+        }
+        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceBetween) {
+            days.forEach { day ->
+                val isDone = done(day)
+                val label = if (isDone) stringResource(doneLabel, Dates.long(day.date)) else null
+                Box(
+                    Modifier
+                        .alpha(if (day.date.isAfter(today)) FUTURE_ALPHA else 1f)
+                        .size(WEEK_CHECK)
+                        .clip(MyFitShapes.pill)
+                        .background(if (isDone) c.accent else c.surfaceRaised)
+                        .then(if (day.isToday && !isDone) Modifier.border(BorderStroke(1.dp, c.outlineStrong), MyFitShapes.pill) else Modifier)
+                        .then(if (label != null) Modifier.semantics { contentDescription = label } else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isDone) Icon(Icons.Rounded.Check, contentDescription = null, tint = c.onAccent, modifier = Modifier.size(16.dp))
+                }
+            }
+        }
+    }
+}
+
+private val WEEK_CHECK = 28.dp
+private val WEEK_ICON_COLUMN = 30.dp
+private const val FUTURE_ALPHA = 0.45f
 
 /** Placeholder until body assessments exist (filled by the Evolution stage). */
 @Composable

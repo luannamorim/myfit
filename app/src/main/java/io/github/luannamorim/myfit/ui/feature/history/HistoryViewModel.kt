@@ -9,6 +9,7 @@ import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.NutritionTracker
 import io.github.luannamorim.myfit.domain.activity.Activity
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoals
 import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.PeriodSummary
@@ -43,8 +44,9 @@ data class HistoryUiState(
     val isLoading: Boolean = true,
     /** The selected day's nutrition log against its targets. */
     val dayNutrition: NutritionStatus? = null,
-    /** Every day of [summaryRange], for "days on target". */
-    val periodNutrition: List<NutritionStatus> = emptyList(),
+    /** Calendar dots: days that hit the calorie target and the water target. */
+    val foodOnTarget: Set<LocalDate> = emptySet(),
+    val waterOnTarget: Set<LocalDate> = emptySet(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,11 +73,11 @@ class HistoryViewModel @Inject constructor(
         combine(history.observeSummaries(range), activities.observe(range)) { s, a -> s to a }
     }
 
-    private val nutrition = combine(month, selected, period) { m, d, p -> d to rangeOf(p, d, m) }
+    private val nutrition = combine(selected, queryRange) { d, range -> d to range }
         .distinctUntilChanged()
         .flatMapLatest { (d, range) -> combine(tracker.observe(d), tracker.observeRange(range)) { day, days -> day to days } }
 
-    val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions, nutrition) { m, d, p, (items, logged), (dayNutrition, periodNutrition) ->
+    val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions, nutrition) { m, d, p, (items, logged), (dayNutrition, gridNutrition) ->
         val range = rangeOf(p, d, m)
         val monthRange = HistoryCalculator.monthOf(m)
         HistoryUiState(
@@ -92,7 +94,8 @@ class HistoryViewModel @Inject constructor(
             summaryRange = range,
             isLoading = false,
             dayNutrition = dayNutrition,
-            periodNutrition = periodNutrition,
+            foodOnTarget = gridNutrition.filter { NutritionGoals.kcalHit(it.day, it.targets, it.goal) == true }.map { it.day.date }.toSet(),
+            waterOnTarget = gridNutrition.filter { NutritionGoals.waterHit(it.day, it.targets) == true }.map { it.day.date }.toSet(),
         )
     }.stateIn(
         viewModelScope,

@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.ui.feature.history
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -66,13 +67,13 @@ class HistoryContentTest {
         NutritionGoal.MAINTAIN,
     )
 
-    private fun show(period: SummaryPeriod, dayNutrition: NutritionStatus?, periodNutrition: List<NutritionStatus>) = compose.setContent {
+    private fun show(period: SummaryPeriod, dayNutrition: NutritionStatus?) = compose.setContent {
         MyFitTheme(ThemeMode.DARK) {
             HistoryContent(
                 state = HistoryUiState(
                     month = YearMonth.of(2026, 11), today = day, selected = day, period = period,
                     summaryRange = if (period == SummaryPeriod.WEEK) week else HistoryCalculator.monthOf(YearMonth.of(2026, 11)),
-                    dayNutrition = dayNutrition, periodNutrition = periodNutrition, isLoading = false,
+                    dayNutrition = dayNutrition, isLoading = false,
                 ),
                 onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
             )
@@ -81,39 +82,29 @@ class HistoryContentTest {
 
     @Test
     fun day_showsItsNutritionAgainstTheTargets() {
-        show(SummaryPeriod.WEEK, status(day, 2900, 2410), emptyList())
+        show(SummaryPeriod.WEEK, status(day, 2900, 2410))
         compose.onNodeWithText("2,9 / 2,8 L").assertIsDisplayed()
         compose.onNodeWithText("2.410 / 2.300 kcal").assertIsDisplayed()
         compose.onNodeWithText("Nada registrado neste dia.").assertDoesNotExist() // nutrition counts as something logged
     }
 
     @Test
-    fun week_countsTheDaysOnTarget_amongTheLoggedOnes() {
-        val days = (0L..6L).map { week.start.plusDays(it) }
-        val list = days.mapIndexed { i, d ->
-            when (i) {
-                0 -> status(d, 3000, 1500) // water hit, kcal missed
-                1 -> status(d, 2900, 2300) // both hit
-                2 -> status(d, 1000, 2400) // water missed, kcal hit
-                else -> status(d, 0, null) // nothing logged
+    fun calendar_marksWorkoutFoodAndWaterPerDay_withALegend() {
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                HistoryContent(
+                    state = HistoryUiState(
+                        month = YearMonth.of(2026, 11), today = day, selected = day,
+                        marked = setOf(day), foodOnTarget = setOf(day), waterOnTarget = setOf(day, day.minusDays(1)),
+                        summaryRange = week, isLoading = false,
+                    ),
+                    onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
+                )
             }
         }
-        show(SummaryPeriod.WEEK, null, list)
-        compose.onNodeWithText("Nutrição").performScrollTo().assertIsDisplayed()
-        compose.onAllNodesWithText("2/3").assertCountEquals(2)
-    }
-
-    @Test
-    fun month_saysHowManyDaysOnTarget() {
-        val month = HistoryCalculator.monthOf(YearMonth.of(2026, 11))
-        val list = (0L until 30L).map { month.start.plusDays(it) }.mapIndexed { i, d -> if (i < 4) status(d, if (i < 3) 3000 else 500, null) else status(d, 0, null) }
-        show(SummaryPeriod.MONTH, null, list)
-        compose.onNodeWithText("3 de 4 dias").performScrollTo().assertIsDisplayed()
-    }
-
-    @Test
-    fun nothingLoggedInThePeriod_hidesTheCard() {
-        show(SummaryPeriod.WEEK, null, (0L..6L).map { status(week.start.plusDays(it), 0, null) })
-        compose.onNodeWithText("Nutrição").assertDoesNotExist()
+        compose.onNodeWithContentDescription("com treino, calorias na meta, água na meta", substring = true).assertExists()
+        compose.onNodeWithContentDescription("segunda-feira, 16 de novembro, água na meta", substring = true).assertExists()
+        compose.onNodeWithText("comida").assertIsDisplayed()
+        compose.onNodeWithText("água").assertIsDisplayed()
     }
 }

@@ -68,15 +68,8 @@ class HistoryScreenshotTest {
                 summaryRange = HistoryCalculator.weekOf(today),
                 isLoading = false,
                 dayNutrition = nutrition(today, 2900, 2410),
-                periodNutrition = HistoryCalculator.weekOf(today).let { w ->
-                    (0L..6L).map { w.start.plusDays(it) }.map { d ->
-                        when {
-                            d.isAfter(today) -> nutrition(d, 0, null)
-                            d.dayOfMonth % 3 == 0 -> nutrition(d, 1200, 1700)
-                            else -> nutrition(d, 2900, 2300)
-                        }
-                    }
-                },
+                foodOnTarget = setOf(LocalDate.of(2026, 11, 2), LocalDate.of(2026, 11, 3), LocalDate.of(2026, 11, 9), today),
+                waterOnTarget = setOf(LocalDate.of(2026, 11, 2), LocalDate.of(2026, 11, 6), LocalDate.of(2026, 11, 10), today),
             ),
             onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
         )

@@ -61,6 +61,8 @@ fun HistoryContent(
             MonthCalendar(
                 month = state.month,
                 marked = state.marked,
+                foodDays = state.foodOnTarget,
+                waterDays = state.waterOnTarget,
                 selected = state.selected,
                 today = state.today,
                 onSelect = onSelect,
@@ -103,8 +105,6 @@ fun HistoryContent(
                 Modifier.weight(1f),
             )
         }
-        PeriodNutritionCard(state.periodNutrition, week = state.period == SummaryPeriod.WEEK)
-
         if (s.sports.isNotEmpty()) {
             MyFitCard {
                 Text(stringResource(R.string.history_sports), style = MyFitTheme.type.caption, color = c.textSecondary)

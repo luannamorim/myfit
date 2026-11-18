@@ -519,7 +519,6 @@
     <string name="a11y_back">Voltar</string>
     <string name="a11y_decrease">Diminuir %1$s</string>
     <string name="a11y_increase">Aumentar %1$s</string>
-    <string name="calendar_has_workout">%1$s, com treino</string>
     <string name="detail_set_done" tools:ignore="PluralsCandidate">%1$d reps%2$s</string>
     <string name="routine_copy_suffix">(cópia)</string>
     <!-- Reminders -->
@@ -633,12 +632,14 @@
     <string name="nutrition_use_recommended_kcal">Usar recomendado (%1$s kcal)</string>
     <string name="nutrition_kcal_edit">Editar meta de calorias</string>
     <string name="nutrition_reminders_meal_name_hint">ex.: Almoço</string>
-    <string name="history_nutrition_legend">● meta batida   ○ não bateu   · sem registro</string>
-    <string name="history_nutrition_hits">%1$d/%2$d</string>
     <string name="history_nutrition_hit">Meta batida</string>
-    <plurals name="history_nutrition_days">
-        <item quantity="one">%1$d de %2$d dia</item>
-        <item quantity="many">%1$d de %2$d dias</item>
-        <item quantity="other">%1$d de %2$d dias</item>
-    </plurals>
+    <string name="home_week_workout">Treino: %1$s</string>
+    <string name="home_week_food">Calorias na meta: %1$s</string>
+    <string name="home_week_water">Água na meta: %1$s</string>
+    <string name="calendar_part_workout">com treino</string>
+    <string name="calendar_part_food">calorias na meta</string>
+    <string name="calendar_part_water">água na meta</string>
+    <string name="calendar_legend_workout">treino</string>
+    <string name="calendar_legend_food">comida</string>
+    <string name="calendar_legend_water">água</string>
 </resources>

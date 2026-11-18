@@ -319,4 +319,21 @@ class HomeViewModelTest {
         assertEquals(listOf(second, first), state.todaySessions.map { it.id }) // latest first: the card used to show the first one
         assertEquals(listOf(Sport.SWIMMING), state.todayActivities.map { it.sport })
     }
+
+    @Test
+    fun week_marksTheDaysOnTargetForFoodAndWater() = runBlocking {
+        val today = env.time.today()
+        BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { })
+            .save(BodyAssessment(date = today.minusDays(3), values = mapOf(Measure.WEIGHT to 80.0, Measure.HEIGHT to 178.0)))
+        val settings = testSettings().apply { update { it.copy(sex = Sex.MALE, birthEpochDay = today.minusYears(30).toEpochDay()) } }
+        val nutrition = NutritionRepository(env.db, env.time, BackupTrigger { })
+        nutrition.addWater(today, 3000) // 2.8 L target
+        nutrition.saveMeal(Meal(date = today, minuteOfDay = 600, description = null, kcal = 2100)) // 2 120 target, maintain ±10 %
+
+        val state = homeViewModel(settings).state.awaitUntil { s -> !s.loading && s.week.days.any { it.drankOnTarget } }
+        val day = state.week.days.single { it.isToday }
+        assertTrue(day.ateOnTarget)
+        assertTrue(day.drankOnTarget)
+        assertEquals(1, state.week.days.count { it.ateOnTarget })
+    }
 }

@@ -487,7 +487,6 @@
     <string name="a11y_back">Back</string>
     <string name="a11y_decrease">Decrease %1$s</string>
     <string name="a11y_increase">Increase %1$s</string>
-    <string name="calendar_has_workout">%1$s, with workout</string>
     <string name="detail_set_done" tools:ignore="PluralsCandidate">%1$d reps%2$s</string>
     <string name="routine_copy_suffix">(copy)</string>
     <!-- Reminders -->
@@ -599,11 +598,14 @@
     <string name="nutrition_use_recommended_kcal">Use recommended (%1$s kcal)</string>
     <string name="nutrition_kcal_edit">Edit calorie target</string>
     <string name="nutrition_reminders_meal_name_hint">e.g. Lunch</string>
-    <string name="history_nutrition_legend">● target hit   ○ missed   · nothing logged</string>
-    <string name="history_nutrition_hits">%1$d/%2$d</string>
     <string name="history_nutrition_hit">Target hit</string>
-    <plurals name="history_nutrition_days">
-        <item quantity="one">%1$d of %2$d day</item>
-        <item quantity="other">%1$d of %2$d days</item>
-    </plurals>
+    <string name="home_week_workout">Workout: %1$s</string>
+    <string name="home_week_food">Calories on target: %1$s</string>
+    <string name="home_week_water">Water on target: %1$s</string>
+    <string name="calendar_part_workout">with workout</string>
+    <string name="calendar_part_food">calories on target</string>
+    <string name="calendar_part_water">water on target</string>
+    <string name="calendar_legend_workout">workout</string>
+    <string name="calendar_legend_food">food</string>
+    <string name="calendar_legend_water">water</string>
 </resources>
