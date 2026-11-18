@@ -283,6 +283,9 @@
     <string name="home_afternoon">Boa tarde</string>
     <string name="home_evening">Boa noite</string>
     <string name="home_today_done">Treino de hoje concluído</string>
+    <string name="home_today_done_activity">Atividade de hoje concluída</string>
+    <string name="home_today_count">Hoje: %1$s</string>
+    <string name="home_today_total">%1$s no total</string>
     <string name="home_next">Próximo treino</string>
     <string name="home_next_at">%1$s às %2$s</string>
     <string name="home_start">Iniciar treino</string>

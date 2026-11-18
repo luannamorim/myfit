@@ -181,6 +181,7 @@ fun MyFitNavHost(
                             onOpenLiveActivity = { navController.navigate(LiveActivityRoute) { launchSingleTop = true } },
                             onOpenSettings = { navController.navigate(SettingsRoute) { launchSingleTop = true } },
                             onOpenNutrition = { navController.navigateToTopLevel(TopLevelDestination.NUTRITION) },
+                            onOpenActivity = { navController.navigate(ActivityEditorRoute(activityId = it)) },
                         ),
                     )
                 }

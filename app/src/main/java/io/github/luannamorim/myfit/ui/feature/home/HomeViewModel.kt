@@ -12,6 +12,7 @@ import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.NutritionTracker
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.activity.LiveActivity
+import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.body.BodyComparison
 import io.github.luannamorim.myfit.domain.body.BodyMetrics
 import io.github.luannamorim.myfit.domain.body.BodySnapshot
@@ -63,7 +64,10 @@ data class HomeUiState(
     val active: ActiveSession? = null,
     /** A sport being timed right now. */
     val live: LiveActivity? = null,
+    /** Today's finished workouts, latest first. */
     val todaySessions: List<SessionSummary> = emptyList(),
+    /** Today's logged activities (swimming, walking…). */
+    val todayActivities: List<Activity> = emptyList(),
     val suggested: RoutineOverview? = null,
     /** When [suggested] comes from a workout reminder: that reminder's moment (local). */
     val suggestedAt: LocalDateTime? = null,
@@ -163,6 +167,7 @@ class HomeViewModel @Inject constructor(
                 active = active,
                 live = live,
                 todaySessions = weekSessions.filter { it.startDate == today },
+                todayActivities = weekActivities.filter { it.date == today },
                 suggested = scheduled?.routine ?: suggestRoutine(list),
                 suggestedAt = scheduled?.at,
                 routines = list,

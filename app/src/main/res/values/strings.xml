@@ -259,6 +259,9 @@
     <string name="home_afternoon">Good afternoon</string>
     <string name="home_evening">Good evening</string>
     <string name="home_today_done">Today\'s workout done</string>
+    <string name="home_today_done_activity">Today\'s activity done</string>
+    <string name="home_today_count">Today: %1$s</string>
+    <string name="home_today_total">%1$s in total</string>
     <string name="home_next">Next workout</string>
     <string name="home_next_at">%1$s at %2$s</string>
     <string name="home_start">Start workout</string>

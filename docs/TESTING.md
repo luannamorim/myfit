@@ -101,6 +101,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Meal: *Add meal*, describe it, tap *Ask AI*: the share sheet opens with the question ready; pick an AI app, read the answer, come back and type the calories, change the time, save. It shows in the list and the total; tap it to edit or delete.
 - [ ] Go to yesterday with ‹: its own meals and water; › never goes past today. A weigh-in today doesn't change yesterday's target.
 - [ ] Back up and restore: meals, water, birth date and goal come back.
+- [ ] Home, after two workouts (or a workout and an activity) today: the done card shows "Today: 2 workouts · 1 activity", the total time, and each one with its start time, latest first; tapping a line opens it. With only one, the card is as before.
 - [ ] Home: "Nutrition today" (before "Body") shows two rings with the percent of the water and calorie targets; tapping one opens the Nutrition tab. Past the target the ring is full and shows e.g. "108%" (amber for calories when the goal is Lose).
 - [ ] Home cards (water, calories, weight, body fat, BMI) have an icon before their title; on a small phone the calories card still shows "x of y kcal" beside its ring.
 - [ ] Bell on the Nutrition tab → *Nutrition reminders*: add a meal time 2 minutes ahead (it gets a name by the hour, e.g. *Lunch*; tap the name to change it). At that time "Time to eat · <name>" arrives, even with the screen locked; *Log meal* opens the meal editor for today; tapping the notification opens the Nutrition tab.

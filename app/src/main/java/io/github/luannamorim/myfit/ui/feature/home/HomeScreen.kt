@@ -42,6 +42,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
+import io.github.luannamorim.myfit.ui.common.activityTitle
+import java.time.LocalTime
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.clickable
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.Durations
 import io.github.luannamorim.myfit.core.format.appLocale
@@ -80,6 +84,7 @@ data class HomeActions(
     val onOpenLiveActivity: () -> Unit = {},
     val onOpenSettings: () -> Unit = {},
     val onOpenNutrition: () -> Unit = {},
+    val onOpenActivity: (Long) -> Unit = {},
 )
 
 @Composable
@@ -127,7 +132,7 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
         state.live?.let { LiveActivityBar(it, onOpen = actions.onOpenLiveActivity) }
         when {
             active != null -> ActiveSessionBar(active, onResume = actions.onResume)
-            state.todaySessions.isNotEmpty() -> TodayDone(state)
+            state.todaySessions.isNotEmpty() || state.todayActivities.isNotEmpty() -> TodayDone(state, actions)
         }
 
         if (state.routines.isEmpty()) {
@@ -172,23 +177,50 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
     }
 }
 
+/** One line of "done today": a finished workout (with its start time) or a logged activity. */
+private data class DoneItem(val time: LocalTime?, val title: String, val durationMs: Long, val open: () -> Unit)
+
+/**
+ * "Done today". One thing: the card as it always was. Several (user request, option A): the day's count and total
+ * time on top, then each one, latest workout first, then the activities; each line opens it.
+ */
 @Composable
-private fun TodayDone(state: HomeUiState) {
+private fun TodayDone(state: HomeUiState, actions: HomeActions) {
     val c = MyFitTheme.colors
-    val session = state.todaySessions.last()
-    MyFitCard(Modifier.fillMaxWidth(), color = c.accentMuted, borderColor = c.accentMuted) {
+    val items = state.todaySessions.map { s -> DoneItem(s.startTime, s.routineName, s.durationMs) { actions.onOpenSession(s.id) } } +
+        state.todayActivities.map { a -> DoneItem(null, activityTitle(a), a.durationMs) { actions.onOpenActivity(a.id) } }
+    val single = items.singleOrNull()
+    MyFitCard(Modifier.fillMaxWidth(), color = c.accentMuted, borderColor = c.accentMuted, onClick = single?.open) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(36.dp).clip(MyFitShapes.pill).background(c.accent), contentAlignment = Alignment.Center) {
                 Icon(Icons.Rounded.Check, contentDescription = null, tint = c.onAccent, modifier = Modifier.size(20.dp))
             }
             Spacer(Modifier.width(Spacing.m))
             Column {
-                Text(stringResource(R.string.home_today_done), style = MyFitTheme.type.label, color = c.textSecondary)
-                Text(
-                    "${session.routineName} · ${Durations.human(session.durationMs)}",
-                    style = MyFitTheme.type.bodyStrong,
-                    color = c.textPrimary,
-                )
+                if (single != null) {
+                    val label = if (state.todaySessions.isNotEmpty()) R.string.home_today_done else R.string.home_today_done_activity
+                    Text(stringResource(label), style = MyFitTheme.type.label, color = c.textSecondary)
+                    Text("${single.title} · ${Durations.human(single.durationMs)}", style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
+                } else {
+                    val counts = listOfNotNull(
+                        state.todaySessions.size.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.home_sessions_count, it, it) },
+                        state.todayActivities.size.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.home_activities_count, it, it) },
+                    ).joinToString(" · ")
+                    Text(stringResource(R.string.home_today_count, counts), style = MyFitTheme.type.label, color = c.textSecondary)
+                    Text(stringResource(R.string.home_today_total, Durations.human(items.sumOf { it.durationMs })), style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
+                }
+            }
+        }
+        if (single == null) {
+            Spacer(Modifier.height(Spacing.s))
+            items.forEach { item ->
+                Row(
+                    Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = item.open).padding(start = 52.dp, top = Spacing.xs, bottom = Spacing.xs),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(item.time?.let(Dates::time).orEmpty(), style = MyFitTheme.type.caption, color = c.textSecondary, modifier = Modifier.width(56.dp))
+                    Text("${item.title} · ${Durations.human(item.durationMs)}", style = MyFitTheme.type.body, color = c.textPrimary)
+                }
             }
         }
     }

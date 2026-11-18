@@ -303,4 +303,20 @@ class HomeViewModelTest {
         val next = vm.state.awaitUntil { it.today == today.plusDays(1) && it.nutrition?.day?.date == today.plusDays(1) }
         assertEquals(0, next.nutrition!!.day.waterMl)
     }
+
+    @Test
+    fun today_listsLatestFirst_withTodaysActivities() = runBlocking {
+        val first = env.startWorkout(1)
+        env.repo.finish(SessionEngine.completeSet(env.repo.getActive()!!, 12, 40.0, env.time.now()), env.time.now(), updateRoutineLoads = false)
+        env.time.advance(3 * 60 * 60 * 1000L)
+        val second = env.startWorkout(1)
+        env.repo.finish(SessionEngine.completeSet(env.repo.getActive()!!, 12, 40.0, env.time.now()), env.time.now(), updateRoutineLoads = false)
+        val activities = ActivityRepository(env.db, env.time, BackupTrigger { })
+        activities.save(Activity(sport = Sport.SWIMMING, date = env.time.today(), durationMinutes = 45))
+        activities.save(Activity(sport = Sport.SOCCER, date = env.time.today().minusDays(1), durationMinutes = 60)) // not today
+
+        val state = homeViewModel().state.awaitUntil { !it.loading && it.todaySessions.size == 2 && it.todayActivities.isNotEmpty() }
+        assertEquals(listOf(second, first), state.todaySessions.map { it.id }) // latest first: the card used to show the first one
+        assertEquals(listOf(Sport.SWIMMING), state.todayActivities.map { it.sport })
+    }
 }
