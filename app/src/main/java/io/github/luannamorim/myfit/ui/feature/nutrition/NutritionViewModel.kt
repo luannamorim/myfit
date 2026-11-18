@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.data.repository.NutritionRepository
 import io.github.luannamorim.myfit.data.repository.NutritionTracker
+import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
 import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
@@ -32,6 +34,8 @@ data class NutritionUiState(
     val day: NutritionDay = NutritionDay(LocalDate.MIN, emptyList(), 0, 0),
     val targets: DailyTargets = DailyTargets(null, null, emptySet()),
     val goal: NutritionGoal = NutritionGoal.MAINTAIN,
+    /** The two quick water buttons, in ml (editable with the pencil). */
+    val waterButtons: List<Int> = AppSettings.DEFAULT_WATER_BUTTONS_ML,
 ) {
     /** No future days. */
     val canGoForward: Boolean get() = date < today
@@ -48,6 +52,7 @@ class NutritionViewModel @Inject constructor(
     private val handle: SavedStateHandle,
     private val nutrition: NutritionRepository,
     tracker: NutritionTracker,
+    private val settings: SettingsRepository,
     private val time: TimeSource,
 ) : ViewModel() {
     private val today = MutableStateFlow(time.today())
@@ -56,8 +61,8 @@ class NutritionViewModel @Inject constructor(
     val state: StateFlow<NutritionUiState> = combine(shownDay, today) { day, t -> minOf(LocalDate.ofEpochDay(day), t) to t }
         .distinctUntilChanged()
         .flatMapLatest { (d, t) ->
-            tracker.observe(d).map { status ->
-                NutritionUiState(loading = false, date = d, today = t, day = status.day, targets = status.targets, goal = status.goal)
+            combine(tracker.observe(d), settings.settings.map { it.waterButtonsMl }.distinctUntilChanged()) { status, buttons ->
+                NutritionUiState(loading = false, date = d, today = t, day = status.day, targets = status.targets, goal = status.goal, waterButtons = buttons)
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NutritionUiState())
@@ -93,6 +98,10 @@ class NutritionViewModel @Inject constructor(
         refreshToday()
         val d = shown()
         viewModelScope.launch { nutrition.undoLastWater(d) }
+    }
+
+    fun setWaterButtons(ml: List<Int>) {
+        viewModelScope.launch { settings.update { it.copy(waterButtonsMl = ml) } }
     }
 
     private companion object {

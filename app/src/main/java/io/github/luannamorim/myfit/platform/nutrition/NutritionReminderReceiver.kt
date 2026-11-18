@@ -34,7 +34,7 @@ class NutritionReminderHandler @Inject constructor(
     suspend fun onMealAlarm(id: Long, triggerAtMs: Long) {
         val meal = settings.current().nutritionReminders.meals.firstOrNull { it.id == id && it.enabled } ?: return
         val nowMs = time.now().wallMs
-        notifications.postMeal(meal.id, whenMs = if (triggerAtMs > 0) triggerAtMs else nowMs)
+        notifications.postMeal(meal.id, meal.label, whenMs = if (triggerAtMs > 0) triggerAtMs else nowMs)
         scheduler.scheduleMealNext(meal, after(nowMs, triggerAtMs))
     }
 
@@ -45,7 +45,8 @@ class NutritionReminderHandler @Inject constructor(
         val status = tracker.observe(time.today()).first()
         val target = status.targets.waterMl
         if (target == null || status.day.waterMl < target) {
-            notifications.postWater(status.day.waterMl, target, whenMs = if (triggerAtMs > 0) triggerAtMs else nowMs)
+            val button = settings.current().waterButtonsMl.first()
+            notifications.postWater(status.day.waterMl, target, button, whenMs = if (triggerAtMs > 0) triggerAtMs else nowMs)
         } else {
             // Target reached: an earlier reminder still in the shade would over-log with its "+250 ml".
             notifications.cancelWater()
@@ -53,9 +54,9 @@ class NutritionReminderHandler @Inject constructor(
         scheduler.scheduleWaterNext(water, after(nowMs, triggerAtMs))
     }
 
-    /** "+250 ml" on the notification: logs it for today and clears the notification. */
+    /** "+250 ml" (the first water button) on the notification: logs it for today and clears the notification. */
     suspend fun onAddWater() {
-        nutrition.addWater(time.today(), NutritionNotifications.WATER_STEP_ML)
+        nutrition.addWater(time.today(), settings.current().waterButtonsMl.first())
         notifications.cancelWater()
     }
 

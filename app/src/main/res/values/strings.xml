@@ -585,4 +585,14 @@
         <item quantity="one">%1$d reminder a day. Stops once you hit your water target.</item>
         <item quantity="other">%1$d reminders a day. Stops once you hit your water target.</item>
     </plurals>
+    <string name="nutrition_water_buttons_edit">Edit water buttons</string>
+    <string name="nutrition_water_button">Button %1$d</string>
+    <string name="nutrition_meal_breakfast">Breakfast</string>
+    <string name="nutrition_meal_lunch">Lunch</string>
+    <string name="nutrition_meal_snack">Snack</string>
+    <string name="nutrition_meal_dinner">Dinner</string>
+    <string name="nutrition_reminders_meal_name">Meal name</string>
+    <string name="nutrition_reminders_meal_name_ok">OK</string>
+    <string name="nutrition_reminders_meal_rename">Rename</string>
+    <string name="nutrition_notif_meal_title_named">Time to eat · %1$s</string>
 </resources>

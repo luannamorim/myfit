@@ -1,11 +1,13 @@
 package io.github.luannamorim.myfit.ui.feature.nutrition
 
 import android.content.Context
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.domain.nutrition.MealReminder
 import io.github.luannamorim.myfit.domain.nutrition.NutritionReminderSchedule
@@ -38,10 +40,15 @@ class NutritionRemindersViewModel @Inject constructor(
         NutritionRemindersUiState(loading = false, reminders = r, notificationsEnabled = n)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NutritionRemindersUiState())
 
-    /** Adds a daily meal time; a time already in the list is ignored. */
-    fun addMeal(minuteOfDay: Int) = updateMeals { meals ->
-        if (meals.any { it.minuteOfDay == minuteOfDay }) meals else meals + MealReminder(NutritionReminderSchedule.nextMealId(meals), minuteOfDay)
+    /** Adds a daily meal time, named by the hour (breakfast, lunch, snack, dinner); a time already in the list is ignored. */
+    fun addMeal(minuteOfDay: Int) {
+        val name = context.getString(defaultMealName(minuteOfDay))
+        updateMeals { meals ->
+            if (meals.any { it.minuteOfDay == minuteOfDay }) meals else meals + MealReminder(NutritionReminderSchedule.nextMealId(meals), minuteOfDay, label = name)
+        }
     }
+
+    fun setMealLabel(id: Long, label: String) = updateMeals { meals -> meals.map { if (it.id == id) it.copy(label = label.trim().take(MAX_LABEL)) else it } }
 
     fun setMealEnabled(id: Long, enabled: Boolean) = updateMeals { meals -> meals.map { if (it.id == id) it.copy(enabled = enabled) else it } }
 
@@ -74,4 +81,17 @@ class NutritionRemindersViewModel @Inject constructor(
     }
 
     private fun readNotificationsEnabled(): Boolean = NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+    private companion object {
+        const val MAX_LABEL = 40
+    }
+}
+
+/** Before 10:00 breakfast, before 15:00 lunch, before 18:00 snack, then dinner. */
+@StringRes
+fun defaultMealName(minuteOfDay: Int): Int = when {
+    minuteOfDay < 10 * 60 -> R.string.nutrition_meal_breakfast
+    minuteOfDay < 15 * 60 -> R.string.nutrition_meal_lunch
+    minuteOfDay < 18 * 60 -> R.string.nutrition_meal_snack
+    else -> R.string.nutrition_meal_dinner
 }

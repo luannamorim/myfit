@@ -8,7 +8,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.unit.dp
+import org.junit.Assert.assertTrue
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
@@ -78,14 +82,40 @@ class NutritionContentTest {
         compose.onNode(hasSetTextAction()).performTextInput("330")
         compose.onNodeWithText("Adicionar").performClick()
         assertEquals(listOf(250, 500, 330), added)
-        compose.onNodeWithText("Desfazer").performClick()
+        compose.onNodeWithContentDescription("Desfazer").performClick()
         assertEquals(1, undone)
+    }
+
+    @Test
+    fun undo_sitsInTheCardsCorner() {
+        show(state())
+        val undo = compose.onNodeWithContentDescription("Desfazer").getBoundsInRoot()
+        val add = compose.onNodeWithText("+250 ml").getBoundsInRoot()
+        val total = compose.onNodeWithText("1,5 / 2,8 L").getBoundsInRoot()
+        assertTrue(undo.right >= total.right - 4.dp) // right edge, like the total above it
+        assertTrue(undo.top < add.bottom && undo.bottom > add.top) // same row as the buttons
+    }
+
+    @Test
+    fun waterButtons_useTheSavedAmounts_andThePencilEditsThem() {
+        val saved = mutableListOf<List<Int>>()
+        val added = mutableListOf<Int>()
+        show(state().copy(waterButtons = listOf(300, 600)), NutritionActions(onAddWater = { added += it }, onSetWaterButtons = { saved += it }))
+        compose.onNodeWithText("+300 ml").performClick()
+        compose.onNodeWithText("+600 ml").performClick()
+        assertEquals(listOf(300, 600), added)
+
+        compose.onNodeWithContentDescription("Editar botões de água").performClick()
+        compose.onNodeWithText("Botão 1").performTextClearance()
+        compose.onNodeWithText("Botão 1").performTextInput("200")
+        compose.onNodeWithText("Salvar").performClick()
+        assertEquals(listOf(listOf(200, 600)), saved)
     }
 
     @Test
     fun noWaterYet_hidesUndo() {
         show(state(waterMl = 0, waterEntries = 0))
-        compose.onNodeWithText("Desfazer").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Desfazer").assertDoesNotExist()
     }
 
     @Test

@@ -73,7 +73,7 @@ class NutritionReminderPlatformTest {
     private val notificationShadow get() = shadowOf(notificationManager)
 
     private val reminders = NutritionReminders(
-        meals = listOf(MealReminder(1, 12 * 60), MealReminder(2, 20 * 60), MealReminder(3, 7 * 60, enabled = false)),
+        meals = listOf(MealReminder(1, 12 * 60, label = "Almoço"), MealReminder(2, 20 * 60), MealReminder(3, 7 * 60, enabled = false)),
         water = WaterReminder(enabled = true, everyMinutes = 120, fromMinute = 8 * 60, untilMinute = 22 * 60),
     )
 
@@ -127,7 +127,7 @@ class NutritionReminderPlatformTest {
         val posted = notificationShadow.allNotifications.single()
         assertEquals(NutritionNotifications.CHANNEL_NUTRITION, posted.channelId)
         assertEquals("Nutrição", notificationManager.getNotificationChannel(NutritionNotifications.CHANNEL_NUTRITION).name)
-        assertEquals("Hora de comer", shadowOf(posted).contentTitle)
+        assertEquals("Hora de comer · Almoço", shadowOf(posted).contentTitle)
         val action = posted.actions.single()
         assertEquals("Registrar refeição", action.title)
         val logMeal = shadowOf(action.actionIntent).savedIntent
@@ -191,6 +191,17 @@ class NutritionReminderPlatformTest {
         handler.onAddWater()
         assertEquals(250, nutrition.observeDay(today).first().waterMl)
         assertTrue(notificationShadow.allNotifications.isEmpty())
+    }
+
+    @Test
+    fun waterButton_followsTheFirstSavedAmount() = runBlocking {
+        store()
+        settings.update { it.copy(waterButtonsMl = listOf(300, 600)) }
+        setNow("2026-11-17T12:00:01")
+        handler.onWaterAlarm(ms("2026-11-17T12:00"))
+        assertEquals("+300 ml", notificationShadow.allNotifications.single().actions.single().title)
+        handler.onAddWater()
+        assertEquals(300, nutrition.observeDay(today).first().waterMl)
     }
 
     @Test

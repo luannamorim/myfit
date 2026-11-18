@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
-/** A daily "time to eat" reminder at [minuteOfDay]. */
+/** A daily "time to eat" reminder at [minuteOfDay]; [label] names the meal ("Almoço"), empty = unnamed. */
 @Serializable
-data class MealReminder(val id: Long, val minuteOfDay: Int, val enabled: Boolean = true)
+data class MealReminder(val id: Long, val minuteOfDay: Int, val enabled: Boolean = true, val label: String = "")
 
 /** "Time to drink water" every [everyMinutes] from [fromMinute] until [untilMinute] (inclusive), every day. */
 @Serializable

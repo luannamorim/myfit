@@ -55,6 +55,7 @@ import io.github.luannamorim.myfit.domain.nutrition.NutritionReminderSchedule
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitCard
 import io.github.luannamorim.myfit.ui.components.MyFitChip
+import io.github.luannamorim.myfit.ui.components.MyFitTextField
 import io.github.luannamorim.myfit.ui.components.MyFitTopBar
 import io.github.luannamorim.myfit.ui.components.SecondaryButton
 import io.github.luannamorim.myfit.ui.components.SectionHeader
@@ -69,6 +70,7 @@ data class NutritionRemindersActions(
     val onAddMeal: (Int) -> Unit = {},
     val onMealEnabled: (Long, Boolean) -> Unit = { _, _ -> },
     val onMealTime: (Long, Int) -> Unit = { _, _ -> },
+    val onMealLabel: (Long, String) -> Unit = { _, _ -> },
     val onDeleteMeal: (Long) -> Unit = {},
     val onWaterEnabled: (Boolean) -> Unit = {},
     val onWaterEvery: (Int) -> Unit = {},
@@ -101,6 +103,7 @@ fun NutritionRemindersScreen(onBack: () -> Unit, viewModel: NutritionRemindersVi
             onAddMeal = { viewModel.addMeal(it); askPermission() },
             onMealEnabled = { id, on -> viewModel.setMealEnabled(id, on); if (on) askPermission() },
             onMealTime = viewModel::setMealTime,
+            onMealLabel = viewModel::setMealLabel,
             onDeleteMeal = viewModel::deleteMeal,
             onWaterEnabled = { on -> viewModel.setWaterEnabled(on); if (on) askPermission() },
             onWaterEvery = viewModel::setWaterEvery,
@@ -159,7 +162,14 @@ fun NutritionRemindersContent(state: NutritionRemindersUiState, actions: Nutriti
                     Text(stringResource(R.string.nutrition_reminders_meals_empty), style = MyFitTheme.type.body, color = c.textTertiary)
                 }
                 r.meals.forEach { meal ->
-                    MealRow(meal, is24Hour, onTime = { picking = Picking.Meal(meal.id) }, onEnabled = { actions.onMealEnabled(meal.id, it) }, onDelete = { actions.onDeleteMeal(meal.id) })
+                    MealRow(
+                        meal,
+                        is24Hour,
+                        onTime = { picking = Picking.Meal(meal.id) },
+                        onEnabled = { actions.onMealEnabled(meal.id, it) },
+                        onDelete = { actions.onDeleteMeal(meal.id) },
+                        onRename = { actions.onMealLabel(meal.id, it) },
+                    )
                 }
                 SecondaryButton(stringResource(R.string.nutrition_reminders_add_time), onClick = { picking = Picking.NewMeal }, icon = Icons.Rounded.Add, modifier = Modifier.fillMaxWidth())
 
@@ -219,12 +229,36 @@ fun NutritionRemindersContent(state: NutritionRemindersUiState, actions: Nutriti
 }
 
 @Composable
-private fun MealRow(meal: MealReminder, is24Hour: Boolean, onTime: () -> Unit, onEnabled: (Boolean) -> Unit, onDelete: () -> Unit) {
+private fun MealRow(meal: MealReminder, is24Hour: Boolean, onTime: () -> Unit, onEnabled: (Boolean) -> Unit, onDelete: () -> Unit, onRename: (String) -> Unit) {
     val c = MyFitTheme.colors
     val time = timeText(meal.minuteOfDay, is24Hour)
     val switchLabel = stringResource(R.string.nutrition_reminders_meal_at, time)
     val deleteLabel = stringResource(R.string.nutrition_reminders_delete, time)
+    var renaming by rememberSaveable(meal.id) { mutableStateOf(false) }
+    var name by rememberSaveable(meal.id) { mutableStateOf(meal.label) }
     MyFitCard(Modifier.fillMaxWidth(), onClick = onTime, contentPadding = Spacing.m) {
+        if (renaming) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MyFitTextField(
+                    value = name,
+                    onValueChange = { name = it.take(40) },
+                    label = stringResource(R.string.nutrition_reminders_meal_name),
+                    modifier = Modifier.weight(1f),
+                )
+                TextAction(stringResource(R.string.nutrition_reminders_meal_name_ok), onClick = { onRename(name); renaming = false })
+            }
+        } else {
+            // Tap the name to rename it ("Almoço", "Pré-treino"); the rest of the card edits the time.
+            Text(
+                meal.label.ifBlank { stringResource(R.string.nutrition_meal_untitled) },
+                style = MyFitTheme.type.bodyStrong,
+                color = if (meal.enabled) c.textSecondary else c.textTertiary,
+                modifier = Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.nutrition_reminders_meal_rename)) {
+                    name = meal.label
+                    renaming = true
+                }.padding(vertical = Spacing.xs),
+            )
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 time,

@@ -32,9 +32,12 @@ data class AppSettings(
     val nutritionGoal: NutritionGoal = NutritionGoal.MAINTAIN,
     /** Meal times and the water interval (1.9.0). */
     val nutritionReminders: NutritionReminders = NutritionReminders(),
+    /** The two quick water buttons of the Nutrition tab, in ml (the first one is also the reminder's button). */
+    val waterButtonsMl: List<Int> = DEFAULT_WATER_BUTTONS_ML,
 ) {
     companion object {
         const val MIN_REST_SECONDS = 15
         const val MAX_REST_SECONDS = 600
+        val DEFAULT_WATER_BUTTONS_ML = listOf(250, 500)
     }
 }

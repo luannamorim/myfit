@@ -30,6 +30,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.outlined.Percent
+import androidx.compose.material.icons.outlined.MonitorWeight
+import androidx.compose.material.icons.outlined.Accessibility
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -230,6 +234,7 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onOpenWeight: (() -> Unit)? = null
                             delta = diff.diff?.let { formatSigned(it, unitLabel(diff.measure)) },
                             deltaPositive = null,
                             hint = diff.missing?.let { stringResource(it.labelRes) },
+                            icon = measureIcon(diff.measure),
                             modifier = Modifier.weight(1f).fillMaxHeight().testTag("bodyTile_${diff.measure.name}").then(clickFor(diff.measure)),
                         )
                     }
@@ -240,6 +245,14 @@ fun BodySnapshotTiles(snapshot: BodySnapshot, onOpenWeight: (() -> Unit)? = null
             snapshot.highlights.firstOrNull { it.measure == m }?.let { BodyRangesSheet(it, snapshot.sex, onDismiss = { openRanges = null }) }
         }
     }
+}
+
+/** Icon beside a dashboard card's label (weight, body fat, BMI); none for the other measures. */
+internal fun measureIcon(measure: Measure): ImageVector? = when (measure) {
+    Measure.WEIGHT -> Icons.Outlined.MonitorWeight
+    Measure.BODY_FAT -> Icons.Outlined.Percent
+    Measure.BMI -> Icons.Outlined.Accessibility
+    else -> null
 }
 
 /** Shown in a body card that has no value yet. */
@@ -261,7 +274,7 @@ private fun TrendTile(diff: MeasureDiff, trend: List<Pair<LocalDate, Double>>, m
     MyFitCard(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                LabelWithDot(measureLabel(diff.measure), diff.status?.color(), diff.status?.let { stringResource(it.labelRes) })
+                LabelWithDot(measureLabel(diff.measure), diff.status?.color(), diff.status?.let { stringResource(it.labelRes) }, measureIcon(diff.measure))
                 Spacer(Modifier.height(Spacing.s))
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(diff.to?.let { DecimalInput.format(it) } ?: EMPTY_VALUE, style = MyFitTheme.type.numericLarge.copy(fontSize = 44.sp, lineHeight = 48.sp), color = c.textPrimary)

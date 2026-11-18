@@ -17,7 +17,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [36])
+@Config(sdk = [36], qualifiers = "pt-rBR")
 class NutritionRemindersViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private val settings = testSettings()
@@ -39,11 +39,23 @@ class NutritionRemindersViewModelTest {
         vm.setMealEnabled(lunch.id, false)
         vm.setMealTime(lunch.id, 6 * 60) // moves before breakfast
         val moved = vm.state.awaitUntil { it.reminders.meals.first().id == lunch.id }.reminders.meals
-        assertEquals(listOf(MealReminder(lunch.id, 6 * 60, enabled = false), meals.first { it.minuteOfDay == 7 * 60 }), moved)
+        assertEquals(listOf(MealReminder(lunch.id, 6 * 60, enabled = false, label = lunch.label), meals.first { it.minuteOfDay == 7 * 60 }), moved)
 
         vm.deleteMeal(lunch.id)
         vm.state.awaitUntil { it.reminders.meals.size == 1 }
         assertEquals(listOf(7 * 60), stored().meals.map { it.minuteOfDay })
+    }
+
+    @Test
+    fun newMeals_getANameByTheHour_andCanBeRenamed() = runBlocking {
+        val vm = vm()
+        vm.state.awaitUntil { !it.loading }
+        listOf(7 * 60, 12 * 60, 16 * 60, 20 * 60).forEach { vm.addMeal(it) }
+        val meals = vm.state.awaitUntil { it.reminders.meals.size == 4 }.reminders.meals
+        assertEquals(listOf("Café da manhã", "Almoço", "Lanche", "Jantar"), meals.map { it.label })
+        vm.setMealLabel(meals[2].id, "  Pré-treino ")
+        vm.state.awaitUntil { it.reminders.meals[2].label == "Pré-treino" }
+        assertEquals("Pré-treino", stored().meals[2].label)
     }
 
     @Test

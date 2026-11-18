@@ -619,4 +619,14 @@
         <item quantity="many">%1$d avisos por dia. Param quando você bate a meta de água.</item>
         <item quantity="other">%1$d avisos por dia. Param quando você bate a meta de água.</item>
     </plurals>
+    <string name="nutrition_water_buttons_edit">Editar botões de água</string>
+    <string name="nutrition_water_button">Botão %1$d</string>
+    <string name="nutrition_meal_breakfast">Café da manhã</string>
+    <string name="nutrition_meal_lunch">Almoço</string>
+    <string name="nutrition_meal_snack">Lanche</string>
+    <string name="nutrition_meal_dinner">Jantar</string>
+    <string name="nutrition_reminders_meal_name">Nome da refeição</string>
+    <string name="nutrition_reminders_meal_name_ok">OK</string>
+    <string name="nutrition_reminders_meal_rename">Renomear</string>
+    <string name="nutrition_notif_meal_title_named">Hora de comer · %1$s</string>
 </resources>

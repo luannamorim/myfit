@@ -12,6 +12,7 @@ import io.github.luannamorim.myfit.domain.model.AppSettings
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RestSound
 import io.github.luannamorim.myfit.domain.model.ThemeMode
+import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import io.github.luannamorim.myfit.domain.nutrition.NutritionReminders
 import kotlinx.coroutines.flow.Flow
@@ -40,6 +41,7 @@ class SettingsRepository @Inject constructor(
         val birth = longPreferencesKey("birth_epoch_day")
         val goal = stringPreferencesKey("nutrition_goal")
         val nutritionReminders = stringPreferencesKey("nutrition_reminders")
+        val waterButtons = stringPreferencesKey("water_buttons_ml")
     }
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -66,6 +68,7 @@ class SettingsRepository @Inject constructor(
             next.birthEpochDay?.let { prefs[Keys.birth] = it } ?: prefs.remove(Keys.birth)
             prefs[Keys.goal] = next.nutritionGoal.name
             prefs[Keys.nutritionReminders] = json.encodeToString(NutritionReminders.serializer(), next.nutritionReminders)
+            prefs[Keys.waterButtons] = validWaterButtons(next.waterButtonsMl).joinToString(",")
         }
     }
 
@@ -93,8 +96,13 @@ class SettingsRepository @Inject constructor(
             nutritionReminders = this[Keys.nutritionReminders]
                 ?.let { runCatching { json.decodeFromString(NutritionReminders.serializer(), it) }.getOrNull() }
                 ?: defaults.nutritionReminders,
+            waterButtonsMl = validWaterButtons(this[Keys.waterButtons]?.split(",")?.mapNotNull { it.trim().toIntOrNull() }),
         )
     }
 }
+
+/** Two amounts in 1..5000 ml, else the defaults (250 and 500). */
+private fun validWaterButtons(values: List<Int>?): List<Int> =
+    values?.takeIf { v -> v.size == 2 && v.all { it in 1..NutritionDay.MAX_WATER_ML } } ?: AppSettings.DEFAULT_WATER_BUTTONS_ML
 
 inline fun <reified E : Enum<E>> enumValueOrNull(name: String): E? = enumValues<E>().firstOrNull { it.name == name }

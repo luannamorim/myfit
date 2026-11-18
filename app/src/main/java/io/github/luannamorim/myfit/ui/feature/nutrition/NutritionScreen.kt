@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.Undo
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material3.Icon
@@ -67,6 +69,8 @@ data class NutritionActions(
     /** Opens where the missing value is filled in: Progress (weight, height) or Settings (sex, birth date). */
     val onFillMissing: (TargetMissing) -> Unit = {},
     val onOpenReminders: () -> Unit = {},
+    /** Saves the two quick water amounts (ml). */
+    val onSetWaterButtons: (List<Int>) -> Unit = {},
 )
 
 @Composable
@@ -101,6 +105,7 @@ fun NutritionScreen(
                 }
             },
             onOpenReminders = onOpenReminders,
+            onSetWaterButtons = viewModel::setWaterButtons,
         ),
         modifier = modifier,
     )
@@ -175,30 +180,81 @@ private fun WaterCard(state: NutritionUiState, actions: NutritionActions) {
     val drunk = state.day.waterMl
     val target = state.targets.waterMl
     var askingAmount by rememberSaveable { mutableStateOf(false) }
+    var editingButtons by rememberSaveable { mutableStateOf(false) }
     MyFitCard(Modifier.fillMaxWidth()) {
-        TotalRow(
-            label = stringResource(R.string.nutrition_water),
-            value = if (target != null) stringResource(R.string.nutrition_liters_of, liters(drunk), liters(target)) else stringResource(R.string.nutrition_liters, liters(drunk)),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.nutrition_water), style = MyFitTheme.type.caption, color = c.textSecondary, modifier = Modifier.weight(1f))
+            Text(
+                if (target != null) stringResource(R.string.nutrition_liters_of, liters(drunk), liters(target)) else stringResource(R.string.nutrition_liters, liters(drunk)),
+                style = MyFitTheme.type.bodyStrong,
+                color = c.textPrimary,
+            )
+            // Edits the amounts of the two quick buttons.
+            IconButton(onClick = { editingButtons = !editingButtons }, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.nutrition_water_buttons_edit), tint = c.textSecondary, modifier = Modifier.size(18.dp))
+            }
+        }
         Spacer(Modifier.height(Spacing.s))
         ProgressBar(if (target != null && target > 0) drunk.toFloat() / target else 0f)
         if (target == null) MissingHint(listOf(TargetMissing.WEIGHT), actions.onFillMissing)
         Spacer(Modifier.height(Spacing.m))
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-            verticalArrangement = Arrangement.spacedBy(Spacing.s),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            WATER_STEPS_ML.forEach { ml ->
-                MyFitChip(stringResource(R.string.nutrition_add_ml, ml), selected = false, onClick = { actions.onAddWater(ml) })
+        // Undo stays in the card's right corner, whatever the buttons do on a narrow phone.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FlowRow(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+                verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            ) {
+                state.waterButtons.forEach { ml ->
+                    MyFitChip(stringResource(R.string.nutrition_add_ml, ml), selected = false, onClick = { actions.onAddWater(ml) })
+                }
+                MyFitChip(stringResource(R.string.nutrition_water_other), selected = false, onClick = { askingAmount = true })
             }
-            MyFitChip(stringResource(R.string.nutrition_water_other), selected = false, onClick = { askingAmount = true })
-            if (state.day.waterEntries > 0) TextAction(stringResource(R.string.nutrition_water_undo), onClick = actions.onUndoWater, color = c.textSecondary)
+            if (state.day.waterEntries > 0) {
+                IconButton(onClick = actions.onUndoWater, modifier = Modifier.size(36.dp)) {
+                    Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(R.string.nutrition_water_undo), tint = c.textSecondary)
+                }
+            }
         }
         if (askingAmount) {
             Spacer(Modifier.height(Spacing.m))
             WaterAmountInput(onAdd = { actions.onAddWater(it); askingAmount = false }, onCancel = { askingAmount = false })
         }
+        if (editingButtons) {
+            Spacer(Modifier.height(Spacing.m))
+            WaterButtonsEditor(state.waterButtons, onSave = { actions.onSetWaterButtons(it); editingButtons = false }, onCancel = { editingButtons = false })
+        }
+    }
+}
+
+/** The two quick amounts, edited in place (1–5000 ml each). */
+@Composable
+private fun WaterButtonsEditor(current: List<Int>, onSave: (List<Int>) -> Unit, onCancel: () -> Unit) {
+    val c = MyFitTheme.colors
+    var first by rememberSaveable { mutableStateOf(current.getOrNull(0)?.toString().orEmpty()) }
+    var second by rememberSaveable { mutableStateOf(current.getOrNull(1)?.toString().orEmpty()) }
+    val values = listOf(first, second).map { t -> t.trim().toIntOrNull()?.takeIf { it in 1..NutritionDay.MAX_WATER_ML } }
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        MyFitTextField(
+            value = first,
+            onValueChange = { v -> first = v.filter(Char::isDigit).take(4) },
+            label = stringResource(R.string.nutrition_water_button, 1),
+            keyboardType = KeyboardType.Number,
+            suffix = "ml",
+            modifier = Modifier.weight(1f),
+        )
+        MyFitTextField(
+            value = second,
+            onValueChange = { v -> second = v.filter(Char::isDigit).take(4) },
+            label = stringResource(R.string.nutrition_water_button, 2),
+            keyboardType = KeyboardType.Number,
+            suffix = "ml",
+            modifier = Modifier.weight(1f),
+        )
+    }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextAction(stringResource(R.string.action_cancel), onClick = onCancel, color = c.textSecondary)
+        TextAction(stringResource(R.string.action_save), onClick = { onSave(values.map { it!! }) }, enabled = values.all { it != null })
     }
 }
 

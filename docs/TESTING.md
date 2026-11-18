@@ -96,12 +96,13 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 ### 6b. Nutrition
 - [ ] The tab bar shows Home, Workouts, History, Progress and Nutrition; the gear next to the bell on Home opens Settings, and back returns to Home.
 - [ ] *Settings → Profile*: set the birth date (no future dates; "Clear" removes it) and the goal. With weight, height, sex and birth date set, Nutrition shows a water target (35 ml per kg) and a calorie target; a card without a target shows only what was logged (e.g. "1.5 L", "1,240 kcal") and "Fill in: …", which opens Progress or Settings.
-- [ ] Water: +250 ml, +500 ml and *Other* (type an amount) add up; *Undo* removes the last one.
+- [ ] Water: +250 ml, +500 ml and *Other* (type an amount) add up; the ↶ icon in the card's right corner removes the last one. The pencil next to the total edits the two buttons' amounts (e.g. 300 and 600 ml); the water reminder's button uses the first one.
 - [ ] Meal: *Add meal*, describe it, tap *Ask AI*: the share sheet opens with the question ready; pick an AI app, read the answer, come back and type the calories, change the time, save. It shows in the list and the total; tap it to edit or delete.
 - [ ] Go to yesterday with ‹: its own meals and water; › never goes past today. A weigh-in today doesn't change yesterday's target.
 - [ ] Back up and restore: meals, water, birth date and goal come back.
 - [ ] Home: "Nutrition today" (before "Body") shows two rings with the percent of the water and calorie targets; tapping one opens the Nutrition tab. Past the target the ring is full and shows e.g. "108%" (amber for calories when the goal is Lose).
-- [ ] Bell on the Nutrition tab → *Nutrition reminders*: add a meal time 2 minutes ahead. At that time "Time to eat" arrives, even with the screen locked; *Log meal* opens the meal editor for today; tapping the notification opens the Nutrition tab.
+- [ ] Home cards (water, calories, weight, body fat, BMI) have an icon before their title; on a small phone the calories card still shows "x of y kcal" beside its ring.
+- [ ] Bell on the Nutrition tab → *Nutrition reminders*: add a meal time 2 minutes ahead (it gets a name by the hour, e.g. *Lunch*; tap the name to change it). At that time "Time to eat · <name>" arrives, even with the screen locked; *Log meal* opens the meal editor for today; tapping the notification opens the Nutrition tab.
 - [ ] Water: turn it on with a window that includes the next few minutes (e.g. every 1 h, from now). The notification shows today's progress; *+250 ml* logs it without opening the app and the notification goes away. Once the day's water target is reached, no more water reminders that day.
 - [ ] Restart the phone: meal and water reminders still fire. Turning them off stops them.
 

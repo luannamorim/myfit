@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
@@ -68,6 +70,20 @@ class NutritionRemindersContentTest {
         compose.onNodeWithText("08:00").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("22:00").assertIsDisplayed()
         compose.onNodeWithText("8 avisos por dia. Param quando você bate a meta de água.").assertIsDisplayed()
+    }
+
+    @Test
+    fun mealName_isShown_andTappingItRenames() {
+        val renamed = mutableListOf<Pair<Long, String>>()
+        show(
+            NutritionReminders(meals = listOf(MealReminder(1, 12 * 60 + 30, label = "Almoço"))),
+            NutritionRemindersActions(onMealLabel = { id, name -> renamed += id to name }),
+        )
+        compose.onNodeWithText("Almoço").performClick()
+        compose.onNodeWithText("Nome da refeição").performTextClearance()
+        compose.onNodeWithText("Nome da refeição").performTextInput("Almoço leve")
+        compose.onNodeWithText("OK").performClick()
+        assertEquals(listOf(1L to "Almoço leve"), renamed)
     }
 
     @Test

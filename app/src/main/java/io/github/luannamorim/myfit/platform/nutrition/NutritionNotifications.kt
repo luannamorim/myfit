@@ -30,7 +30,7 @@ class NutritionNotifications @Inject constructor(
     }
 
     /** "Time to eat", with "Log meal" (opens the meal editor for today). False when notifications are off. */
-    fun postMeal(mealId: Long, whenMs: Long): Boolean {
+    fun postMeal(mealId: Long, label: String, whenMs: Long): Boolean {
         // One PendingIntent per meal (data URI), carrying the id so MainActivity clears this notification:
         // action buttons don't auto-cancel.
         val logMeal = PendingIntent.getActivity(
@@ -44,11 +44,16 @@ class NutritionNotifications @Inject constructor(
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val action = NotificationCompat.Action(0, context.getString(R.string.nutrition_notif_meal_action), logMeal)
-        return post(TAG_MEAL, mealId.hashCode(), context.getString(R.string.nutrition_notif_meal_title), context.getString(R.string.nutrition_notif_meal_text), whenMs, action)
+        val title = if (label.isBlank()) {
+            context.getString(R.string.nutrition_notif_meal_title)
+        } else {
+            context.getString(R.string.nutrition_notif_meal_title_named, label.trim())
+        }
+        return post(TAG_MEAL, mealId.hashCode(), title, context.getString(R.string.nutrition_notif_meal_text), whenMs, action)
     }
 
     /** "Time to drink water · 1.5 of 2.8 L today", with "+250 ml" (logs without opening the app). */
-    fun postWater(waterMl: Int, targetMl: Int?, whenMs: Long): Boolean {
+    fun postWater(waterMl: Int, targetMl: Int?, buttonMl: Int, whenMs: Long): Boolean {
         val text = if (targetMl != null) {
             context.getString(R.string.nutrition_notif_water_progress, liters(waterMl), liters(targetMl))
         } else {
@@ -60,7 +65,7 @@ class NutritionNotifications @Inject constructor(
             Intent(context, NutritionReminderReceiver::class.java).setAction(NutritionReminderReceiver.ACTION_ADD_WATER),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        val action = NotificationCompat.Action(0, context.getString(R.string.nutrition_add_ml, WATER_STEP_ML), add)
+        val action = NotificationCompat.Action(0, context.getString(R.string.nutrition_add_ml, buttonMl), add)
         return post(TAG_WATER, WATER_ID, context.getString(R.string.nutrition_notif_water_title), text, whenMs, action)
     }
 
@@ -101,7 +106,6 @@ class NutritionNotifications @Inject constructor(
         const val CHANNEL_NUTRITION = "nutrition"
         const val TAG_MEAL = "nutrition_meal"
         const val TAG_WATER = "nutrition_water"
-        const val WATER_STEP_ML = 250
         /** On "Log meal": the meal reminder whose notification to clear. */
         const val EXTRA_MEAL_NOTIFICATION = "meal_notification"
         private const val WATER_ID = 1

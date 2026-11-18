@@ -50,6 +50,7 @@ class NutritionViewModelTest {
         handle,
         nutrition,
         NutritionTracker(nutrition, body, HistoryRepository(env.db, env.time, BackupTrigger { }), activities, settings),
+        settings,
         env.time,
     )
 
@@ -150,6 +151,16 @@ class NutritionViewModelTest {
         val s = vm.state.awaitUntil { it.today == today.plusDays(1) && !it.loading }
         assertEquals(today.minusDays(1), s.date)
         assertTrue(s.canGoForward)
+    }
+
+    @Test
+    fun waterButtons_comeFromSettings_andCanBeChanged() = runBlocking {
+        val settings = profile()
+        val vm = viewModel(settings)
+        assertEquals(listOf(250, 500), vm.state.awaitUntil { !it.loading }.waterButtons)
+        vm.setWaterButtons(listOf(300, 600))
+        assertEquals(listOf(300, 600), vm.state.awaitUntil { it.waterButtons == listOf(300, 600) }.waterButtons)
+        assertEquals(listOf(300, 600), settings.current().waterButtonsMl)
     }
 
     @Test

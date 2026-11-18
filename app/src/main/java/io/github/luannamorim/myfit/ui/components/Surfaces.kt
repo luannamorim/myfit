@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -87,14 +89,20 @@ fun SectionHeader(
  * Screen readers read [dotDescription] with the label ("BMI Good").
  */
 @Composable
-fun LabelWithDot(label: String, dotColor: Color?, dotDescription: String?) {
+fun LabelWithDot(label: String, dotColor: Color?, dotDescription: String?, icon: ImageVector? = null) {
     val style = MyFitTheme.type.caption
     val color = MyFitTheme.colors.textSecondary
-    if (dotColor == null) {
-        Text(label, style = style, color = color)
-        return
-    }
+    // Top-aligned: the icon and the dot stay level with the first line when the label wraps (big fonts).
     Row {
+        // Decorative: the label says what the card is.
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(6.dp))
+        }
+        if (dotColor == null) {
+            Text(label, style = style, color = color)
+            return@Row
+        }
         Text(
             label,
             style = style,
@@ -121,10 +129,11 @@ fun StatTile(
     indicatorColor: Color? = null,
     indicatorDescription: String? = null,
     hint: String? = null,
+    icon: ImageVector? = null,
 ) {
     val c = MyFitTheme.colors
     MyFitCard(modifier) {
-        LabelWithDot(label, indicatorColor, indicatorDescription)
+        LabelWithDot(label, indicatorColor, indicatorDescription, icon)
         Spacer(Modifier.height(Spacing.s))
         Row(verticalAlignment = Alignment.Bottom) {
             // Shrinks instead of wrapping (e.g. "12 h 30 min" in a half-width tile). Auto-size shrinks the line

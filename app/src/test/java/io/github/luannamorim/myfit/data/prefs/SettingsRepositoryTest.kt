@@ -100,6 +100,20 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun waterButtons_default250And500_persist_andTravelInExports() = runTest {
+        val r = repo()
+        assertEquals(listOf(250, 500), r.current().waterButtonsMl)
+        r.update { it.copy(waterButtonsMl = listOf(300, 750)) }
+        assertEquals(listOf(300, 750), r.current().waterButtonsMl)
+        val copy = repo(File(tmp.root, "buttons.preferences_pb"))
+        copy.importJson(r.exportJson())
+        assertEquals(listOf(300, 750), copy.current().waterButtonsMl)
+        // Out-of-range or missing values fall back to the defaults.
+        r.update { it.copy(waterButtonsMl = listOf(0, 9000)) }
+        assertEquals(listOf(250, 500), r.current().waterButtonsMl)
+    }
+
+    @Test
     fun nutritionReminders_persist_andTravelInExports() = runTest {
         val r = repo()
         assertEquals(NutritionReminders(), r.current().nutritionReminders)
