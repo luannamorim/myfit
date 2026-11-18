@@ -76,7 +76,7 @@ object BodyMetrics {
         return BANDS.mapIndexed { i, status -> BodyRange(bounds.getOrNull(i - 1), bounds.getOrNull(i), status) }
     }
 
-    /** Upper bounds of POOR, CAUTION, GOOD and CAUTION; above the last one is POOR again. */
+    /** Upper bounds of VERY_LOW, LOW, NORMAL and HIGH; above the last one is VERY_HIGH. */
     private fun bounds(measure: Measure, sex: Sex?): List<Double>? = when (measure) {
         Measure.BMI -> BMI_BOUNDS
         Measure.BODY_FAT -> when (sex) {
@@ -104,7 +104,7 @@ object BodyMetrics {
         else -> null
     }
 
-    private val BANDS = listOf(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD, BodyStatus.CAUTION, BodyStatus.POOR)
+    private val BANDS = BodyStatus.entries
     private val BMI_BOUNDS = listOf(16.0, 18.5, 25.0, 30.0)
     private val FAT_MEN_BOUNDS = listOf(2.0, 6.0, 18.0, 25.0)
     private val FAT_WOMEN_BOUNDS = listOf(10.0, 14.0, 25.0, 32.0)

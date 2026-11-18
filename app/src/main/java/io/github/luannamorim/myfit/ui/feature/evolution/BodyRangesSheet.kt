@@ -120,8 +120,8 @@ private fun RangeRow(range: BodyRange?, columns: List<String>, current: Boolean,
     }
 }
 
-/** Wide enough for "Atenção"/"Caution" at the body size. */
-private val STATUS_WIDTH = 84.dp
+/** Wide enough for "Muito baixo"/"Very high" at the body size. */
+private val STATUS_WIDTH = 104.dp
 
 /**
  * "Below 16", "18.5 – 24.9", "30 or more": the upper end shown is the last one-decimal value inside the band

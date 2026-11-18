@@ -286,9 +286,11 @@
     <string name="measure_height">Height</string>
     <string name="measure_body_fat">Body fat</string>
     <string name="measure_bmi">BMI</string>
-    <string name="body_status_good">Good</string>
-    <string name="body_status_caution">Caution</string>
-    <string name="body_status_poor">Poor</string>
+    <string name="body_status_very_low">Very low</string>
+    <string name="body_status_low">Low</string>
+    <string name="body_status_normal">Normal</string>
+    <string name="body_status_high">High</string>
+    <string name="body_status_very_high">Very high</string>
     <string name="body_missing_height">Height missing</string>
     <string name="body_missing_weight">Weight missing</string>
     <string name="body_missing_sex">Set your sex</string>

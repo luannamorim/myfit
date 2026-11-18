@@ -258,12 +258,12 @@ internal fun measureIcon(measure: Measure): ImageVector? = when (measure) {
 /** Shown in a body card that has no value yet. */
 private const val EMPTY_VALUE = "—"
 
-/** Health-range colors: the one place body measurements get green, amber or red (see BRAND.md). */
+/** Health-range colors: the one place body measurements get green, yellow or red (see BRAND.md). */
 @Composable
 internal fun BodyStatus.color(): Color = when (this) {
-    BodyStatus.GOOD -> MyFitTheme.colors.accent
-    BodyStatus.CAUTION -> MyFitTheme.colors.caution
-    BodyStatus.POOR -> MyFitTheme.colors.danger
+    BodyStatus.NORMAL -> MyFitTheme.colors.accent
+    BodyStatus.LOW, BodyStatus.HIGH -> MyFitTheme.colors.caution
+    BodyStatus.VERY_LOW, BodyStatus.VERY_HIGH -> MyFitTheme.colors.danger
 }
 
 /** Full-width highlight: value and change vs the previous assessment, plus a trend line of recent ones. */

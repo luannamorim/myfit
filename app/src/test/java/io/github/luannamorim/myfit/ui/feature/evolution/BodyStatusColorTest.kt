@@ -24,11 +24,15 @@ class BodyStatusColorTest {
         compose.setContent {
             MyFitTheme(ThemeMode.DARK) {
                 val c = MyFitTheme.colors
-                seen["caution"] = BodyStatus.CAUTION.color()
+                seen["caution"] = BodyStatus.LOW.color()
+                seen["high"] = BodyStatus.HIGH.color()
+                seen["veryLow"] = BodyStatus.VERY_LOW.color()
+                seen["veryHigh"] = BodyStatus.VERY_HIGH.color()
+                seen["danger"] = c.danger
                 seen["token"] = c.caution
                 seen["food"] = c.food
                 seen["warning"] = c.warning
-                seen["good"] = BodyStatus.GOOD.color()
+                seen["good"] = BodyStatus.NORMAL.color()
                 seen["accent"] = c.accent
             }
         }
@@ -37,5 +41,9 @@ class BodyStatusColorTest {
         assertNotEquals(seen["food"], seen["caution"])
         assertNotEquals(seen["warning"], seen["caution"])
         assertEquals(seen["accent"], seen["good"])
+        // Low and high share the yellow; the two extremes are red.
+        assertEquals(seen["caution"], seen["high"])
+        assertEquals(seen["danger"], seen["veryLow"])
+        assertEquals(seen["danger"], seen["veryHigh"])
     }
 }

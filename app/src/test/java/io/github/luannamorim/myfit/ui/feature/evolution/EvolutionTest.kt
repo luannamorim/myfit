@@ -209,7 +209,7 @@ class EvolutionTest {
         val noFat = unset.snapshot!!.highlights.single { it.measure == Measure.BODY_FAT }
         assertNull(noFat.to)
         assertEquals(BodyMissing.SEX, noFat.missing)
-        assertEquals(BodyStatus.GOOD, unset.snapshot!!.highlights.single { it.measure == Measure.BMI }.status) // BMI 23.1
+        assertEquals(BodyStatus.NORMAL, unset.snapshot!!.highlights.single { it.measure == Measure.BMI }.status) // BMI 23.1
         assertTrue(unset.charts.none { it.measure == Measure.BODY_FAT })
 
         settings.update { it.copy(sex = Sex.MALE) }
@@ -218,7 +218,7 @@ class EvolutionTest {
         val fat = male.snapshot!!.highlights.single { it.measure == Measure.BODY_FAT }
         assertEquals(16.4, fat.to!!, 0.0)
         assertTrue(fat.estimated)
-        assertEquals(BodyStatus.GOOD, fat.status) // 16.4 % for a man
+        assertEquals(BodyStatus.NORMAL, fat.status) // 16.4 % for a man
         // The list counts only what was typed: weight, height, neck, abdomen.
         assertEquals(4, male.assessments.first { it.date == apr }.measuredCount)
     }

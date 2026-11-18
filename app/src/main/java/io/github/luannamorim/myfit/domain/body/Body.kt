@@ -45,8 +45,11 @@ data class BodyAssessment(
     val measuredCount: Int get() = values.keys.count { it !in estimated }
 }
 
-/** Health range of a value (BMI and body fat only), shown as a green, amber or red dot. */
-enum class BodyStatus { GOOD, CAUTION, POOR }
+/**
+ * Level of a value against its reference table (BMI and body fat only), lowest band first. Shown as a dot:
+ * [NORMAL] green, [LOW]/[HIGH] yellow, [VERY_LOW]/[VERY_HIGH] red.
+ */
+enum class BodyStatus { VERY_LOW, LOW, NORMAL, HIGH, VERY_HIGH }
 
 /** One band of a reference table: [from] inclusive, [until] exclusive; null = open end. */
 data class BodyRange(val from: Double?, val until: Double?, val status: BodyStatus)

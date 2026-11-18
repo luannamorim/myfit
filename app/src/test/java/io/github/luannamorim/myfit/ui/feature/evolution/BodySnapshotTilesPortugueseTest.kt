@@ -34,7 +34,7 @@ import java.time.LocalDate
 
 /**
  * Portuguese on a small phone: the status dot sits in each card's top-right corner, the label is read with
- * the status ("IMC Atenção"), and body fat and BMI cards share one height.
+ * the status ("IMC Alto"), and body fat and BMI cards share one height.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -44,7 +44,7 @@ class BodySnapshotTilesPortugueseTest {
 
     @Test
     fun dotSitsInTheCorner_andIsReadWithTheLabel() {
-        // Man, 80 kg, 1,78 m, neck 38, abdomen 92: BMI 25,2 and estimated body fat 21,5 % — both "Atenção".
+        // Man, 80 kg, 1,78 m, neck 38, abdomen 92: BMI 25,2 and estimated body fat 21,5 % — both "Alto".
         val values = mapOf(Measure.WEIGHT to 80.0, Measure.HEIGHT to 178.0, Measure.NECK to 38.0, Measure.ABDOMEN to 92.0)
         val items = BodyMetrics.derive(listOf(BodyAssessment(1, LocalDate.of(2026, 11, 12), values)), Sex.MALE)
         val snapshot = BodyMetrics.withStatus(BodyComparison.snapshot(items), Sex.MALE)!!
@@ -52,8 +52,8 @@ class BodySnapshotTilesPortugueseTest {
             MyFitTheme(ThemeMode.LIGHT) { Box(Modifier.background(MyFitTheme.colors.background)) { BodySnapshotTiles(snapshot) } }
         }
         compose.onRoot().captureRoboImage("$SCREENSHOT_DIR/body_tiles_pt_360_light.png")
-        compose.onNodeWithContentDescription("Gordura corporal Atenção", useUnmergedTree = true).assertExists()
-        compose.onNodeWithContentDescription("IMC Atenção", useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription("Gordura corporal Alto", useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription("IMC Alto", useUnmergedTree = true).assertExists()
         // The dot sits in the card's top-right corner, not after the words.
         listOf("BODY_FAT", "BMI").forEachIndexed { i, m ->
             val card = compose.onNodeWithTag("bodyTile_$m").getBoundsInRoot()
@@ -83,5 +83,11 @@ class BodySnapshotTilesPortugueseTest {
         compose.onNodeWithTag("bodyTile_BODY_FAT").performClick()
         compose.waitForIdle()
         captureScreenRoboImage("$SCREENSHOT_DIR/body_ranges_fat_pt_dark.png")
+        // The five words, each on one line in the status column (same height as the short "Alto").
+        val one = compose.onNodeWithText("Alto", useUnmergedTree = true).getBoundsInRoot()
+        listOf("Muito baixo", "Baixo", "Regular", "Muito alto").forEach {
+            val b = compose.onNodeWithText(it, useUnmergedTree = true).getBoundsInRoot()
+            assertTrue("$it wraps", (b.bottom - b.top) < (one.bottom - one.top) * 1.5f)
+        }
     }
 }

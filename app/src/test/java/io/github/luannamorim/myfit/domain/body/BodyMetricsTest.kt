@@ -88,21 +88,21 @@ class BodyMetricsTest {
 
     @Test
     fun status_bmi_boundaries() {
-        val (P, C, G) = Triple(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD)
-        assertEquals(listOf(P, C, C, G, G, C, C, P), statuses(Measure.BMI, null, 15.9, 16.0, 18.4, 18.5, 24.9, 25.0, 29.9, 30.0))
-        assertEquals(G, BodyMetrics.status(Measure.BMI, 22.0, Sex.FEMALE)) // sex doesn't matter for BMI
+        val (VL, L, N, H, VH) = BodyStatus.entries
+        assertEquals(listOf(VL, L, L, N, N, H, H, VH), statuses(Measure.BMI, null, 15.9, 16.0, 18.4, 18.5, 24.9, 25.0, 29.9, 30.0))
+        assertEquals(N, BodyMetrics.status(Measure.BMI, 22.0, Sex.FEMALE)) // sex doesn't matter for BMI
     }
 
     @Test
     fun status_bodyFat_men_boundaries() {
-        val (P, C, G) = Triple(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD)
-        assertEquals(listOf(P, C, C, G, G, C, C, P), statuses(Measure.BODY_FAT, Sex.MALE, 1.9, 2.0, 5.9, 6.0, 17.9, 18.0, 24.9, 25.0))
+        val (VL, L, N, H, VH) = BodyStatus.entries
+        assertEquals(listOf(VL, L, L, N, N, H, H, VH), statuses(Measure.BODY_FAT, Sex.MALE, 1.9, 2.0, 5.9, 6.0, 17.9, 18.0, 24.9, 25.0))
     }
 
     @Test
     fun status_bodyFat_women_boundaries() {
-        val (P, C, G) = Triple(BodyStatus.POOR, BodyStatus.CAUTION, BodyStatus.GOOD)
-        assertEquals(listOf(P, C, C, G, G, C, C, P), statuses(Measure.BODY_FAT, Sex.FEMALE, 9.9, 10.0, 13.9, 14.0, 24.9, 25.0, 31.9, 32.0))
+        val (VL, L, N, H, VH) = BodyStatus.entries
+        assertEquals(listOf(VL, L, L, N, N, H, H, VH), statuses(Measure.BODY_FAT, Sex.FEMALE, 9.9, 10.0, 13.9, 14.0, 24.9, 25.0, 31.9, 32.0))
     }
 
     @Test
@@ -117,7 +117,7 @@ class BodyMetricsTest {
         val a = BodyAssessment(1, apr, mapOf(Measure.WEIGHT to 73.25, Measure.HEIGHT to 178.0, Measure.NECK to 38.0, Measure.ABDOMEN to 85.0))
         val snap = BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(listOf(a), Sex.MALE)), Sex.MALE)!!
         assertEquals(
-            mapOf(Measure.WEIGHT to null, Measure.BODY_FAT to BodyStatus.GOOD, Measure.BMI to BodyStatus.GOOD),
+            mapOf(Measure.WEIGHT to null, Measure.BODY_FAT to BodyStatus.NORMAL, Measure.BMI to BodyStatus.NORMAL),
             snap.highlights.associate { it.measure to it.status },
         )
         assertNull(BodyMetrics.withStatus(null, Sex.MALE))
@@ -151,11 +151,11 @@ class BodyMetricsTest {
     fun ranges_bmi_exact() {
         assertEquals(
             listOf(
-                BodyRange(null, 16.0, BodyStatus.POOR),
-                BodyRange(16.0, 18.5, BodyStatus.CAUTION),
-                BodyRange(18.5, 25.0, BodyStatus.GOOD),
-                BodyRange(25.0, 30.0, BodyStatus.CAUTION),
-                BodyRange(30.0, null, BodyStatus.POOR),
+                BodyRange(null, 16.0, BodyStatus.VERY_LOW),
+                BodyRange(16.0, 18.5, BodyStatus.LOW),
+                BodyRange(18.5, 25.0, BodyStatus.NORMAL),
+                BodyRange(25.0, 30.0, BodyStatus.HIGH),
+                BodyRange(30.0, null, BodyStatus.VERY_HIGH),
             ),
             BodyMetrics.ranges(Measure.BMI, null),
         )

@@ -313,9 +313,11 @@
     <string name="measure_height">Altura</string>
     <string name="measure_body_fat">Gordura corporal</string>
     <string name="measure_bmi">IMC</string>
-    <string name="body_status_good">Bom</string>
-    <string name="body_status_caution">Atenção</string>
-    <string name="body_status_poor">Ruim</string>
+    <string name="body_status_very_low">Muito baixo</string>
+    <string name="body_status_low">Baixo</string>
+    <string name="body_status_normal">Regular</string>
+    <string name="body_status_high">Alto</string>
+    <string name="body_status_very_high">Muito alto</string>
     <string name="body_missing_height">Falta a altura</string>
     <string name="body_missing_weight">Falta o peso</string>
     <string name="body_missing_sex">Defina o sexo</string>

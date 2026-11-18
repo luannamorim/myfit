@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import java.time.LocalDate
 
-/** The health-range dot on the Home/Progress cards: only BMI and body fat, read with the label ("BMI Good"). */
+/** The health-range dot on the Home/Progress cards: only BMI and body fat, read with the label ("BMI Normal"). */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36], qualifiers = PHONE)
 class BodySnapshotTilesTest {
@@ -44,24 +44,24 @@ class BodySnapshotTilesTest {
 
     private fun currentRow(text: String) = hasTestTag("range_current") and hasAnyDescendant(hasText(text))
 
-    /** Cards whose label is read with this status word ("BMI Good"); the dot itself is drawn in the corner. */
+    /** Cards whose label is read with this status word ("BMI Normal"); the dot itself is drawn in the corner. */
     private fun count(status: String) = compose.onAllNodes(hasContentDescription(" $status", substring = true), useUnmergedTree = true)
 
     @Test
     fun bmiAndBodyFat_showTheirDot_weightDoesNot() {
         show(mapOf(Measure.WEIGHT to 73.25, Measure.HEIGHT to 178.0, Measure.NECK to 38.0, Measure.ABDOMEN to 85.0), Sex.MALE)
-        count("Good").assertCountEquals(2) // BMI 23.1, body fat 16.4 %
-        compose.onNodeWithContentDescription("BMI Good", useUnmergedTree = true).assertExists()
-        compose.onNodeWithContentDescription("Body fat Good", useUnmergedTree = true).assertExists() // no "(est.)"
-        count("Caution").assertCountEquals(0)
-        count("Poor").assertCountEquals(0)
+        count("Normal").assertCountEquals(2) // BMI 23.1, body fat 16.4 %
+        compose.onNodeWithContentDescription("BMI Normal", useUnmergedTree = true).assertExists()
+        compose.onNodeWithContentDescription("Body fat Normal", useUnmergedTree = true).assertExists() // no "(est.)"
+        count("High").assertCountEquals(0)
+        count("Very high").assertCountEquals(0)
     }
 
     @Test
     fun bmiMissing_showsHint_bodyFatKeepsItsDot() {
         // No height, so no BMI value: its card stays, with "—" and what is missing.
         show(mapOf(Measure.WEIGHT to 73.0, Measure.BODY_FAT to 20.0), Sex.MALE)
-        count("Caution").assertCountEquals(1)
+        count("High").assertCountEquals(1) // body fat 20 % for a man
         compose.onNodeWithText("Height missing", useUnmergedTree = true).assertExists()
     }
 
@@ -76,7 +76,7 @@ class BodySnapshotTilesTest {
     @Test
     fun withoutSex_bodyFatHasNoDot_bmiStillDoes() {
         show(mapOf(Measure.WEIGHT to 95.0, Measure.HEIGHT to 170.0, Measure.BODY_FAT to 30.0), null)
-        count("Poor").assertCountEquals(1) // BMI 32.9; body fat 30 % gets nothing without sex
+        count("Very high").assertCountEquals(1) // BMI 32.9; body fat 30 % gets nothing without sex
         compose.onNodeWithText("Set your sex", useUnmergedTree = true).assertDoesNotExist() // it was typed: there is a value
     }
 
@@ -101,6 +101,16 @@ class BodySnapshotTilesTest {
         compose.onNodeWithText("Below 16", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("30 or more", useUnmergedTree = true).assertExists()
         compose.onNode(currentRow("18.5 – 24.9"), useUnmergedTree = true).assertExists()
+        compose.onNode(currentRow("Normal"), useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun rangesSheet_namesTheFiveLevels_lowestFirst() {
+        show(mapOf(Measure.WEIGHT to 73.25, Measure.HEIGHT to 178.0), null)
+        compose.onNodeWithTag("bodyTile_BMI").performClick()
+        val words = listOf("Very low", "Low", "Normal", "High", "Very high")
+        val tops = words.map { compose.onNodeWithText(it, useUnmergedTree = true).getBoundsInRoot().top }
+        assertEquals(tops.sorted(), tops) // one row each, from the lowest band to the highest
     }
 
     @Test

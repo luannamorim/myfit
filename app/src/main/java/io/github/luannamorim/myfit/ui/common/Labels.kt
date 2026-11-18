@@ -82,9 +82,11 @@ val PhotoPose.labelRes: Int
 @get:StringRes
 val BodyStatus.labelRes: Int
     get() = when (this) {
-        BodyStatus.GOOD -> R.string.body_status_good
-        BodyStatus.CAUTION -> R.string.body_status_caution
-        BodyStatus.POOR -> R.string.body_status_poor
+        BodyStatus.VERY_LOW -> R.string.body_status_very_low
+        BodyStatus.LOW -> R.string.body_status_low
+        BodyStatus.NORMAL -> R.string.body_status_normal
+        BodyStatus.HIGH -> R.string.body_status_high
+        BodyStatus.VERY_HIGH -> R.string.body_status_very_high
     }
 
 @get:StringRes
