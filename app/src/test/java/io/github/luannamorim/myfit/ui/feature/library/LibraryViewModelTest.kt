@@ -61,7 +61,11 @@ class LibraryViewModelTest {
         vm.state.awaitUntil { !it.isLoading && it.exercises.isNotEmpty() }
         vm.toggleGroup(MuscleGroup.BACK)
         vm.setQuery("remada")
-        val state = vm.state.awaitUntil { s -> s.query == "remada" && s.exercises.all { it.muscleGroup == MuscleGroup.BACK } }
+        // The query shows at once; its results come from Room a moment later: wait for both.
+        val state = vm.state.awaitUntil { s ->
+            s.query == "remada" && s.exercises.isNotEmpty() &&
+                s.exercises.all { it.muscleGroup == MuscleGroup.BACK && it.name.lowercase().contains("remada") }
+        }
         assertTrue(state.exercises.isNotEmpty())
         assertTrue(state.exercises.all { it.name.lowercase().contains("remada") })
         vm.toggleSelected(state.exercises[1].id)

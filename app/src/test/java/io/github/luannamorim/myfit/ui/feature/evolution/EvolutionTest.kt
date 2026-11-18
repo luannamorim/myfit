@@ -25,8 +25,10 @@ import io.github.luannamorim.myfit.testutil.inMemoryDb
 import io.github.luannamorim.myfit.testutil.testSettings
 import io.github.luannamorim.myfit.ui.navigation.AssessmentEditorRoute
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -312,6 +314,9 @@ class EvolutionTest {
         vm.state.awaitUntil { it.selectedPhotos.size == 1 }
         vm.deleteSelectedPhotos()
         vm.state.awaitUntil { it.photos.size == 2 }
-        assertFalse(images.file(toDelete.imagePath).exists())
+        // The row goes first and the file right after it (the list can update in between): wait for the file.
+        val file = images.file(toDelete.imagePath)
+        withTimeout(5_000) { while (file.exists()) delay(10) }
+        assertFalse(file.exists())
     }
 }

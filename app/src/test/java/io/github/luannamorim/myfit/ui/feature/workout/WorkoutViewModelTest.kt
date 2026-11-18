@@ -78,16 +78,17 @@ class WorkoutViewModelTest {
         vm.state.awaitUntil { it.hasSession }
         vm.changeReps(-2)
         vm.changeLoad(2.5)
-        assertEquals(10, vm.state.value.reps)
-        assertEquals(42.5, vm.state.value.loadKg!!, 0.0)
+        // The state is recomputed asynchronously (Room and DataStore feed it from other threads): wait for it.
+        val edited = vm.state.awaitUntil { it.reps == 10 && it.loadKg == 42.5 }
+        assertEquals(10, edited.reps)
         vm.completeSet()
-        vm.state.awaitUntil { it.setNumber == 2 }
+        val next = vm.state.awaitUntil { it.setNumber == 2 }
         val done = env.repo.getActive()!!.exercises[0].sets[0]
         assertEquals(10, done.actualReps)
         assertEquals(42.5, done.actualLoadKg!!, 0.0)
         // Load carried forward to the next set, reps reset to plan.
-        assertEquals(12, vm.state.value.reps)
-        assertEquals(42.5, vm.state.value.loadKg!!, 0.0)
+        assertEquals(12, next.reps)
+        assertEquals(42.5, next.loadKg!!, 0.0)
     }
 
     @Test

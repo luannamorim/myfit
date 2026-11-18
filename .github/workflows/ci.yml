@@ -32,6 +32,14 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Robolectric downloads its Android jar (~200 MB) from Maven Central on first use; a failed download
+      # failed every test once. Keep it between runs.
+      - uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: robolectric-
+
       - name: Test, lint and build
         run: ./gradlew testDebugUnitTest lintDebug assembleDebug --console=plain
 
