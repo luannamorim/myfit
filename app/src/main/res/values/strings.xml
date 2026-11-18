@@ -601,6 +601,9 @@
     <string name="nutrition_reminders_meal_name_hint">e.g. Lunch</string>
     <string name="history_nutrition_legend">● target hit   ○ missed   · nothing logged</string>
     <string name="history_nutrition_hits">%1$d/%2$d</string>
-    <string name="history_nutrition_days">%1$d of %2$d days</string>
     <string name="history_nutrition_hit">Target hit</string>
+    <plurals name="history_nutrition_days">
+        <item quantity="one">%1$d of %2$d day</item>
+        <item quantity="other">%1$d of %2$d days</item>
+    </plurals>
 </resources>

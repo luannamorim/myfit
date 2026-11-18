@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -142,7 +143,7 @@ private fun MonthRow(icon: ImageVector, label: String, hits: List<Boolean?>) {
         Icon(icon, contentDescription = null, tint = c.textSecondary, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(6.dp))
         Text(label, style = MyFitTheme.type.body, color = c.textPrimary, modifier = Modifier.weight(1f))
-        Text(stringResource(R.string.history_nutrition_days, hit, logged), style = MyFitTheme.type.numeric, color = c.textSecondary)
+        Text(pluralStringResource(R.plurals.history_nutrition_days, logged, hit, logged), style = MyFitTheme.type.numeric, color = c.textSecondary)
     }
     Spacer(Modifier.height(Spacing.xs))
     ProgressBar(if (logged > 0) hit.toFloat() / logged else 0f)

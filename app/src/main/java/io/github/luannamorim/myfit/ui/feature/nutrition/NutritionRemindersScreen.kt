@@ -33,6 +33,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -137,7 +138,7 @@ fun NutritionRemindersContent(state: NutritionRemindersUiState, actions: Nutriti
     // The "new meal" form: the user names it and picks its time together.
     var adding by rememberSaveable { mutableStateOf(false) }
     var newName by rememberSaveable { mutableStateOf("") }
-    var newMinute by rememberSaveable { mutableStateOf(12 * 60) }
+    var newMinute by rememberSaveable { mutableIntStateOf(12 * 60) }
     Scaffold(
         modifier = modifier,
         containerColor = c.background,
