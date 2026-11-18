@@ -20,7 +20,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 
 ## Non-goals
 
-- Not a social network: no sharing, rankings, friends or feed. (Handing a meal description to an AI app through the Android share sheet is not social sharing.)
+- Not a social network: no sharing, rankings, friends or feed. (Handing a meal description or photo to an AI app through the Android share sheet is not social sharing.)
 - No gamification: no badges, points or streaks that pressure you not to "break" them.
 - No account, login or server: data lives on the device and in the user's backup files.
 - Not a coach: it doesn't generate workouts, prescribe loads, build diets or give health advice. Daily calorie and water targets are estimates from well-known formulas (Mifflin-St Jeor, 35 ml/kg), shown as a reference.
@@ -103,7 +103,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 
 27a. MUST log, per day, water (quick +250/+500 ml or another amount, with undo of the last one) and meals (free-text description, calories, time), browsing past days but not future ones.
 27b. MUST show daily targets for water (35 ml per kg) and calories (Mifflin-St Jeor basal rate × an activity factor from the days with workouts or activities in the previous 4 weeks, adjusted by the goal: lose −500, maintain, gain +300, never below the basal rate), computed as they were on the shown day, and say what is missing (weight, height, sex, birth date) when a target can't be computed.
-27c. SHOULD offer an *Ask AI* button that hands the meal description to any AI app through the Android share sheet, so the user can type back the calories it estimates. The app itself never goes online.
+27c. SHOULD offer an *Ask AI* button that hands the meal description to any AI app through the Android share sheet, and a *Photo to AI* button that does the same with a photo taken or picked from the gallery (a dish, snack, drink, package or nutrition label; shrunk to 1280 px, not stored with the meal), so the user can type back the calories it estimates. The app itself never goes online.
 27b'. MAY let the user set their own daily water and calorie targets, always showing the recommendation next to them.
 27d. SHOULD show today's water and calories on Home as the percent of each target (rings), opening the Nutrition tab.
 27e. SHOULD remind the user to eat at chosen daily times and to drink water every 1–3 hours inside a daily window (fixed times; a water reminder is skipped once today's target is reached), with a "+X ml" action (the first water button) that logs water without opening the app.

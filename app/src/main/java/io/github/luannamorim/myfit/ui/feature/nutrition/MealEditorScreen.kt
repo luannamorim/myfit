@@ -1,6 +1,9 @@
 package io.github.luannamorim.myfit.ui.feature.nutrition
 
+import android.content.ClipData
 import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -35,6 +39,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
+import io.github.luannamorim.myfit.ui.common.rememberPhotoSource
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
 import io.github.luannamorim.myfit.ui.components.MyFitTextField
@@ -53,6 +58,8 @@ data class MealEditorActions(
     val onMinute: (Int) -> Unit = {},
     /** Hands the prompt to an AI app (the app itself has no internet access). */
     val onAskAi: (String) -> Unit = {},
+    /** Takes or picks a photo, then hands it with this prompt to an AI app. */
+    val onPhotoToAi: (String) -> Unit = {},
     val onSave: () -> Unit = {},
     val onDelete: () -> Unit = {},
 )
@@ -61,12 +68,40 @@ data class MealEditorActions(
 fun askAiIntent(prompt: String, chooserTitle: String): Intent =
     Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, prompt), chooserTitle)
 
+/**
+ * Share sheet with the meal photo and the prompt. The read grant travels in the ClipData, which the
+ * chooser passes on to the AI app the user picks.
+ */
+fun askAiPhotoIntent(photo: Uri, prompt: String, chooserTitle: String): Intent {
+    val send = Intent(Intent.ACTION_SEND)
+        .setType("image/jpeg")
+        .putExtra(Intent.EXTRA_STREAM, photo)
+        .putExtra(Intent.EXTRA_TEXT, prompt)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    send.clipData = ClipData.newRawUri("", photo)
+    return Intent.createChooser(send, chooserTitle)
+}
+
 @Composable
 fun MealEditorScreen(onClose: () -> Unit, modifier: Modifier = Modifier, viewModel: MealEditorViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val chooserTitle = stringResource(R.string.meal_ask_ai)
+    val photoChooserTitle = stringResource(R.string.meal_photo_ai)
+    // Survives Android killing the app while the camera is open.
+    var photoPrompt by rememberSaveable { mutableStateOf("") }
+    val photoSource = rememberPhotoSource(viewModel::preparePhoto)
     LaunchedEffect(state.done) { if (state.done) onClose() }
+    LaunchedEffect(state.photoToShare) {
+        val photo = state.photoToShare ?: return@LaunchedEffect
+        context.startActivity(askAiPhotoIntent(photo, photoPrompt, photoChooserTitle))
+        viewModel.onPhotoHandled()
+    }
+    LaunchedEffect(state.photoFailed) {
+        if (!state.photoFailed) return@LaunchedEffect
+        Toast.makeText(context, R.string.meal_photo_failed, Toast.LENGTH_SHORT).show()
+        viewModel.onPhotoHandled()
+    }
     MealEditorContent(
         state = state,
         actions = MealEditorActions(
@@ -75,6 +110,10 @@ fun MealEditorScreen(onClose: () -> Unit, modifier: Modifier = Modifier, viewMod
             onKcal = viewModel::setKcal,
             onMinute = viewModel::setMinute,
             onAskAi = { prompt -> context.startActivity(askAiIntent(prompt, chooserTitle)) },
+            onPhotoToAi = { prompt ->
+                photoPrompt = prompt
+                photoSource.choose()
+            },
             onSave = viewModel::save,
             onDelete = viewModel::delete,
         ),
@@ -88,6 +127,9 @@ fun MealEditorContent(state: MealEditorState, actions: MealEditorActions, modifi
     var pickingTime by rememberSaveable { mutableStateOf(false) }
     var confirmingDelete by rememberSaveable { mutableStateOf(false) }
     val prompt = stringResource(R.string.meal_ai_prompt, state.description.trim())
+    val photoQuestion = stringResource(R.string.meal_ai_photo_prompt)
+    val photoDetails = stringResource(R.string.meal_ai_photo_details, state.description.trim())
+    val photoPrompt = if (state.description.isBlank()) photoQuestion else "$photoQuestion $photoDetails"
     Scaffold(
         modifier = modifier,
         containerColor = c.background,
@@ -129,6 +171,13 @@ fun MealEditorContent(state: MealEditorState, actions: MealEditorActions, modifi
                     onClick = { actions.onAskAi(prompt) },
                     enabled = state.canAsk,
                     icon = Icons.Outlined.AutoAwesome,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                SecondaryButton(
+                    stringResource(R.string.meal_photo_ai),
+                    onClick = { actions.onPhotoToAi(photoPrompt) },
+                    enabled = state.canSendPhoto,
+                    icon = Icons.Outlined.PhotoCamera,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(stringResource(R.string.meal_ask_ai_hint), style = MyFitTheme.type.caption, color = c.textTertiary)

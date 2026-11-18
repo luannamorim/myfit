@@ -1,14 +1,17 @@
 package io.github.luannamorim.myfit.ui.feature.nutrition
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
+import io.github.luannamorim.myfit.data.images.AiPhotoStore
 import io.github.luannamorim.myfit.data.repository.NutritionRepository
 import io.github.luannamorim.myfit.domain.nutrition.Meal
 import io.github.luannamorim.myfit.ui.navigation.MealEditorRoute
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,10 +33,19 @@ data class MealEditorState(
     val done: Boolean = false,
     /** A save or delete is running: further taps are ignored (no duplicate meals). */
     val busy: Boolean = false,
+    /** A photo is being shrunk for the AI app: the photo button waits. */
+    val preparingPhoto: Boolean = false,
+    /** Ready to hand to the AI app; the screen opens the share sheet, then calls [MealEditorViewModel.onPhotoHandled]. */
+    val photoToShare: Uri? = null,
+    /** The picked photo couldn't be read; the screen says so, then calls [MealEditorViewModel.onPhotoHandled]. */
+    val photoFailed: Boolean = false,
 ) {
     val kcal: Int? get() = kcalText.toIntOrNull()?.takeIf { it in Meal.MIN_KCAL..Meal.MAX_KCAL }
     val canSave: Boolean get() = !loading && !busy && kcal != null
     val canAsk: Boolean get() = description.isNotBlank()
+
+    /** A photo explains itself: no description needed. */
+    val canSendPhoto: Boolean get() = !loading && !preparingPhoto
 }
 
 /**
@@ -45,6 +57,7 @@ class MealEditorViewModel @Inject constructor(
     private val handle: SavedStateHandle,
     private val repo: NutritionRepository,
     time: TimeSource,
+    private val photos: AiPhotoStore,
 ) : ViewModel() {
     private val route = handle.toRoute<MealEditorRoute>()
     private val _state = MutableStateFlow(MealEditorState(isNew = route.mealId == 0L, date = LocalDate.ofEpochDay(route.dateEpochDay)))
@@ -105,6 +118,24 @@ class MealEditorViewModel @Inject constructor(
             _state.update { it.copy(done = true) }
         }
     }
+
+    /** Shrinks the taken or picked photo into a shareable copy (see [AiPhotoStore]). */
+    fun preparePhoto(source: Uri) {
+        if (_state.value.preparingPhoto) return
+        _state.update { it.copy(preparingPhoto = true, photoToShare = null, photoFailed = false) }
+        viewModelScope.launch {
+            val shared = try {
+                photos.prepare(source)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                null
+            }
+            _state.update { it.copy(preparingPhoto = false, photoToShare = shared, photoFailed = shared == null) }
+        }
+    }
+
+    fun onPhotoHandled() = _state.update { it.copy(photoToShare = null, photoFailed = false) }
 
     private fun edit(change: (MealEditorState) -> MealEditorState) {
         val next = change(_state.value)

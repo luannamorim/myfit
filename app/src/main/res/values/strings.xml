@@ -566,8 +566,12 @@
     <string name="meal_description">What did you eat?</string>
     <string name="meal_description_hint">e.g. rice, beans, grilled chicken and salad</string>
     <string name="meal_ask_ai">Ask AI</string>
-    <string name="meal_ask_ai_hint">Opens an AI app with the question ready. Come back and type the calories it gives you.</string>
+    <string name="meal_ask_ai_hint">Opens an AI app with the question ready (and the photo, if you send one). Come back and type the calories it gives you.</string>
     <string name="meal_ai_prompt">How many calories are in this meal: \"%1$s\"? Reply only with the estimated total in kcal.</string>
+    <string name="meal_photo_ai">Photo to AI</string>
+    <string name="meal_ai_photo_prompt">How many calories are in what this photo shows? It may be a dish, a snack, a drink, a package or a label with a nutrition facts table. If it\'s a label, use its values. Reply only with the estimated total in kcal.</string>
+    <string name="meal_ai_photo_details">Details: \"%1$s\".</string>
+    <string name="meal_photo_failed">Couldn\'t open this photo.</string>
     <string name="meal_kcal">Calories</string>
     <string name="meal_time">Time</string>
     <string name="meal_delete_title">Delete meal?</string>

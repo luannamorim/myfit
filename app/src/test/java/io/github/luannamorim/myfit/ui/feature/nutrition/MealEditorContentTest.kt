@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.ui.feature.nutrition
 
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -9,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -22,8 +24,8 @@ class MealEditorContentTest {
     @get:Rule val compose = createComposeRule()
     private val day = LocalDate.of(2026, 11, 17)
 
-    private fun show(state: MealEditorState, onAskAi: (String) -> Unit = {}) = compose.setContent {
-        MyFitTheme(ThemeMode.DARK) { MealEditorContent(state, MealEditorActions(onAskAi = onAskAi)) }
+    private fun show(state: MealEditorState, onAskAi: (String) -> Unit = {}, onPhotoToAi: (String) -> Unit = {}) = compose.setContent {
+        MyFitTheme(ThemeMode.DARK) { MealEditorContent(state, MealEditorActions(onAskAi = onAskAi, onPhotoToAi = onPhotoToAi)) }
     }
 
     @Test
@@ -52,5 +54,47 @@ class MealEditorContentTest {
         assertEquals(Intent.ACTION_SEND, send.action)
         assertEquals("text/plain", send.type)
         assertEquals("Quantas calorias?", send.getStringExtra(Intent.EXTRA_TEXT))
+    }
+
+    @Test
+    fun photoToAi_worksWithoutADescription_andAsksAboutAnyFood() {
+        val prompts = mutableListOf<String>()
+        show(MealEditorState(loading = false, date = day, description = "", minuteOfDay = 750), onPhotoToAi = { prompts += it })
+        compose.onNodeWithText("Perguntar à IA").assertIsNotEnabled()
+        compose.onNodeWithText("Foto para IA").performClick()
+        val prompt = prompts.single()
+        assertTrue(prompt, prompt.contains("rótulo") && prompt.contains("bebida") && prompt.contains("kcal"))
+        assertFalse(prompt, prompt.contains("Detalhes"))
+    }
+
+    @Test
+    fun photoToAi_addsTheDescriptionAsDetails() {
+        val prompts = mutableListOf<String>()
+        show(MealEditorState(loading = false, date = day, description = "  2 fatias ", minuteOfDay = 750), onPhotoToAi = { prompts += it })
+        compose.onNodeWithText("Foto para IA").performClick()
+        val prompt = prompts.single()
+        assertTrue(prompt, prompt.endsWith(" Detalhes: \"2 fatias\"."))
+    }
+
+    @Test
+    fun photoButton_isDisabled_whilePreparing() {
+        show(MealEditorState(loading = false, date = day, minuteOfDay = 750, preparingPhoto = true))
+        compose.onNodeWithText("Foto para IA").assertIsNotEnabled()
+    }
+
+    @Test
+    fun askAiPhotoIntent_sharesTheImageWithReadGrant() {
+        val photo = Uri.parse("content://io.github.luannamorim.myfit.camera/ai/meal-1.jpg")
+        val chooser = askAiPhotoIntent(photo, "Quantas calorias?", "Foto para IA")
+        assertEquals(Intent.ACTION_CHOOSER, chooser.action)
+        @Suppress("DEPRECATION")
+        val send = chooser.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)!!
+        assertEquals(Intent.ACTION_SEND, send.action)
+        assertEquals("image/jpeg", send.type)
+        @Suppress("DEPRECATION")
+        assertEquals(photo, send.getParcelableExtra<Uri>(Intent.EXTRA_STREAM))
+        assertEquals("Quantas calorias?", send.getStringExtra(Intent.EXTRA_TEXT))
+        assertEquals(photo, send.clipData!!.getItemAt(0).uri)
+        assertTrue(send.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
     }
 }
