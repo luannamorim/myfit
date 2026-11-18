@@ -61,7 +61,6 @@ import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.feature.activity.LiveActivityBar
 import io.github.luannamorim.myfit.ui.feature.evolution.BodySnapshotTiles
 import io.github.luannamorim.myfit.ui.feature.nutrition.NutritionTodayCards
-import io.github.luannamorim.myfit.ui.feature.history.SessionRow
 import io.github.luannamorim.myfit.ui.feature.reminders.reminderDayText
 import io.github.luannamorim.myfit.ui.feature.reminders.timeText
 import io.github.luannamorim.myfit.ui.navigation.ActiveSessionBar
@@ -158,11 +157,6 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
             icon = Icons.Rounded.Pool,
             modifier = Modifier.fillMaxWidth(),
         )
-
-        state.last?.let { last ->
-            SectionHeader(stringResource(R.string.home_last_activity), Modifier.padding(top = Spacing.s))
-            SessionRow(last, showDate = true, onClick = { actions.onOpenSession(last.id) })
-        }
 
         state.nutrition?.let { nutrition ->
             SectionHeader(stringResource(R.string.home_nutrition), Modifier.padding(top = Spacing.s))

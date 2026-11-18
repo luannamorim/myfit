@@ -72,7 +72,6 @@ data class HomeUiState(
     /** When [suggested] comes from a workout reminder: that reminder's moment (local). */
     val suggestedAt: LocalDateTime? = null,
     val routines: List<RoutineOverview> = emptyList(),
-    val last: SessionSummary? = null,
     val body: BodySnapshot? = null,
     /** Today's water and calories against their targets. */
     val nutrition: NutritionStatus? = null,
@@ -151,12 +150,12 @@ class HomeViewModel @Inject constructor(
         return combine(
             combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged()) { r, rem -> r to rem },
             combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },
-            combine(history.observeLast(), nutrition.observe(today)) { l, n -> l to n },
+            nutrition.observe(today),
             combine(controller.active, liveActivity.live) { a, l -> a to l },
             combine(body.observeAssessments(), settings.settings.map { it.sex }.distinctUntilChanged()) { raw, sex ->
                 BodyMetrics.withStatus(BodyComparison.snapshot(BodyMetrics.derive(raw, sex)), sex)
             },
-        ) { (list, reminders), (weekSessions, weekActivities), (last, nutritionToday), (active, live), bodySnapshot ->
+        ) { (list, reminders), (weekSessions, weekActivities), nutritionToday, (active, live), bodySnapshot ->
             val now = Instant.ofEpochMilli(time.now().wallMs).atZone(time.zone())
             val scheduled = scheduledRoutine(list, reminders, now)
             val trainedDays = HistoryCalculator.activeDays(weekSessions, weekActivities)
@@ -171,7 +170,6 @@ class HomeViewModel @Inject constructor(
                 suggested = scheduled?.routine ?: suggestRoutine(list),
                 suggestedAt = scheduled?.at,
                 routines = list,
-                last = last,
                 body = bodySnapshot,
                 nutrition = nutritionToday,
                 week = WeekStrip(

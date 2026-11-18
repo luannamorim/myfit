@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
-import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
@@ -25,7 +24,6 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.time.LocalDate
-import java.time.LocalTime
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -70,7 +68,6 @@ class HomeScreenshotTest {
                 today = today,
                 suggested = routines[2],
                 routines = routines,
-                last = SessionSummary(9, "Chest & triceps", today.minusDays(1), LocalTime.of(19, 5), 61 * 60_000L, 14, listOf("Bench press")),
                 week = week(setOf(today.minusDays(3), today.minusDays(1)), 2, 113 * 60_000L),
                 nutrition = NutritionStatus(
                     NutritionDay(today, listOf(Meal(1, today, 12 * 60, "Lunch", 1880)), 1500, 6),

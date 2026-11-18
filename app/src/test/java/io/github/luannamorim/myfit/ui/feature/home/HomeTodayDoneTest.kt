@@ -88,4 +88,19 @@ class HomeTodayDoneTest {
         severalThings_showTheDayTotal_andEachOneLatestFirst_eachOpening()
         compose.onRoot().captureRoboImage("$SCREENSHOT_DIR/home_today_several_pt.png")
     }
+
+    @Test
+    fun home_hasNoLastActivitySection() {
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                HomeContent(
+                    HomeUiState(loading = false, greeting = Greeting.EVENING, today = today),
+                    HomeActions(),
+                    body = { BodyEmptyCard {} },
+                )
+            }
+        }
+        compose.onNodeWithText("ÚLTIMA ATIVIDADE").assertDoesNotExist()
+        compose.onNodeWithText("Peito", substring = true).assertDoesNotExist()
+    }
 }
