@@ -171,6 +171,8 @@ class NutritionViewModelTest {
         vm.setKcalTarget(2500)
         vm.setWater(3200, listOf(300, 600))
         val s = vm.state.awaitUntil { it.targets.kcal == 2500 && it.targets.waterMl == 3200 }
+        assertEquals(2500, s.customKcal)
+        assertEquals(3200, s.customWaterMl)
         assertEquals(2120, s.targets.recommendedKcal)
         assertEquals(2800, s.targets.recommendedWaterMl)
         assertEquals(listOf(300, 600), s.waterButtons)

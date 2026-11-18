@@ -36,6 +36,9 @@ data class NutritionUiState(
     val goal: NutritionGoal = NutritionGoal.MAINTAIN,
     /** The two quick water buttons, in ml (editable with the pencil). */
     val waterButtons: List<Int> = AppSettings.DEFAULT_WATER_BUTTONS_ML,
+    /** The user's own targets (null = recommended): the pencils prefill from these, not from a guess. */
+    val customWaterMl: Int? = null,
+    val customKcal: Int? = null,
 ) {
     /** No future days. */
     val canGoForward: Boolean get() = date < today
@@ -61,8 +64,11 @@ class NutritionViewModel @Inject constructor(
     val state: StateFlow<NutritionUiState> = combine(shownDay, today) { day, t -> minOf(LocalDate.ofEpochDay(day), t) to t }
         .distinctUntilChanged()
         .flatMapLatest { (d, t) ->
-            combine(tracker.observe(d), settings.settings.map { it.waterButtonsMl }.distinctUntilChanged()) { status, buttons ->
-                NutritionUiState(loading = false, date = d, today = t, day = status.day, targets = status.targets, goal = status.goal, waterButtons = buttons)
+            combine(tracker.observe(d), settings.settings.distinctUntilChanged()) { status, s ->
+                NutritionUiState(
+                    loading = false, date = d, today = t, day = status.day, targets = status.targets, goal = status.goal,
+                    waterButtons = s.waterButtonsMl, customWaterMl = s.customWaterMl, customKcal = s.customKcal,
+                )
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NutritionUiState())

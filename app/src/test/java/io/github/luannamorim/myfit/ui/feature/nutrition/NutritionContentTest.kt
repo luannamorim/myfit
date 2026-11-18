@@ -128,6 +128,24 @@ class NutritionContentTest {
     }
 
     @Test
+    fun ownTargetEqualToTheRecommended_isKept_whenSavingTheButtons() {
+        val saved = mutableListOf<Pair<Int?, List<Int>>>()
+        val kcal = mutableListOf<Int?>()
+        show(
+            state(targets = DailyTargets(2300, 2800, emptySet())).copy(customWaterMl = 2800, customKcal = 2300),
+            NutritionActions(onSetWater = { t, b -> saved += t to b }, onSetKcalTarget = { kcal += it }),
+        )
+        compose.onNodeWithContentDescription("Editar botões de água").performClick()
+        compose.onNodeWithText("Botão 1").performTextClearance()
+        compose.onNodeWithText("Botão 1").performTextInput("300")
+        compose.onNodeWithText("Salvar").performClick()
+        assertEquals(listOf<Pair<Int?, List<Int>>>(2800 to listOf(300, 500)), saved) // still the user's own 2.8 L
+        compose.onNodeWithContentDescription("Editar meta de calorias").performClick()
+        compose.onNodeWithText("Salvar").performClick()
+        assertEquals(listOf<Int?>(2300), kcal)
+    }
+
+    @Test
     fun kcalTarget_hasAPencil_andTheRecommendedAlwaysShows() {
         val saved = mutableListOf<Int?>()
         show(state(targets = DailyTargets(2500, 2800, emptySet(), recommendedKcal = 2300, recommendedWaterMl = 2800)), NutritionActions(onSetKcalTarget = { saved += it }))

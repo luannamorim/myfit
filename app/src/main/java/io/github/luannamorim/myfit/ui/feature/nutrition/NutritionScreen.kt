@@ -229,7 +229,7 @@ private fun WaterCard(state: NutritionUiState, actions: NutritionActions) {
         if (editingButtons) {
             Spacer(Modifier.height(Spacing.m))
             WaterEditor(
-                customMl = state.targets.waterMl?.takeIf { it != state.targets.recommendedWaterMl },
+                customMl = state.customWaterMl,
                 recommendedMl = state.targets.recommendedWaterMl,
                 buttons = state.waterButtons,
                 onSave = { t, b -> actions.onSetWater(t, b); editingButtons = false },
@@ -334,7 +334,7 @@ private fun CaloriesCard(state: NutritionUiState, actions: NutritionActions) {
         if (editing) {
             Spacer(Modifier.height(Spacing.m))
             KcalEditor(
-                customKcal = target?.takeIf { it != recommended },
+                customKcal = state.customKcal,
                 recommendedKcal = recommended,
                 onSave = { actions.onSetKcalTarget(it); editing = false },
                 onCancel = { editing = false },

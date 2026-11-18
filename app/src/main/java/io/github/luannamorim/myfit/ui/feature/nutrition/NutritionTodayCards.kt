@@ -102,17 +102,16 @@ private fun RingCard(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Ring(percent, ringColor)
             Spacer(Modifier.width(Spacing.s + Spacing.xs))
-            Column(Modifier.weight(1f)) {
-                Text(detail, style = MyFitTheme.type.caption, color = c.textSecondary)
-                if (missing.isNotEmpty()) {
-                    Text(
-                        stringResource(R.string.nutrition_fill, missing.map { stringResource(missingName(it)) }.joinToString(", ")),
-                        style = MyFitTheme.type.caption,
-                        color = c.accent,
-                        modifier = Modifier.padding(top = Spacing.xs),
-                    )
-                }
-            }
+            Text(detail, style = MyFitTheme.type.caption, color = c.textSecondary, modifier = Modifier.weight(1f))
+        }
+        // Under the ring at the card's full width: beside it (~46 dp on a 360 dp phone) it broke words mid-way.
+        if (missing.isNotEmpty()) {
+            Text(
+                stringResource(R.string.nutrition_fill, missing.map { stringResource(missingName(it)) }.joinToString(", ")),
+                style = MyFitTheme.type.caption,
+                color = c.accent,
+                modifier = Modifier.padding(top = Spacing.s),
+            )
         }
     }
 }
@@ -122,7 +121,7 @@ private fun RingCard(
 private fun Ring(percent: Int?, color: Color) {
     val c = MyFitTheme.colors
     val track = c.surfaceRaised
-    Box(Modifier.size(RING_SIZE), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(RING_SIZE).testTag("nutritionRing"), contentAlignment = Alignment.Center) {
         Canvas(Modifier.size(RING_SIZE)) {
             val stroke = RING_STROKE.toPx()
             val topLeft = Offset(stroke / 2, stroke / 2)

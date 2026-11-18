@@ -94,7 +94,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Turning a reminder's switch off stops it.
 
 ### 6b. Nutrition
-- [ ] The tab bar shows Home, Workouts, History, Progress and Nutrition; the gear next to the bell on Home opens Settings, and back returns to Home.
+- [ ] The tab bar shows Home, Workouts, History, Progress and Nutrition; the gear on Home opens Settings, and back returns to Home.
 - [ ] *Settings → Profile*: set the birth date (no future dates; "Clear" removes it) and the goal. With weight, height, sex and birth date set, Nutrition shows a water target (35 ml per kg) and a calorie target; a card without a target shows only what was logged (e.g. "1.5 L", "1,240 kcal") and "Fill in: …", which opens Progress or Settings.
 - [ ] Own targets: the pencil on the water card sets the day's target in liters (and the buttons), the pencil on the calories card the kcal target; "Recommended: …" stays under each bar, and "Use recommended (…)" goes back to it. Home's rings and the water reminder follow your target.
 - [ ] Water: +250 ml, +500 ml and *Other* (type an amount) add up; the ↶ icon in the card's right corner removes the last one. The pencil next to the total edits the two buttons' amounts (e.g. 300 and 600 ml); the water reminder's button uses the first one.
