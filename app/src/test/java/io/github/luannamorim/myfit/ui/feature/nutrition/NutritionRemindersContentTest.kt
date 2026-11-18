@@ -1,6 +1,7 @@
 package io.github.luannamorim.myfit.ui.feature.nutrition
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -84,6 +85,18 @@ class NutritionRemindersContentTest {
         compose.onNodeWithText("Nome da refeição").performTextInput("Almoço leve")
         compose.onNodeWithText("OK").performClick()
         assertEquals(listOf(1L to "Almoço leve"), renamed)
+    }
+
+    @Test
+    fun addingAMeal_asksForItsNameAndTime_together() {
+        val added = mutableListOf<Pair<Int, String>>()
+        show(NutritionReminders(), NutritionRemindersActions(onAddMeal = { m, n -> added += m to n }))
+        compose.onNodeWithText("Adicionar horário").performClick()
+        compose.onNodeWithText("12:00").assertIsDisplayed() // the time, tap to change
+        compose.onNodeWithText("Adicionar").assertIsNotEnabled() // a name first
+        compose.onNodeWithText("Nome da refeição").performTextInput("Pré-treino")
+        compose.onNodeWithText("Adicionar").performClick()
+        assertEquals(listOf(12 * 60 to "Pré-treino"), added)
     }
 
     @Test

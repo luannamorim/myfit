@@ -67,7 +67,8 @@ import java.time.LocalTime
 
 data class NutritionRemindersActions(
     val onBack: () -> Unit = {},
-    val onAddMeal: (Int) -> Unit = {},
+    /** A new meal time with the name the user typed. */
+    val onAddMeal: (Int, String) -> Unit = { _, _ -> },
     val onMealEnabled: (Long, Boolean) -> Unit = { _, _ -> },
     val onMealTime: (Long, Int) -> Unit = { _, _ -> },
     val onMealLabel: (Long, String) -> Unit = { _, _ -> },
@@ -100,7 +101,7 @@ fun NutritionRemindersScreen(onBack: () -> Unit, viewModel: NutritionRemindersVi
         state = state,
         actions = NutritionRemindersActions(
             onBack = onBack,
-            onAddMeal = { viewModel.addMeal(it); askPermission() },
+            onAddMeal = { minute, name -> viewModel.addMeal(minute, name); askPermission() },
             onMealEnabled = { id, on -> viewModel.setMealEnabled(id, on); if (on) askPermission() },
             onMealTime = viewModel::setMealTime,
             onMealLabel = viewModel::setMealLabel,
@@ -133,6 +134,10 @@ fun NutritionRemindersContent(state: NutritionRemindersUiState, actions: Nutriti
     val c = MyFitTheme.colors
     val r = state.reminders
     var picking by rememberSaveable(stateSaver = PickingSaver) { mutableStateOf<Picking?>(null) }
+    // The "new meal" form: the user names it and picks its time together.
+    var adding by rememberSaveable { mutableStateOf(false) }
+    var newName by rememberSaveable { mutableStateOf("") }
+    var newMinute by rememberSaveable { mutableStateOf(12 * 60) }
     Scaffold(
         modifier = modifier,
         containerColor = c.background,
@@ -171,7 +176,32 @@ fun NutritionRemindersContent(state: NutritionRemindersUiState, actions: Nutriti
                         onRename = { actions.onMealLabel(meal.id, it) },
                     )
                 }
-                SecondaryButton(stringResource(R.string.nutrition_reminders_add_time), onClick = { picking = Picking.NewMeal }, icon = Icons.Rounded.Add, modifier = Modifier.fillMaxWidth())
+                if (adding) {
+                    MyFitCard(Modifier.fillMaxWidth(), contentPadding = Spacing.m) {
+                        MyFitTextField(
+                            value = newName,
+                            onValueChange = { newName = it.take(40) },
+                            label = stringResource(R.string.nutrition_reminders_meal_name),
+                            placeholder = stringResource(R.string.nutrition_reminders_meal_name_hint),
+                        )
+                        TimeRow(stringResource(R.string.meal_time), newMinute, is24Hour) { picking = Picking.NewMeal }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            TextAction(stringResource(R.string.action_cancel), onClick = { adding = false }, color = c.textSecondary)
+                            TextAction(
+                                stringResource(R.string.nutrition_add),
+                                onClick = { actions.onAddMeal(newMinute, newName.trim()); adding = false },
+                                enabled = newName.isNotBlank(),
+                            )
+                        }
+                    }
+                } else {
+                    SecondaryButton(
+                        stringResource(R.string.nutrition_reminders_add_time),
+                        onClick = { newName = ""; newMinute = 12 * 60; adding = true },
+                        icon = Icons.Rounded.Add,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
 
                 SectionHeader(stringResource(R.string.nutrition_water), Modifier.padding(top = Spacing.s))
                 MyFitCard(Modifier.fillMaxWidth()) {
@@ -206,7 +236,7 @@ fun NutritionRemindersContent(state: NutritionRemindersUiState, actions: Nutriti
     }
     picking?.let { p ->
         val initial = when (p) {
-            Picking.NewMeal -> 12 * 60
+            Picking.NewMeal -> newMinute
             is Picking.Meal -> r.meals.firstOrNull { it.id == p.id }?.minuteOfDay ?: 12 * 60
             Picking.From -> r.water.fromMinute
             Picking.Until -> r.water.untilMinute
@@ -216,7 +246,7 @@ fun NutritionRemindersContent(state: NutritionRemindersUiState, actions: Nutriti
             is24Hour = is24Hour,
             onConfirm = { minute ->
                 when (p) {
-                    Picking.NewMeal -> actions.onAddMeal(minute)
+                    Picking.NewMeal -> newMinute = minute
                     is Picking.Meal -> actions.onMealTime(p.id, minute)
                     Picking.From -> actions.onWaterFrom(minute)
                     Picking.Until -> actions.onWaterUntil(minute)

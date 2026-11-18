@@ -28,9 +28,9 @@ class NutritionRemindersViewModelTest {
     fun meals_addedInTimeOrder_withoutDuplicates_toggled_moved_andDeleted() = runBlocking {
         val vm = vm()
         vm.state.awaitUntil { !it.loading }
-        vm.addMeal(12 * 60)
-        vm.addMeal(7 * 60)
-        vm.addMeal(12 * 60) // already there
+        vm.addMeal(12 * 60, "Almoço")
+        vm.addMeal(7 * 60, "Café")
+        vm.addMeal(12 * 60, "Outro almoço") // that time is already there
         val meals = vm.state.awaitUntil { it.reminders.meals.size == 2 }.reminders.meals
         assertEquals(listOf(7 * 60, 12 * 60), meals.map { it.minuteOfDay })
         assertEquals(meals, stored().meals)
@@ -47,12 +47,12 @@ class NutritionRemindersViewModelTest {
     }
 
     @Test
-    fun newMeals_getANameByTheHour_andCanBeRenamed() = runBlocking {
+    fun newMeals_keepTheNameTheUserTyped_andCanBeRenamed() = runBlocking {
         val vm = vm()
         vm.state.awaitUntil { !it.loading }
-        listOf(7 * 60, 12 * 60, 16 * 60, 20 * 60).forEach { vm.addMeal(it) }
+        listOf(7 * 60 to "  Café ", 12 * 60 to "Almoço", 16 * 60 to "Lanche da tarde", 20 * 60 to "Jantar").forEach { (m, n) -> vm.addMeal(m, n) }
         val meals = vm.state.awaitUntil { it.reminders.meals.size == 4 }.reminders.meals
-        assertEquals(listOf("Café da manhã", "Almoço", "Lanche", "Jantar"), meals.map { it.label })
+        assertEquals(listOf("Café", "Almoço", "Lanche da tarde", "Jantar"), meals.map { it.label }) // as typed (trimmed), no names by the hour
         vm.setMealLabel(meals[2].id, "  Pré-treino ")
         vm.state.awaitUntil { it.reminders.meals[2].label == "Pré-treino" }
         assertEquals("Pré-treino", stored().meals[2].label)

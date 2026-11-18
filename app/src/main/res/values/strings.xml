@@ -587,10 +587,6 @@
     </plurals>
     <string name="nutrition_water_buttons_edit">Edit water buttons</string>
     <string name="nutrition_water_button">Button %1$d</string>
-    <string name="nutrition_meal_breakfast">Breakfast</string>
-    <string name="nutrition_meal_lunch">Lunch</string>
-    <string name="nutrition_meal_snack">Snack</string>
-    <string name="nutrition_meal_dinner">Dinner</string>
     <string name="nutrition_reminders_meal_name">Meal name</string>
     <string name="nutrition_reminders_meal_name_ok">OK</string>
     <string name="nutrition_reminders_meal_rename">Rename</string>
@@ -601,4 +597,5 @@
     <string name="nutrition_use_recommended_liters">Use recommended (%1$s L)</string>
     <string name="nutrition_use_recommended_kcal">Use recommended (%1$s kcal)</string>
     <string name="nutrition_kcal_edit">Edit calorie target</string>
+    <string name="nutrition_reminders_meal_name_hint">e.g. Lunch</string>
 </resources>
