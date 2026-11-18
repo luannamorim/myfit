@@ -87,7 +87,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Body cards always present once there is an assessment: without height BMI shows "—" and "Height missing"; without Sex body fat shows "—" and "Set your sex" (in Portuguese "Falta a altura" / "Defina o sexo"). Body fat and BMI cards always have the same height, even when a label wraps (bigger font).
 
 ### 6a. Reminders
-- [ ] Home: the bell in the top-right corner (outline, gray, no background) opens Reminders.
+- [ ] Workouts tab: the bell next to + (outline, gray) opens Reminders. Home's header has only the settings gear.
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.
 - [ ] A one-off reminder with "Other activity" (tap "Swimming" to fill the name) on a date: it fires once and then shows as off.
 - [ ] Restart the phone: a weekly reminder still fires at its next time.
@@ -96,6 +96,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 ### 6b. Nutrition
 - [ ] The tab bar shows Home, Workouts, History, Progress and Nutrition; the gear next to the bell on Home opens Settings, and back returns to Home.
 - [ ] *Settings → Profile*: set the birth date (no future dates; "Clear" removes it) and the goal. With weight, height, sex and birth date set, Nutrition shows a water target (35 ml per kg) and a calorie target; a card without a target shows only what was logged (e.g. "1.5 L", "1,240 kcal") and "Fill in: …", which opens Progress or Settings.
+- [ ] Own targets: the pencil on the water card sets the day's target in liters (and the buttons), the pencil on the calories card the kcal target; "Recommended: …" stays under each bar, and "Use recommended (…)" goes back to it. Home's rings and the water reminder follow your target.
 - [ ] Water: +250 ml, +500 ml and *Other* (type an amount) add up; the ↶ icon in the card's right corner removes the last one. The pencil next to the total edits the two buttons' amounts (e.g. 300 and 600 ml); the water reminder's button uses the first one.
 - [ ] Meal: *Add meal*, describe it, tap *Ask AI*: the share sheet opens with the question ready; pick an AI app, read the answer, come back and type the calories, change the time, save. It shows in the list and the total; tap it to edit or delete.
 - [ ] Go to yesterday with ‹: its own meals and water; › never goes past today. A weigh-in today doesn't change yesterday's target.

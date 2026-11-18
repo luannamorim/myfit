@@ -104,6 +104,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 27a. MUST log, per day, water (quick +250/+500 ml or another amount, with undo of the last one) and meals (free-text description, calories, time), browsing past days but not future ones.
 27b. MUST show daily targets for water (35 ml per kg) and calories (Mifflin-St Jeor basal rate × an activity factor from the days with workouts or activities in the previous 4 weeks, adjusted by the goal: lose −500, maintain, gain +300, never below the basal rate), computed as they were on the shown day, and say what is missing (weight, height, sex, birth date) when a target can't be computed.
 27c. SHOULD offer an *Ask AI* button that hands the meal description to any AI app through the Android share sheet, so the user can type back the calories it estimates. The app itself never goes online.
+27b'. MAY let the user set their own daily water and calorie targets, always showing the recommendation next to them.
 27d. SHOULD show today's water and calories on Home as the percent of each target (rings), opening the Nutrition tab.
 27e. SHOULD remind the user to eat at chosen daily times and to drink water every 1–3 hours inside a daily window (fixed times; a water reminder is skipped once today's target is reached), with a "+250 ml" action that logs water without opening the app.
 
