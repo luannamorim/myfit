@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.ui.feature.home
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.model.ThemeMode
@@ -34,5 +35,7 @@ class HomeWeekTest {
         assertEquals(3, compose.onAllNodesWithContentDescription("Treino:", substring = true, useUnmergedTree = true).fetchSemanticsNodes().size)
         assertEquals(3, compose.onAllNodesWithContentDescription("Calorias na meta:", substring = true, useUnmergedTree = true).fetchSemanticsNodes().size)
         assertEquals(2, compose.onAllNodesWithContentDescription("Água na meta:", substring = true, useUnmergedTree = true).fetchSemanticsNodes().size)
+        // User request: no "3 treinos · 1 h 16 min" line under the week.
+        compose.onNodeWithText("3 treinos", substring = true).assertDoesNotExist()
     }
 }

@@ -298,7 +298,6 @@
     <string name="home_body_empty">Registre peso e medidas para acompanhar sua evolução.</string>
     <string name="home_body_cta">Nova avaliação</string>
     <string name="home_week">Esta semana</string>
-    <string name="home_week_summary">%1$s · %2$s</string>
     <plurals name="home_sessions_count">
         <item quantity="one">%d treino</item>
         <item quantity="other">%d treinos</item>

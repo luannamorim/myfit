@@ -102,7 +102,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Go to yesterday with ‹: its own meals and water; › never goes past today. A weigh-in today doesn't change yesterday's target.
 - [ ] Back up and restore: meals, water, birth date and goal come back.
 - [ ] History: a day with water or meals logged shows a Nutrition card (water and calories against the targets, ✓ when hit). The calendar shows up to three dots per day, always in the same order and color (workout green, calories on target orange, water on target blue), with a legend under it; there's no weekly/monthly Nutrition card. Calories count as hit at or under the target to lose fat, at or over to gain muscle, within 10 % to maintain.
-- [ ] Home, "This week": three rows (workout, food, water icons at the start), a check on each day done in the row's color (green, orange, blue); today has a border, future days are faded.
+- [ ] Home, "This week": three rows (workout, food, water icons at the start), a check on each day done in the row's color (green, orange, blue); today has a border, future days are faded. No summary line under it.
 - [ ] Nutrition reminders: *Add time* asks for the meal's name together with the time; *Add* stays off until there's a name.
 - [ ] Home, after two workouts (or a workout and an activity) today: the done card shows "Today: 2 workouts · 1 activity", the total time, and each one with its start time, latest first; tapping a line opens it. With only one, the card is as before.
 - [ ] Home: "Nutrition today" (before "Body") shows two rings with the percent of the water and calorie targets; tapping one opens the Nutrition tab. Past the target the ring is full and shows e.g. "108%" (amber for calories when the goal is Lose).

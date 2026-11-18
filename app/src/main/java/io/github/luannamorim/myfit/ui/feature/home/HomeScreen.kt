@@ -316,21 +316,6 @@ private fun WeekCard(state: HomeUiState, onClick: () -> Unit) {
         WeekRow(Icons.Outlined.FitnessCenter, c.accent, days, R.string.home_week_workout, state.today) { it.trained }
         WeekRow(Icons.Outlined.Restaurant, c.food, days, R.string.home_week_food, state.today) { it.ateOnTarget }
         WeekRow(Icons.Outlined.WaterDrop, c.water, days, R.string.home_week_water, state.today) { it.drankOnTarget }
-        Spacer(Modifier.height(Spacing.m))
-        Text(
-            stringResource(
-                R.string.home_week_summary,
-                pluralStringResource(R.plurals.home_sessions_count, state.week.sessions, state.week.sessions) +
-                    if (state.week.activities > 0) {
-                        " · " + pluralStringResource(R.plurals.home_activities_count, state.week.activities, state.week.activities)
-                    } else {
-                        ""
-                    },
-                Durations.human(state.week.totalDurationMs),
-            ),
-            style = MyFitTheme.type.caption,
-            color = c.textSecondary,
-        )
     }
 }
 

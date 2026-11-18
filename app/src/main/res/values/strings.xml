@@ -274,7 +274,6 @@
     <string name="home_body_empty">Log your weight and measurements to track your progress.</string>
     <string name="home_body_cta">New assessment</string>
     <string name="home_week">This week</string>
-    <string name="home_week_summary">%1$s · %2$s</string>
     <plurals name="home_sessions_count">
         <item quantity="one">%d workout</item>
         <item quantity="other">%d workouts</item>
