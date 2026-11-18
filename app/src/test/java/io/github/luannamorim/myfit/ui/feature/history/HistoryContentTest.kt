@@ -107,4 +107,48 @@ class HistoryContentTest {
         compose.onNodeWithText("comida").assertIsDisplayed()
         compose.onNodeWithText("água").assertIsDisplayed()
     }
+
+    @Test
+    fun summary_showsFoodAndWaterDaysOnTarget_asHitsOverDays() {
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                HistoryContent(
+                    state = HistoryUiState(
+                        month = YearMonth.of(2026, 11), today = day, selected = day, summaryRange = week, isLoading = false,
+                        periodFood = DaysOnTarget(3, 7), periodWater = DaysOnTarget(5, 7),
+                    ),
+                    onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
+                )
+            }
+        }
+        compose.onNodeWithText("Comida na meta").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Água na meta").assertIsDisplayed()
+        compose.onNodeWithText("3/7").assertIsDisplayed()
+        compose.onNodeWithText("5/7").assertIsDisplayed()
+    }
+
+    @Test
+    fun summary_hidesTheFoodAndWaterTiles_whenNothingWasLogged() {
+        show(SummaryPeriod.WEEK, null)
+        compose.onNodeWithText("Comida na meta").assertDoesNotExist()
+        compose.onNodeWithText("Água na meta").assertDoesNotExist()
+    }
+
+    @Test
+    fun summary_showsWeightLifted_insteadOfFrequency() {
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                HistoryContent(
+                    state = HistoryUiState(
+                        month = YearMonth.of(2026, 11), today = day, selected = day, summaryRange = week, isLoading = false,
+                        summary = PeriodSummary(3, 120 * 60_000L, 3.0, emptyList(), volumeKg = 12480.0),
+                    ),
+                    onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
+                )
+            }
+        }
+        compose.onNodeWithText("Peso levantado").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("12.480").assertIsDisplayed()
+        compose.onNodeWithText("Frequência").assertDoesNotExist()
+    }
 }

@@ -65,4 +65,12 @@ class HistoryCalculatorTest {
         assertEquals(LocalDate.of(2026, 10, 26), grid.start) // Nov 1, 2026 is a Sunday
         assertEquals(LocalDate.of(2026, 12, 6), grid.endInclusive)
     }
+
+    @Test
+    fun summary_addsUpTheWeightLiftedInTheRange() {
+        val d = LocalDate.of(2026, 11, 17)
+        fun s(id: Long, day: LocalDate, kg: Double) = SessionSummary(id, "Treino", day, java.time.LocalTime.NOON, 3_600_000, 10, listOf("Agachamento"), volumeKg = kg)
+        val summary = HistoryCalculator.summarize(listOf(s(1, d, 4800.0), s(2, d.minusDays(1), 3250.5), s(3, d.minusDays(30), 9999.0)), d.minusDays(6)..d)
+        assertEquals(8050.5, summary.volumeKg, 0.0)
+    }
 }

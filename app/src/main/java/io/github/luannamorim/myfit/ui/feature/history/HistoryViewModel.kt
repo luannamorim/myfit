@@ -29,6 +29,9 @@ import javax.inject.Inject
 
 enum class SummaryPeriod { WEEK, MONTH }
 
+/** Days of the summary period (up to today) that hit a target: shown as "hit/days". */
+data class DaysOnTarget(val hit: Int, val days: Int)
+
 data class HistoryUiState(
     val month: YearMonth,
     val today: LocalDate,
@@ -47,6 +50,9 @@ data class HistoryUiState(
     /** Calendar dots: days that hit the calorie target and the water target. */
     val foodOnTarget: Set<LocalDate> = emptySet(),
     val waterOnTarget: Set<LocalDate> = emptySet(),
+    /** Summary tiles "Food/Water on target"; null = nothing logged in the period (tiles hidden). */
+    val periodFood: DaysOnTarget? = null,
+    val periodWater: DaysOnTarget? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -79,6 +85,10 @@ class HistoryViewModel @Inject constructor(
 
     val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions, nutrition) { m, d, p, (items, logged), (dayNutrition, gridNutrition) ->
         val range = rangeOf(p, d, m)
+        // Days of the period so far: a week in progress isn't counted against days still to come.
+        val elapsed = if (range.start.isAfter(today)) 0 else (range.start.toEpochDay()..minOf(range.endInclusive, today).toEpochDay()).count()
+        val periodDays = gridNutrition.filter { it.day.date in range && !it.day.date.isAfter(today) }
+        val periodLogged = periodDays.any { it.day.waterEntries > 0 || it.day.meals.isNotEmpty() }
         val monthRange = HistoryCalculator.monthOf(m)
         HistoryUiState(
             month = m,
@@ -96,6 +106,8 @@ class HistoryViewModel @Inject constructor(
             dayNutrition = dayNutrition,
             foodOnTarget = gridNutrition.filter { NutritionGoals.kcalHit(it.day, it.targets, it.goal) == true }.map { it.day.date }.toSet(),
             waterOnTarget = gridNutrition.filter { NutritionGoals.waterHit(it.day, it.targets) == true }.map { it.day.date }.toSet(),
+            periodFood = if (periodLogged) DaysOnTarget(periodDays.count { NutritionGoals.kcalHit(it.day, it.targets, it.goal) == true }, elapsed) else null,
+            periodWater = if (periodLogged) DaysOnTarget(periodDays.count { NutritionGoals.waterHit(it.day, it.targets) == true }, elapsed) else null,
         )
     }.stateIn(
         viewModelScope,

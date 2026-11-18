@@ -8,6 +8,7 @@ import io.github.luannamorim.myfit.domain.history.SessionDetail
 import io.github.luannamorim.myfit.domain.history.SessionExerciseDetail
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.domain.model.Intensity
+import io.github.luannamorim.myfit.domain.model.ExerciseMeasure
 import io.github.luannamorim.myfit.domain.model.ItemStatus
 import io.github.luannamorim.myfit.domain.model.SessionStatus
 import io.github.luannamorim.myfit.domain.session.SessionEngine
@@ -75,6 +76,10 @@ class HistoryRepository @Inject constructor(
             exercises = ordered.filter { e -> e.sets.any { it.status == ItemStatus.DONE } }.map { ExerciseSeed.displayName(it.exercise.seedKey, it.exercise.name) },
             intensity = session.intensity,
             imagePath = session.imagePath,
+            volumeKg = ordered.filter { it.exercise.measure == ExerciseMeasure.REPS }
+                .flatMap { it.sets }
+                .filter { it.status == ItemStatus.DONE }
+                .sumOf { (it.actualReps ?: 0) * (it.actualLoadKg ?: 0.0) },
         )
     }
 }

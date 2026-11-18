@@ -238,8 +238,6 @@
     <string name="history_month">Month</string>
     <string name="history_sessions">Workouts</string>
     <string name="history_total_time">Total time</string>
-    <string name="history_frequency">Frequency</string>
-    <string name="history_frequency_value">%1$s×/wk</string>
     <string name="history_no_sessions_day">Nothing logged on this day.</string>
     <string name="history_month_sessions">Workouts this month</string>
     <string name="history_activities">Activities</string>
@@ -607,4 +605,12 @@
     <string name="calendar_legend_workout">workout</string>
     <string name="calendar_legend_food">food</string>
     <string name="calendar_legend_water">water</string>
+    <string name="history_food_on_target">Food on target</string>
+    <string name="history_water_on_target">Water on target</string>
+    <string name="history_days_on_target">%1$d/%2$d</string>
+    <plurals name="history_days_unit">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <string name="history_volume">Weight lifted</string>
 </resources>

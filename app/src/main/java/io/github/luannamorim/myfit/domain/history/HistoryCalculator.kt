@@ -24,6 +24,8 @@ data class SessionSummary(
     val exercises: List<String>,
     val intensity: Intensity? = null,
     val imagePath: String? = null,
+    /** kg × reps of the sets done (load-and-reps exercises only), like the workout summary's volume. */
+    val volumeKg: Double = 0.0,
 )
 
 data class ExerciseFrequency(val name: String, val sessions: Int)
@@ -40,6 +42,8 @@ data class PeriodSummary(
     val exercises: List<ExerciseFrequency>,
     val activities: Int = 0,
     val sports: List<SportFrequency> = emptyList(),
+    /** Weight lifted in the period: the sum of the workouts' volumes. */
+    val volumeKg: Double = 0.0,
 )
 
 data class SessionExerciseDetail(
@@ -85,6 +89,7 @@ object HistoryCalculator {
             avgPerWeek = if (weeks > 0) count / weeks else 0.0,
             exercises = frequency,
             activities = activitiesInRange.size,
+            volumeKg = inRange.sumOf { it.volumeKg },
             sports = sports,
         )
     }

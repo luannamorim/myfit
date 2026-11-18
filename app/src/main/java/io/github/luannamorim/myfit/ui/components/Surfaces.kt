@@ -89,14 +89,14 @@ fun SectionHeader(
  * Screen readers read [dotDescription] with the label ("BMI Good").
  */
 @Composable
-fun LabelWithDot(label: String, dotColor: Color?, dotDescription: String?, icon: ImageVector? = null) {
+fun LabelWithDot(label: String, dotColor: Color?, dotDescription: String?, icon: ImageVector? = null, iconTint: Color? = null) {
     val style = MyFitTheme.type.caption
     val color = MyFitTheme.colors.textSecondary
     // Top-aligned: the icon and the dot stay level with the first line when the label wraps (big fonts).
     Row {
         // Decorative: the label says what the card is.
         if (icon != null) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
+            Icon(icon, contentDescription = null, tint = iconTint ?: color, modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(6.dp))
         }
         if (dotColor == null) {
@@ -130,10 +130,11 @@ fun StatTile(
     indicatorDescription: String? = null,
     hint: String? = null,
     icon: ImageVector? = null,
+    iconTint: Color? = null,
 ) {
     val c = MyFitTheme.colors
     MyFitCard(modifier) {
-        LabelWithDot(label, indicatorColor, indicatorDescription, icon)
+        LabelWithDot(label, indicatorColor, indicatorDescription, icon, iconTint)
         Spacer(Modifier.height(Spacing.s))
         Row(verticalAlignment = Alignment.Bottom) {
             // Shrinks instead of wrapping (e.g. "12 h 30 min" in a half-width tile). Auto-size shrinks the line

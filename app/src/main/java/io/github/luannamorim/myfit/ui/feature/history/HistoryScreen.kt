@@ -19,9 +19,17 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.dp
 import io.github.luannamorim.myfit.R
+import io.github.luannamorim.myfit.core.format.formatThousands
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.Durations
-import io.github.luannamorim.myfit.core.format.formatOneDecimal
 import io.github.luannamorim.myfit.domain.history.SessionSummary
 import io.github.luannamorim.myfit.ui.common.icon
 import io.github.luannamorim.myfit.ui.common.labelRes
@@ -99,12 +107,17 @@ fun HistoryContent(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
             StatTile(stringResource(R.string.history_total_time), Durations.human(s.totalDurationMs), Modifier.weight(1f))
-            StatTile(
-                stringResource(R.string.history_frequency),
-                stringResource(R.string.history_frequency_value, formatOneDecimal(s.avgPerWeek)),
-                Modifier.weight(1f),
-            )
+            // Replaces "Frequency" (user request, 1.15.0): kg × reps of the sets done in the period.
+            StatTile(stringResource(R.string.history_volume), formatThousands(s.volumeKg), Modifier.weight(1f), unit = "kg")
         }
+        // Food and water days on target in the period (user-approved mockup, 1.15.0), in the kinds' colors.
+        if (state.periodFood != null && state.periodWater != null) {
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                DaysOnTargetTile(stringResource(R.string.history_food_on_target), Icons.Outlined.Restaurant, c.food, state.periodFood, Modifier.weight(1f).fillMaxHeight())
+                DaysOnTargetTile(stringResource(R.string.history_water_on_target), Icons.Outlined.WaterDrop, c.water, state.periodWater, Modifier.weight(1f).fillMaxHeight())
+            }
+        }
+
         if (s.sports.isNotEmpty()) {
             MyFitCard {
                 Text(stringResource(R.string.history_sports), style = MyFitTheme.type.caption, color = c.textSecondary)
@@ -158,3 +171,16 @@ fun SessionRow(session: SessionSummary, onClick: () -> Unit, showDate: Boolean =
         }
     }
 }
+
+@Composable
+private fun DaysOnTargetTile(label: String, icon: ImageVector, tint: Color, value: DaysOnTarget, modifier: Modifier) {
+    StatTile(
+        label = label,
+        value = stringResource(R.string.history_days_on_target, value.hit, value.days),
+        unit = pluralStringResource(R.plurals.history_days_unit, value.days),
+        icon = icon,
+        iconTint = tint,
+        modifier = modifier,
+    )
+}
+

@@ -22,6 +22,7 @@ import io.github.luannamorim.myfit.testutil.awaitUntil
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -127,5 +128,22 @@ class HistoryViewModelTest {
         assertEquals(2800, state.dayNutrition!!.targets.waterMl)
         assertTrue(today.minusDays(1) !in state.waterOnTarget) // 1 L of 2.8: missed
         assertTrue(state.foodOnTarget.isEmpty()) // no meals logged
+    }
+
+    @Test
+    fun summary_countsDaysOnTargetForFoodAndWater_upToToday_hiddenWithoutLogs() = runBlocking {
+        val today = env.time.today()
+        val vm = viewModel()
+        val empty = vm.state.awaitUntil { !it.isLoading }
+        assertNull(empty.periodFood) // nothing logged: the tiles stay hidden
+        assertNull(empty.periodWater)
+
+        body.save(BodyAssessment(date = today.minusDays(10), values = mapOf(Measure.WEIGHT to 80.0)))
+        nutrition.addWater(today, 3000) // 2.8 L target: hit
+        val week = HistoryCalculator.weekOf(today)
+        val elapsed = (week.start.toEpochDay()..today.toEpochDay()).count()
+        val s = vm.state.awaitUntil { it.periodWater?.hit == 1 }
+        assertEquals(DaysOnTarget(1, elapsed), s.periodWater)
+        assertEquals(DaysOnTarget(0, elapsed), s.periodFood) // logged water but no meals: 0 days on target
     }
 }

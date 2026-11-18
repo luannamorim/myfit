@@ -64,7 +64,10 @@ class HistoryScreenshotTest {
                 summary = PeriodSummary(
                     3, 304 * 60_000L, 5.0, listOf(ExerciseFrequency("Bent-over row", 2), ExerciseFrequency("Barbell back squat", 1)),
                     activities = 2, sports = listOf(SportFrequency(Sport.SOCCER, null, 1), SportFrequency(Sport.SWIMMING, null, 1)),
+                    volumeKg = 12480.0,
                 ),
+                periodFood = DaysOnTarget(3, 4),
+                periodWater = DaysOnTarget(4, 4),
                 summaryRange = HistoryCalculator.weekOf(today),
                 isLoading = false,
                 dayNutrition = nutrition(today, 2900, 2410),
