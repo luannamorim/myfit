@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -21,6 +23,7 @@ import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import io.github.luannamorim.myfit.domain.nutrition.TargetMissing
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -48,7 +51,7 @@ class NutritionTodayCardsNarrowTest {
                 ) }
             }
         }
-        val detail = compose.onNodeWithText("1.880 de\n2.300 kcal", useUnmergedTree = true)
+        val detail = compose.onNodeWithText("1.880 de\n2.300\u00A0k", useUnmergedTree = true)
         detail.assertIsDisplayed()
         val card = compose.onNodeWithTag("nutritionCard_kcal").getBoundsInRoot()
         val text = detail.getBoundsInRoot()
@@ -75,5 +78,25 @@ class NutritionTodayCardsNarrowTest {
         val hint = compose.onNodeWithText("Preencha: peso, altura, sexo, data de nascimento", useUnmergedTree = true).getBoundsInRoot()
         val ring = compose.onAllNodesWithTag("nutritionRing", useUnmergedTree = true)[1].getBoundsInRoot()
         assertTrue("hint $hint should start under the ring $ring", hint.left < ring.right && hint.top >= ring.bottom)
+    }
+
+    @Test
+    fun caloriesDetail_fitsInTwoLines_onA360dpPhone() {
+        val today = LocalDate.of(2026, 11, 17)
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                Box(Modifier.width(360.dp).padding(horizontal = Spacing.screen)) { // a 360 dp phone
+                    NutritionTodayCards(
+                        NutritionStatus(NutritionDay(today, listOf(Meal(1, today, 600, null, 1880)), 1500, 6), DailyTargets(2300, 2800, emptySet()), NutritionGoal.MAINTAIN),
+                        onOpen = {},
+                    )
+                }
+            }
+        }
+        // User report: "kcal" fell to a third line under the number; "k" keeps it on the number's line.
+        val results = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithText("1.880 de\n2.300\u00A0k", useUnmergedTree = true).fetchSemanticsNode()
+            .config[SemanticsActions.GetTextLayoutResult].action?.invoke(results)
+        assertEquals(2, results.single().lineCount)
     }
 }

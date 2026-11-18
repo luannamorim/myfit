@@ -69,7 +69,8 @@ fun NutritionTodayCards(status: NutritionStatus, onOpen: () -> Unit, modifier: M
             done = day.kcal,
             target = targets.kcal,
             detail = targets.kcal?.let { stringResource(R.string.home_nutrition_kcal_detail, formatThousands(day.kcal.toDouble()), formatThousands(it.toDouble())) }
-                ?: stringResource(R.string.nutrition_kcal, formatThousands(day.kcal.toDouble())),
+                // "k", not "kcal": the unit stays on the number's line in the narrow column beside the ring.
+                ?: stringResource(R.string.home_nutrition_kcal_short, formatThousands(day.kcal.toDouble())),
             missing = if (targets.kcal == null) targets.missing.sorted() else emptyList(),
             // Past the target matters when losing fat (same rule as the tab).
             ringColor = if (over && status.goal == NutritionGoal.LOSE) c.warning else c.accent,
@@ -94,7 +95,8 @@ private fun RingCard(
     val c = MyFitTheme.colors
     // Below the target it never reads 100 % (the water reminder still fires until the target is reached).
     val percent = target?.takeIf { it > 0 }?.let { if (done < it) minOf((done * 100f / it).roundToInt(), 99) else (done * 100f / it).roundToInt() }
-    MyFitCard(modifier, onClick = onOpen) {
+    // 12 dp inside (not 16): on a 360 dp phone the column beside the ring needs the room for "2.300 k".
+    MyFitCard(modifier, onClick = onOpen, contentPadding = Spacing.m) {
         LabelWithDot(label, dotColor = null, dotDescription = null, icon = icon)
         Spacer(Modifier.height(Spacing.m))
         // The detail always sits beside the ring and wraps into lines when narrow (it used to drop under the

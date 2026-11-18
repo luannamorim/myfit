@@ -49,7 +49,7 @@ class NutritionTodayCardsTest {
         compose.onNodeWithText("54%").assertIsDisplayed()
         compose.onNodeWithText("82%").assertIsDisplayed()
         compose.onNodeWithText("1,5 de\n2,8 L", useUnmergedTree = true).assertIsDisplayed()
-        compose.onNodeWithText("1.880 de\n2.300 kcal", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithText("1.880 de\n2.300\u00A0k", useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test

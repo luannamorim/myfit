@@ -293,7 +293,8 @@
     <string name="home_nutrition">Nutrição hoje</string>
     <string name="home_nutrition_percent">%1$d%%</string>
     <string name="home_nutrition_water_detail">%1$s de\n%2$s L</string>
-    <string name="home_nutrition_kcal_detail">%1$s de\n%2$s kcal</string>
+    <string name="home_nutrition_kcal_detail">%1$s de\n%2$s\u00A0k</string>
+    <string name="home_nutrition_kcal_short">%1$s\u00A0k</string>
     <string name="home_body_empty">Registre peso e medidas para acompanhar sua evolução.</string>
     <string name="home_body_cta">Nova avaliação</string>
     <string name="home_week">Esta semana</string>
