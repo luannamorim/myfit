@@ -240,10 +240,8 @@
     <string name="history_total_time">Total time</string>
     <string name="history_frequency">Frequency</string>
     <string name="history_frequency_value">%1$s×/wk</string>
-    <string name="history_exercises">Exercises done</string>
     <string name="history_no_sessions_day">Nothing logged on this day.</string>
     <string name="history_month_sessions">Workouts this month</string>
-    <string name="history_add_activity">Activity</string>
     <string name="history_activities">Activities</string>
     <string name="history_month_activities">Activities this month</string>
     <string name="history_sports">Sports</string>

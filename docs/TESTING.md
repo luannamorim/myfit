@@ -65,7 +65,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Toggle Week/Month in the summaries. Workouts, total time and frequency match what was done.
 - [ ] With more than 10 hours in the period (Month) and a bigger system font: "Tempo total" stays on one line (a bit smaller) and its card is as tall as the others.
 - [ ] The session row shows the intensity; the session detail shows the photo, and intensity and photo can be changed or removed there.
-- [ ] "+ Activity" on a past day: log swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name. They appear on that day, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it.
+- [ ] Home → *Start activity* (log it): swimming (distance in m), indoor cycling (drawing at the top) and a "Free" one with your own name, one of them on a past date. They appear on that day in History, mark the calendar and count in Activities, Total time and the Sports card. Tap one to edit or delete it. History has no "+ Activity" button and no "Exercises done" card.
 - [ ] Home: "Start activity" opens the same screen; the week counts the activity days and their time.
 - [ ] **Live:** pick Running → *Start timer* → allow notifications and location. Walk outdoors for a few minutes with the screen locked: the notification counts up and shows the km. Pause/resume from the notification. *Finish* pauses the timer and opens "Activity done" (time, distance, intensity, notes, photo); nothing is saved yet: back returns to the paused timer, *Save* logs it and closes it for good.
 - [ ] Open a logged activity from History: the sport is fixed (no sport chips); date, time, distance, intensity and photo can be changed.

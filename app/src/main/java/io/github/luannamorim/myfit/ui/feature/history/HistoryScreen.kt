@@ -30,7 +30,6 @@ import io.github.luannamorim.myfit.ui.components.MyFitChip
 import io.github.luannamorim.myfit.ui.components.SectionHeader
 import io.github.luannamorim.myfit.ui.components.StatTile
 import io.github.luannamorim.myfit.ui.components.TabScreen
-import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.feature.activity.ActivityRow
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
@@ -40,11 +39,10 @@ fun HistoryScreen(
     onOpenSession: (Long) -> Unit,
     modifier: Modifier = Modifier,
     onOpenActivity: (Long) -> Unit = {},
-    onNewActivity: (java.time.LocalDate) -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    HistoryContent(state, viewModel::select, viewModel::showMonth, viewModel::setPeriod, onOpenSession, modifier, onOpenActivity, onNewActivity)
+    HistoryContent(state, viewModel::select, viewModel::showMonth, viewModel::setPeriod, onOpenSession, modifier, onOpenActivity)
 }
 
 @Composable
@@ -56,7 +54,6 @@ fun HistoryContent(
     onOpenSession: (Long) -> Unit,
     modifier: Modifier = Modifier,
     onOpenActivity: (Long) -> Unit = {},
-    onNewActivity: (java.time.LocalDate) -> Unit = {},
 ) {
     val c = MyFitTheme.colors
     TabScreen(title = stringResource(R.string.nav_history), modifier = modifier) {
@@ -71,15 +68,7 @@ fun HistoryContent(
             )
         }
 
-        SectionHeader(
-            Dates.long(state.selected),
-            action = {
-                // Log a sport on the selected day (no future days).
-                if (!state.selected.isAfter(state.today)) {
-                    TextAction("+ " + stringResource(R.string.history_add_activity), onClick = { onNewActivity(state.selected) })
-                }
-            },
-        )
+        SectionHeader(Dates.long(state.selected))
         if (state.daySessions.isEmpty() && state.dayActivities.isEmpty()) {
             Text(stringResource(R.string.history_no_sessions_day), style = MyFitTheme.type.body, color = c.textSecondary)
         } else {
@@ -112,18 +101,6 @@ fun HistoryContent(
                 Modifier.weight(1f),
             )
         }
-        if (s.exercises.isNotEmpty()) {
-            MyFitCard {
-                Text(stringResource(R.string.history_exercises), style = MyFitTheme.type.caption, color = c.textSecondary)
-                s.exercises.take(MAX_EXERCISES).forEach { ex ->
-                    Row(Modifier.fillMaxWidth().padding(top = Spacing.s)) {
-                        Text(ex.name, style = MyFitTheme.type.body, color = c.textPrimary, modifier = Modifier.weight(1f))
-                        Text(stringResource(R.string.history_exercise_times, ex.sessions), style = MyFitTheme.type.numeric, color = c.textSecondary)
-                    }
-                }
-            }
-        }
-
         if (s.sports.isNotEmpty()) {
             MyFitCard {
                 Text(stringResource(R.string.history_sports), style = MyFitTheme.type.caption, color = c.textSecondary)

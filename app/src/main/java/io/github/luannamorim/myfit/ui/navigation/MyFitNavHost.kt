@@ -198,7 +198,6 @@ fun MyFitNavHost(
                     HistoryScreen(
                         onOpenSession = { navController.navigate(SessionDetailRoute(it)) },
                         onOpenActivity = { navController.navigate(ActivityEditorRoute(activityId = it)) },
-                        onNewActivity = { navController.navigate(ActivityEditorRoute(dateEpochDay = it.toEpochDay())) },
                     )
                 }
                 composable<EvolutionRoute> {

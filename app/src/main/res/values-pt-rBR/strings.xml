@@ -263,10 +263,8 @@
     <string name="history_total_time">Tempo total</string>
     <string name="history_frequency">Frequência</string>
     <string name="history_frequency_value">%1$s×/sem</string>
-    <string name="history_exercises">Exercícios realizados</string>
     <string name="history_no_sessions_day">Nada registrado neste dia.</string>
     <string name="history_month_sessions">Treinos do mês</string>
-    <string name="history_add_activity">Atividade</string>
     <string name="history_activities">Atividades</string>
     <string name="history_month_activities">Atividades do mês</string>
     <string name="history_sports">Esportes</string>
