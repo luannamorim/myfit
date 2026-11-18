@@ -42,6 +42,8 @@ class SettingsRepository @Inject constructor(
         val goal = stringPreferencesKey("nutrition_goal")
         val nutritionReminders = stringPreferencesKey("nutrition_reminders")
         val waterButtons = stringPreferencesKey("water_buttons_ml")
+        val customKcal = intPreferencesKey("custom_kcal")
+        val customWater = intPreferencesKey("custom_water_ml")
     }
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -69,6 +71,8 @@ class SettingsRepository @Inject constructor(
             prefs[Keys.goal] = next.nutritionGoal.name
             prefs[Keys.nutritionReminders] = json.encodeToString(NutritionReminders.serializer(), next.nutritionReminders)
             prefs[Keys.waterButtons] = validWaterButtons(next.waterButtonsMl).joinToString(",")
+            next.customKcal?.takeIf { it in AppSettings.CUSTOM_KCAL_RANGE }?.let { prefs[Keys.customKcal] = it } ?: prefs.remove(Keys.customKcal)
+            next.customWaterMl?.takeIf { it in AppSettings.CUSTOM_WATER_RANGE_ML }?.let { prefs[Keys.customWater] = it } ?: prefs.remove(Keys.customWater)
         }
     }
 
@@ -96,6 +100,8 @@ class SettingsRepository @Inject constructor(
             nutritionReminders = this[Keys.nutritionReminders]
                 ?.let { runCatching { json.decodeFromString(NutritionReminders.serializer(), it) }.getOrNull() }
                 ?: defaults.nutritionReminders,
+            customKcal = this[Keys.customKcal],
+            customWaterMl = this[Keys.customWater],
             waterButtonsMl = validWaterButtons(this[Keys.waterButtons]?.split(",")?.mapNotNull { it.trim().toIntOrNull() }),
         )
     }

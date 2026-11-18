@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -52,6 +53,7 @@ fun RoutinesScreen(
     onStart: (Long) -> Unit,
     onOpenLibrary: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenReminders: () -> Unit = {},
     viewModel: RoutinesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -65,6 +67,7 @@ fun RoutinesScreen(
         onDelete = viewModel::delete,
         onOpenLibrary = onOpenLibrary,
         modifier = modifier,
+        onOpenReminders = onOpenReminders,
     )
 }
 
@@ -78,6 +81,7 @@ fun RoutinesContent(
     onDelete: (Long) -> Unit,
     onOpenLibrary: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenReminders: () -> Unit = {},
 ) {
     var pendingDelete by remember { mutableStateOf<RoutineOverview?>(null) }
 
@@ -85,6 +89,15 @@ fun RoutinesContent(
         title = stringResource(R.string.nav_routines),
         modifier = modifier,
         actions = {
+            // Workout reminders (moved here from Home in 1.10.0): quiet outline bell, like the Nutrition tab's.
+            IconButton(onClick = onOpenReminders) {
+                Icon(
+                    Icons.Rounded.NotificationsNone,
+                    contentDescription = stringResource(R.string.reminders_title),
+                    tint = MyFitTheme.colors.textSecondary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
             FilledIconButton(
                 onClick = onCreate,
                 colors = IconButtonDefaults.filledIconButtonColors(

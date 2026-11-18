@@ -28,7 +28,7 @@ class NutritionTracker @Inject constructor(
             settings.settings,
         ) { day, assessments, activeDays, s ->
             val birth = s.birthEpochDay?.let(LocalDate::ofEpochDay)
-            NutritionStatus(day, NutritionTargets.forDay(date, assessments, activeDays, s.sex, birth, s.nutritionGoal), s.nutritionGoal)
+            NutritionStatus(day, NutritionTargets.forDay(date, assessments, activeDays, s.sex, birth, s.nutritionGoal, s.customKcal, s.customWaterMl), s.nutritionGoal)
         }
     }
 }

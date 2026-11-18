@@ -41,6 +41,8 @@ import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.formatThousands
+import io.github.luannamorim.myfit.domain.model.AppSettings
+import kotlin.math.roundToInt
 import io.github.luannamorim.myfit.domain.nutrition.Meal
 import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
@@ -69,8 +71,10 @@ data class NutritionActions(
     /** Opens where the missing value is filled in: Progress (weight, height) or Settings (sex, birth date). */
     val onFillMissing: (TargetMissing) -> Unit = {},
     val onOpenReminders: () -> Unit = {},
-    /** Saves the two quick water amounts (ml). */
-    val onSetWaterButtons: (List<Int>) -> Unit = {},
+    /** Water pencil: daily target in ml (null = recommended) and the two quick amounts. */
+    val onSetWater: (Int?, List<Int>) -> Unit = { _, _ -> },
+    /** Calories pencil: daily target (null = recommended). */
+    val onSetKcalTarget: (Int?) -> Unit = {},
 )
 
 @Composable
@@ -105,7 +109,8 @@ fun NutritionScreen(
                 }
             },
             onOpenReminders = onOpenReminders,
-            onSetWaterButtons = viewModel::setWaterButtons,
+            onSetWater = viewModel::setWater,
+            onSetKcalTarget = viewModel::setKcalTarget,
         ),
         modifier = modifier,
     )
@@ -196,6 +201,7 @@ private fun WaterCard(state: NutritionUiState, actions: NutritionActions) {
         }
         Spacer(Modifier.height(Spacing.s))
         ProgressBar(if (target != null && target > 0) drunk.toFloat() / target else 0f)
+        state.targets.recommendedWaterMl?.let { Recommended(stringResource(R.string.nutrition_recommended_liters, liters(it))) }
         if (target == null) MissingHint(listOf(TargetMissing.WEIGHT), actions.onFillMissing)
         Spacer(Modifier.height(Spacing.m))
         // Undo stays in the card's right corner, whatever the buttons do on a narrow phone.
@@ -222,18 +228,40 @@ private fun WaterCard(state: NutritionUiState, actions: NutritionActions) {
         }
         if (editingButtons) {
             Spacer(Modifier.height(Spacing.m))
-            WaterButtonsEditor(state.waterButtons, onSave = { actions.onSetWaterButtons(it); editingButtons = false }, onCancel = { editingButtons = false })
+            WaterEditor(
+                customMl = state.targets.waterMl?.takeIf { it != state.targets.recommendedWaterMl },
+                recommendedMl = state.targets.recommendedWaterMl,
+                buttons = state.waterButtons,
+                onSave = { t, b -> actions.onSetWater(t, b); editingButtons = false },
+                onCancel = { editingButtons = false },
+            )
         }
     }
 }
 
-/** The two quick amounts, edited in place (1–5000 ml each). */
+/**
+ * Water pencil: the daily target in liters (empty = the recommendation, shown as placeholder and link) and the
+ * two quick amounts (1–5000 ml each).
+ */
 @Composable
-private fun WaterButtonsEditor(current: List<Int>, onSave: (List<Int>) -> Unit, onCancel: () -> Unit) {
+private fun WaterEditor(customMl: Int?, recommendedMl: Int?, buttons: List<Int>, onSave: (Int?, List<Int>) -> Unit, onCancel: () -> Unit) {
     val c = MyFitTheme.colors
-    var first by rememberSaveable { mutableStateOf(current.getOrNull(0)?.toString().orEmpty()) }
-    var second by rememberSaveable { mutableStateOf(current.getOrNull(1)?.toString().orEmpty()) }
+    var targetText by rememberSaveable { mutableStateOf(customMl?.let { liters(it) }.orEmpty()) }
+    var first by rememberSaveable { mutableStateOf(buttons.getOrNull(0)?.toString().orEmpty()) }
+    var second by rememberSaveable { mutableStateOf(buttons.getOrNull(1)?.toString().orEmpty()) }
     val values = listOf(first, second).map { t -> t.trim().toIntOrNull()?.takeIf { it in 1..NutritionDay.MAX_WATER_ML } }
+    val targetMl = DecimalInput.parse(targetText)?.let { (it * 1000).roundToInt() }
+    val targetOk = targetText.isBlank() || targetMl in AppSettings.CUSTOM_WATER_RANGE_ML
+    MyFitTextField(
+        value = targetText,
+        onValueChange = { targetText = it },
+        label = stringResource(R.string.nutrition_daily_target),
+        placeholder = recommendedMl?.let { liters(it) },
+        keyboardType = KeyboardType.Decimal,
+        suffix = "L",
+        isError = !targetOk,
+    )
+    Spacer(Modifier.height(Spacing.s))
     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
         MyFitTextField(
             value = first,
@@ -252,10 +280,34 @@ private fun WaterButtonsEditor(current: List<Int>, onSave: (List<Int>) -> Unit, 
             modifier = Modifier.weight(1f),
         )
     }
+    EditorButtons(
+        useRecommended = recommendedMl?.let { stringResource(R.string.nutrition_use_recommended_liters, liters(it)) },
+        onUseRecommended = { onSave(null, values.map { it ?: 0 }.takeIf { v -> v.all { it > 0 } } ?: buttons) },
+        onCancel = onCancel,
+        onSave = { onSave(if (targetText.isBlank()) null else targetMl, values.map { it!! }) },
+        canSave = targetOk && values.all { it != null },
+        cancelColor = c.textSecondary,
+    )
+}
+
+/**
+ * "Use recommended (…)" on its own line (long in Portuguese: on one line with them it squeezed Save to nothing),
+ * then Cancel and Save on the right.
+ */
+@Composable
+private fun EditorButtons(useRecommended: String?, onUseRecommended: () -> Unit, onCancel: () -> Unit, onSave: () -> Unit, canSave: Boolean, cancelColor: androidx.compose.ui.graphics.Color) {
+    if (useRecommended != null) TextAction(useRecommended, onClick = onUseRecommended)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextAction(stringResource(R.string.action_cancel), onClick = onCancel, color = c.textSecondary)
-        TextAction(stringResource(R.string.action_save), onClick = { onSave(values.map { it!! }) }, enabled = values.all { it != null })
+        TextAction(stringResource(R.string.action_cancel), onClick = onCancel, color = cancelColor)
+        TextAction(stringResource(R.string.action_save), onClick = onSave, enabled = canSave)
     }
+}
+
+/** "Recommended: 2.8 L" under a bar: the app's estimate stays visible when the user sets their own target. */
+@Composable
+private fun Recommended(text: String) {
+    Spacer(Modifier.height(Spacing.s))
+    Text(text, style = MyFitTheme.type.caption, color = MyFitTheme.colors.textTertiary)
 }
 
 @Composable
@@ -263,6 +315,8 @@ private fun CaloriesCard(state: NutritionUiState, actions: NutritionActions) {
     val c = MyFitTheme.colors
     val eaten = state.day.kcal
     val target = state.targets.kcal
+    val recommended = state.targets.recommendedKcal
+    var editing by rememberSaveable { mutableStateOf(false) }
     MyFitCard(Modifier.fillMaxWidth()) {
         TotalRow(
             label = stringResource(R.string.nutrition_calories),
@@ -271,9 +325,21 @@ private fun CaloriesCard(state: NutritionUiState, actions: NutritionActions) {
             } else {
                 stringResource(R.string.nutrition_kcal, formatThousands(eaten.toDouble()))
             },
+            onEdit = { editing = !editing },
+            editDescription = stringResource(R.string.nutrition_kcal_edit),
         )
         Spacer(Modifier.height(Spacing.s))
         ProgressBar(if (target != null && target > 0) eaten.toFloat() / target else 0f)
+        recommended?.let { Recommended(stringResource(R.string.nutrition_recommended_kcal, formatThousands(it.toDouble()))) }
+        if (editing) {
+            Spacer(Modifier.height(Spacing.m))
+            KcalEditor(
+                customKcal = target?.takeIf { it != recommended },
+                recommendedKcal = recommended,
+                onSave = { actions.onSetKcalTarget(it); editing = false },
+                onCancel = { editing = false },
+            )
+        }
         if (target == null) {
             MissingHint(state.targets.missing.sorted(), actions.onFillMissing)
         } else {
@@ -304,12 +370,42 @@ private fun goalLabel(goal: NutritionGoal): String = stringResource(
 )
 
 @Composable
-private fun TotalRow(label: String, value: String) {
+private fun TotalRow(label: String, value: String, onEdit: (() -> Unit)? = null, editDescription: String? = null) {
     val c = MyFitTheme.colors
-    Row(verticalAlignment = Alignment.Bottom) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = MyFitTheme.type.caption, color = c.textSecondary, modifier = Modifier.weight(1f))
         Text(value, style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
+        if (onEdit != null) {
+            IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.Outlined.Edit, contentDescription = editDescription, tint = c.textSecondary, modifier = Modifier.size(18.dp))
+            }
+        }
     }
+}
+
+/** Calories pencil: the daily target (empty = the recommendation, shown as placeholder and link). */
+@Composable
+private fun KcalEditor(customKcal: Int?, recommendedKcal: Int?, onSave: (Int?) -> Unit, onCancel: () -> Unit) {
+    var text by rememberSaveable { mutableStateOf(customKcal?.toString().orEmpty()) }
+    val kcal = text.trim().toIntOrNull()
+    val ok = text.isBlank() || kcal in AppSettings.CUSTOM_KCAL_RANGE
+    MyFitTextField(
+        value = text,
+        onValueChange = { v -> text = v.filter(Char::isDigit).take(4) },
+        label = stringResource(R.string.nutrition_daily_target),
+        placeholder = recommendedKcal?.toString(),
+        keyboardType = KeyboardType.Number,
+        suffix = "kcal",
+        isError = !ok,
+    )
+    EditorButtons(
+        useRecommended = recommendedKcal?.let { stringResource(R.string.nutrition_use_recommended_kcal, formatThousands(it.toDouble())) },
+        onUseRecommended = { onSave(null) },
+        onCancel = onCancel,
+        onSave = { onSave(if (text.isBlank()) null else kcal) },
+        canSave = ok,
+        cancelColor = MyFitTheme.colors.textSecondary,
+    )
 }
 
 /** "Fill in: weight, birth date"; tapping opens where the first one is filled (body values first). */

@@ -158,9 +158,24 @@ class NutritionViewModelTest {
         val settings = profile()
         val vm = viewModel(settings)
         assertEquals(listOf(250, 500), vm.state.awaitUntil { !it.loading }.waterButtons)
-        vm.setWaterButtons(listOf(300, 600))
+        vm.setWater(null, listOf(300, 600))
         assertEquals(listOf(300, 600), vm.state.awaitUntil { it.waterButtons == listOf(300, 600) }.waterButtons)
         assertEquals(listOf(300, 600), settings.current().waterButtonsMl)
+    }
+
+    @Test
+    fun customTargets_areUsed_andRecommendedStaysVisible() = runBlocking {
+        val settings = profile()
+        val vm = viewModel(settings)
+        vm.state.awaitUntil { !it.loading && it.targets.kcal != null }
+        vm.setKcalTarget(2500)
+        vm.setWater(3200, listOf(300, 600))
+        val s = vm.state.awaitUntil { it.targets.kcal == 2500 && it.targets.waterMl == 3200 }
+        assertEquals(2120, s.targets.recommendedKcal)
+        assertEquals(2800, s.targets.recommendedWaterMl)
+        assertEquals(listOf(300, 600), s.waterButtons)
+        vm.setKcalTarget(null)
+        assertEquals(2120, vm.state.awaitUntil { it.targets.kcal == 2120 }.targets.kcal)
     }
 
     @Test

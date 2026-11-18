@@ -100,8 +100,14 @@ class NutritionViewModel @Inject constructor(
         viewModelScope.launch { nutrition.undoLastWater(d) }
     }
 
-    fun setWaterButtons(ml: List<Int>) {
-        viewModelScope.launch { settings.update { it.copy(waterButtonsMl = ml) } }
+    /** Water card's pencil: the daily target (null = recommended) and the two quick buttons. */
+    fun setWater(targetMl: Int?, buttons: List<Int>) {
+        viewModelScope.launch { settings.update { it.copy(customWaterMl = targetMl, waterButtonsMl = buttons) } }
+    }
+
+    /** Calories card's pencil: the daily target (null = recommended). */
+    fun setKcalTarget(kcal: Int?) {
+        viewModelScope.launch { settings.update { it.copy(customKcal = kcal) } }
     }
 
     private companion object {

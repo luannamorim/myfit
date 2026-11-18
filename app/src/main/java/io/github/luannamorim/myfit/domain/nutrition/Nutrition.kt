@@ -8,8 +8,17 @@ enum class NutritionGoal { LOSE, MAINTAIN, GAIN }
 /** What the user can fill in to get a target, in display order. */
 enum class TargetMissing { WEIGHT, HEIGHT, SEX, BIRTH_DATE }
 
-/** Targets for one day; null when a value is [missing]. Water only needs the weight. */
-data class DailyTargets(val kcal: Int?, val waterMl: Int?, val missing: Set<TargetMissing>)
+/**
+ * Targets for one day: the user's own when set, else the recommendation; null when there's neither.
+ * [recommendedKcal]/[recommendedWaterMl] are always the app's estimate (null when data is [missing]), shown as reference.
+ */
+data class DailyTargets(
+    val kcal: Int?,
+    val waterMl: Int?,
+    val missing: Set<TargetMissing>,
+    val recommendedKcal: Int? = kcal,
+    val recommendedWaterMl: Int? = waterMl,
+)
 
 /** A logged meal: free text and the calories the user typed (often estimated by an AI app). */
 data class Meal(

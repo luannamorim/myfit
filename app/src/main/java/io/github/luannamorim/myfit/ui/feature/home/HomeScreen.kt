@@ -78,7 +78,6 @@ data class HomeActions(
     val onOpenBody: () -> Unit = {},
     val onLogActivity: () -> Unit = {},
     val onOpenLiveActivity: () -> Unit = {},
-    val onOpenReminders: () -> Unit = {},
     val onOpenSettings: () -> Unit = {},
     val onOpenNutrition: () -> Unit = {},
 )
@@ -112,15 +111,6 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
         subtitle = if (state.loading) null else Dates.long(state.today).replaceFirstChar { it.titlecase(appLocale) },
         modifier = modifier,
         actions = {
-            // Shortcut to Settings › Reminders, kept quiet: outline bell, no container, secondary color.
-            IconButton(onClick = actions.onOpenReminders) {
-                Icon(
-                    Icons.Rounded.NotificationsNone,
-                    contentDescription = stringResource(R.string.reminders_title),
-                    tint = MyFitTheme.colors.textSecondary,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
             // Settings left the tab bar for Nutrition (1.8.0): same quiet style as the bell.
             IconButton(onClick = actions.onOpenSettings) {
                 Icon(

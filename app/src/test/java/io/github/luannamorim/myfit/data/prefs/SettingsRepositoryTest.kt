@@ -114,6 +114,22 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun customTargets_persist_clear_andIgnoreNonsense() = runTest {
+        val r = repo()
+        assertNull(r.current().customKcal)
+        assertNull(r.current().customWaterMl)
+        r.update { it.copy(customKcal = 2500, customWaterMl = 3200) }
+        assertEquals(2500, r.current().customKcal)
+        assertEquals(3200, r.current().customWaterMl)
+        val copy = repo(File(tmp.root, "targets.preferences_pb"))
+        copy.importJson(r.exportJson())
+        assertEquals(2500, copy.current().customKcal)
+        r.update { it.copy(customKcal = null, customWaterMl = 50) } // back to recommended; 50 ml isn't a daily target
+        assertNull(r.current().customKcal)
+        assertNull(r.current().customWaterMl)
+    }
+
+    @Test
     fun nutritionReminders_persist_andTravelInExports() = runTest {
         val r = repo()
         assertEquals(NutritionReminders(), r.current().nutritionReminders)

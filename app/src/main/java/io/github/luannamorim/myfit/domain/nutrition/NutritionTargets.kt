@@ -52,6 +52,8 @@ object NutritionTargets {
         sex: Sex?,
         birthDate: LocalDate?,
         goal: NutritionGoal,
+        customKcal: Int? = null,
+        customWaterMl: Int? = null,
     ): DailyTargets {
         val weight = known(BodyComparison.series(assessments, Measure.WEIGHT), date)
         val height = known(BodyComparison.series(assessments, Measure.HEIGHT).filter { it.second in BodyMetrics.PLAUSIBLE_HEIGHT_CM }, date)
@@ -72,7 +74,7 @@ object NutritionTargets {
             null
         }
         val water = weight?.let { roundTo(it * WATER_ML_PER_KG, 50) }
-        return DailyTargets(kcal, water, missing)
+        return DailyTargets(customKcal ?: kcal, customWaterMl ?: water, missing, recommendedKcal = kcal, recommendedWaterMl = water)
     }
 
     /** Last value up to [date]; before the first one, the first one (nutrition logs can predate the first weigh-in). */

@@ -35,18 +35,19 @@ class HomeScreenshotTest {
     private val today = LocalDate.of(2026, 11, 12)
 
     @Test
-    fun remindersButton_opensReminders() {
+    fun header_hasOnlyTheSettingsGear_theRemindersBellMovedToWorkouts() {
         var opened = 0
         compose.setContent {
             MyFitTheme(ThemeMode.DARK) {
                 HomeContent(
                     HomeUiState(loading = false, greeting = Greeting.MORNING, today = today, week = week(emptySet(), 0, 0)),
-                    HomeActions(onOpenReminders = { opened++ }),
+                    HomeActions(onOpenSettings = { opened++ }),
                     body = { BodyEmptyCard {} },
                 )
             }
         }
-        compose.onNodeWithContentDescription("Reminders").performClick()
+        compose.onNodeWithContentDescription("Reminders").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Settings").performClick()
         assertEquals(1, opened)
     }
 

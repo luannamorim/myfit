@@ -25,7 +25,9 @@ class NutritionTargetsTest {
         birth: LocalDate? = born,
         goal: NutritionGoal = NutritionGoal.MAINTAIN,
         date: LocalDate = day,
-    ) = NutritionTargets.forDay(date, assessments, activeDays, sex, birth, goal)
+        customKcal: Int? = null,
+        customWaterMl: Int? = null,
+    ) = NutritionTargets.forDay(date, assessments, activeDays, sex, birth, goal, customKcal, customWaterMl)
 
     @Test
     fun bmr_male_mifflinStJeor() = assertEquals(1767.5, NutritionTargets.bmr(80.0, 178.0, 30, Sex.MALE), 0.001)
@@ -136,6 +138,23 @@ class NutritionTargetsTest {
     fun implausibleAge_countsAsMissingBirthDate() {
         assertEquals(setOf(TargetMissing.BIRTH_DATE), targets(birth = day.minusYears(5)).missing)
         assertEquals(setOf(TargetMissing.BIRTH_DATE), targets(birth = day.minusYears(120)).missing)
+    }
+
+    @Test
+    fun customTargets_replaceTheRecommended_whichStaysAsReference() {
+        val t = targets(customKcal = 2500, customWaterMl = 3200)
+        assertEquals(2500, t.kcal)
+        assertEquals(3200, t.waterMl)
+        assertEquals(2120, t.recommendedKcal)
+        assertEquals(2800, t.recommendedWaterMl)
+        // Without the data for a recommendation, a custom target still works.
+        val bare = targets(assessments = emptyList(), sex = null, birth = null, customKcal = 2000, customWaterMl = 2500)
+        assertEquals(2000, bare.kcal)
+        assertEquals(2500, bare.waterMl)
+        assertNull(bare.recommendedKcal)
+        assertNull(bare.recommendedWaterMl)
+        // No custom target: the recommendation is the target.
+        assertEquals(targets().kcal, targets().recommendedKcal)
     }
 
     @Test

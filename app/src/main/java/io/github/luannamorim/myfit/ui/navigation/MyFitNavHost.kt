@@ -179,7 +179,6 @@ fun MyFitNavHost(
                             onOpenBody = { navController.navigateToTopLevel(TopLevelDestination.EVOLUTION) },
                             onLogActivity = { navController.navigate(ActivityEditorRoute()) },
                             onOpenLiveActivity = { navController.navigate(LiveActivityRoute) { launchSingleTop = true } },
-                            onOpenReminders = { navController.navigate(RemindersRoute) },
                             onOpenSettings = { navController.navigate(SettingsRoute) { launchSingleTop = true } },
                             onOpenNutrition = { navController.navigateToTopLevel(TopLevelDestination.NUTRITION) },
                         ),
@@ -191,6 +190,7 @@ fun MyFitNavHost(
                         onEdit = { navController.navigate(RoutineEditorRoute(it)) },
                         onStart = appViewModel::startRoutine,
                         onOpenLibrary = { navController.navigate(ExerciseLibraryRoute) },
+                        onOpenReminders = { navController.navigate(RemindersRoute) },
                     )
                 }
                 composable<HistoryRoute> {

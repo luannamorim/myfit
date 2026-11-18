@@ -629,4 +629,10 @@
     <string name="nutrition_reminders_meal_name_ok">OK</string>
     <string name="nutrition_reminders_meal_rename">Renomear</string>
     <string name="nutrition_notif_meal_title_named">Hora de comer · %1$s</string>
+    <string name="nutrition_recommended_liters">Recomendado: %1$s L</string>
+    <string name="nutrition_recommended_kcal">Recomendado: %1$s kcal</string>
+    <string name="nutrition_daily_target">Meta do dia</string>
+    <string name="nutrition_use_recommended_liters">Usar recomendado (%1$s L)</string>
+    <string name="nutrition_use_recommended_kcal">Usar recomendado (%1$s kcal)</string>
+    <string name="nutrition_kcal_edit">Editar meta de calorias</string>
 </resources>

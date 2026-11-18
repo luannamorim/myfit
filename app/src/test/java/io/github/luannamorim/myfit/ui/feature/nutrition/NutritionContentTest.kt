@@ -98,9 +98,9 @@ class NutritionContentTest {
 
     @Test
     fun waterButtons_useTheSavedAmounts_andThePencilEditsThem() {
-        val saved = mutableListOf<List<Int>>()
+        val saved = mutableListOf<Pair<Int?, List<Int>>>()
         val added = mutableListOf<Int>()
-        show(state().copy(waterButtons = listOf(300, 600)), NutritionActions(onAddWater = { added += it }, onSetWaterButtons = { saved += it }))
+        show(state().copy(waterButtons = listOf(300, 600)), NutritionActions(onAddWater = { added += it }, onSetWater = { t, b -> saved += t to b }))
         compose.onNodeWithText("+300 ml").performClick()
         compose.onNodeWithText("+600 ml").performClick()
         assertEquals(listOf(300, 600), added)
@@ -109,7 +109,37 @@ class NutritionContentTest {
         compose.onNodeWithText("Botão 1").performTextClearance()
         compose.onNodeWithText("Botão 1").performTextInput("200")
         compose.onNodeWithText("Salvar").performClick()
-        assertEquals(listOf(listOf(200, 600)), saved)
+        assertEquals(listOf<Pair<Int?, List<Int>>>(null to listOf(200, 600)), saved) // target untouched: still the recommended
+    }
+
+    @Test
+    fun waterTarget_isEditable_andTheRecommendedAlwaysShows() {
+        val saved = mutableListOf<Int?>()
+        show(state(targets = DailyTargets(3000, 3000, emptySet(), recommendedKcal = 2300, recommendedWaterMl = 2800)), NutritionActions(onSetWater = { t, _ -> saved += t }))
+        compose.onNodeWithText("1,5 / 3 L").assertIsDisplayed()
+        compose.onNodeWithText("Recomendado: 2,8 L").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Editar botões de água").performClick()
+        compose.onNodeWithText("Meta do dia").performTextClearance()
+        compose.onNodeWithText("Meta do dia").performTextInput("3,5")
+        compose.onNodeWithText("Salvar").performClick()
+        compose.onNodeWithContentDescription("Editar botões de água").performClick()
+        compose.onNodeWithText("Usar recomendado (2,8 L)").performClick()
+        assertEquals(listOf<Int?>(3500, null), saved)
+    }
+
+    @Test
+    fun kcalTarget_hasAPencil_andTheRecommendedAlwaysShows() {
+        val saved = mutableListOf<Int?>()
+        show(state(targets = DailyTargets(2500, 2800, emptySet(), recommendedKcal = 2300, recommendedWaterMl = 2800)), NutritionActions(onSetKcalTarget = { saved += it }))
+        compose.onNodeWithText("1.240 / 2.500 kcal").assertIsDisplayed()
+        compose.onNodeWithText("Recomendado: 2.300 kcal").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Editar meta de calorias").performClick()
+        compose.onNodeWithText("Meta do dia").performTextClearance()
+        compose.onNodeWithText("Meta do dia").performTextInput("2800")
+        compose.onNodeWithText("Salvar").performClick()
+        compose.onNodeWithContentDescription("Editar meta de calorias").performClick()
+        compose.onNodeWithText("Usar recomendado (2.300 kcal)").performClick()
+        assertEquals(listOf<Int?>(2800, null), saved)
     }
 
     @Test

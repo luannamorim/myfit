@@ -8,6 +8,11 @@ import io.github.luannamorim.myfit.domain.model.MuscleGroup
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.testutil.PHONE
 import io.github.luannamorim.myfit.testutil.snapBothThemes
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
+import org.junit.Assert.assertEquals
+import io.github.luannamorim.myfit.ui.theme.MyFitTheme
+import io.github.luannamorim.myfit.domain.model.ThemeMode
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,5 +67,17 @@ class RoutinesScreenshotTest {
             onNameChange = {}, onDescriptionChange = {}, onAddExercises = {}, onMove = { _, _ -> },
             onUpdateItem = { _, _ -> }, onRemoveItem = {}, onSave = {}, onClose = {},
         )
+    }
+
+    @Test
+    fun remindersBell_opensReminders() {
+        var opened = 0
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                RoutinesContent(RoutinesUiState(isLoading = false), {}, {}, {}, {}, {}, {}, onOpenReminders = { opened++ })
+            }
+        }
+        compose.onNodeWithContentDescription("Reminders").performClick()
+        assertEquals(1, opened)
     }
 }
