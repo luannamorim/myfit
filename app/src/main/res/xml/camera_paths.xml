@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Temporary photos taken with the camera app, before ImageStore imports them. -->
+<!-- Temporary photos: taken with the camera app (before ImageStore imports them) and shrunk copies shared with an AI app (AiPhotoStore). -->
 <paths>
     <cache-path name="camera" path="camera/" />
+    <cache-path name="ai" path="ai/" />
 </paths>

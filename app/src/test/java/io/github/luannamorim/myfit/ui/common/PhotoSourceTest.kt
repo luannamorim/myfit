@@ -6,10 +6,12 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.model.ThemeMode
+import io.github.luannamorim.myfit.testutil.clearFileProviderCache
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +22,8 @@ import java.io.File
 @Config(sdk = [36], qualifiers = "pt-rBR")
 class PhotoSourceTest {
     @get:Rule val compose = createComposeRule()
+
+    @Before fun resetFileProvider() = clearFileProviderCache()
 
     @Test
     fun sheet_offersCameraAndGallery() {
