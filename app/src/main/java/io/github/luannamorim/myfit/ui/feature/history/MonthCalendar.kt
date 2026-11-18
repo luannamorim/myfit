@@ -128,12 +128,12 @@ private fun CalendarLegend() {
     val c = MyFitTheme.colors
     Row(Modifier.fillMaxWidth().padding(top = Spacing.s), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
         listOf(
-            Icons.Outlined.FitnessCenter to R.string.calendar_legend_workout,
-            Icons.Outlined.Restaurant to R.string.calendar_legend_food,
-            Icons.Outlined.WaterDrop to R.string.calendar_legend_water,
-        ).forEachIndexed { i, (icon, label) ->
+            Triple(Icons.Outlined.FitnessCenter, R.string.calendar_legend_workout, c.accent),
+            Triple(Icons.Outlined.Restaurant, R.string.calendar_legend_food, c.food),
+            Triple(Icons.Outlined.WaterDrop, R.string.calendar_legend_water, c.water),
+        ).forEachIndexed { i, (icon, label, color) ->
             if (i > 0) Spacer(Modifier.width(Spacing.m))
-            Box(Modifier.size(5.dp).clip(MyFitShapes.pill).background(c.accent))
+            Box(Modifier.size(6.dp).clip(MyFitShapes.pill).background(color))
             Spacer(Modifier.width(4.dp))
             Icon(icon, contentDescription = null, tint = c.textTertiary, modifier = Modifier.size(14.dp))
             Spacer(Modifier.width(3.dp))
@@ -187,14 +187,14 @@ private fun DayCell(
                     else -> c.textPrimary
                 },
             )
-            // Fixed slots, so a dot's place says what it is (see the legend).
+            // Fixed slots and one color per kind (workout green, food orange, water blue), see the legend.
             Row(Modifier.padding(top = 3.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                listOf(workout, food, water).forEach { on ->
+                listOf(workout to c.accent, food to c.food, water to c.water).forEach { (on, color) ->
                     Box(
                         Modifier
                             .size(5.dp)
                             .clip(MyFitShapes.pill)
-                            .background(if (on) (if (isSelected) c.background else c.accent) else androidx.compose.ui.graphics.Color.Transparent),
+                            .background(if (on) (if (isSelected) c.background else color) else androidx.compose.ui.graphics.Color.Transparent),
                     )
                 }
             }

@@ -45,6 +45,7 @@ import io.github.luannamorim.myfit.R
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.alpha
 import androidx.compose.material.icons.outlined.WaterDrop
@@ -311,9 +312,10 @@ private fun WeekCard(state: HomeUiState, onClick: () -> Unit) {
                 }
             }
         }
-        WeekRow(Icons.Outlined.FitnessCenter, days, R.string.home_week_workout, state.today) { it.trained }
-        WeekRow(Icons.Outlined.Restaurant, days, R.string.home_week_food, state.today) { it.ateOnTarget }
-        WeekRow(Icons.Outlined.WaterDrop, days, R.string.home_week_water, state.today) { it.drankOnTarget }
+        // Same colors as History's calendar dots: workout green, food orange, water blue.
+        WeekRow(Icons.Outlined.FitnessCenter, c.accent, days, R.string.home_week_workout, state.today) { it.trained }
+        WeekRow(Icons.Outlined.Restaurant, c.food, days, R.string.home_week_food, state.today) { it.ateOnTarget }
+        WeekRow(Icons.Outlined.WaterDrop, c.water, days, R.string.home_week_water, state.today) { it.drankOnTarget }
         Spacer(Modifier.height(Spacing.m))
         Text(
             stringResource(
@@ -333,7 +335,7 @@ private fun WeekCard(state: HomeUiState, onClick: () -> Unit) {
 }
 
 @Composable
-private fun WeekRow(icon: ImageVector, days: List<DayMark>, @StringRes doneLabel: Int, today: LocalDate, done: (DayMark) -> Boolean) {
+private fun WeekRow(icon: ImageVector, color: Color, days: List<DayMark>, @StringRes doneLabel: Int, today: LocalDate, done: (DayMark) -> Boolean) {
     val c = MyFitTheme.colors
     Row(Modifier.fillMaxWidth().padding(top = Spacing.s), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.width(WEEK_ICON_COLUMN)) {
@@ -348,7 +350,7 @@ private fun WeekRow(icon: ImageVector, days: List<DayMark>, @StringRes doneLabel
                         .alpha(if (day.date.isAfter(today)) FUTURE_ALPHA else 1f)
                         .size(WEEK_CHECK)
                         .clip(MyFitShapes.pill)
-                        .background(if (isDone) c.accent else c.surfaceRaised)
+                        .background(if (isDone) color else c.surfaceRaised)
                         .then(if (day.isToday && !isDone) Modifier.border(BorderStroke(1.dp, c.outlineStrong), MyFitShapes.pill) else Modifier)
                         .then(if (label != null) Modifier.semantics { contentDescription = label } else Modifier),
                     contentAlignment = Alignment.Center,

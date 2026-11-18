@@ -28,6 +28,11 @@ class ColorContrastTest {
         assertContrast("$p accent/background", colors.accent, colors.background, 3.0)
         assertContrast("$p accent/surface", colors.accent, colors.surface, 3.0)
         assertContrast("$p danger/background", colors.danger, colors.background, 3.0)
+        // Kind colors (calendar dots, Home week checks): visible on cards, check readable on top.
+        assertContrast("$p food/surface", colors.food, colors.surface, 3.0)
+        assertContrast("$p water/surface", colors.water, colors.surface, 3.0)
+        assertContrast("$p onAccent/food", colors.onAccent, colors.food, 4.5)
+        assertContrast("$p onAccent/water", colors.onAccent, colors.water, 4.5)
     }
 
     @Test

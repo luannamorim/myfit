@@ -23,6 +23,9 @@ data class MyFitColors(
     val accentMuted: Color,
     val danger: Color,
     val warning: Color,
+    /** Kind colors (user request, 1.14.0): calorie target hit (orange) and water target hit (blue); workouts use [accent]. */
+    val food: Color,
+    val water: Color,
     val isDark: Boolean,
 )
 
@@ -40,6 +43,8 @@ val DarkColors = MyFitColors(
     accentMuted = Color(0x2447F55E),
     danger = Color(0xFFF2555A),
     warning = Color(0xFFF5A524),
+    food = Color(0xFFFF8A3D),
+    water = Color(0xFF4DA3FF),
     isDark = true,
 )
 
@@ -57,6 +62,8 @@ val LightColors = MyFitColors(
     accentMuted = Color(0x1F15803D),
     danger = Color(0xFFCD2B31),
     warning = Color(0xFFB45309),
+    food = Color(0xFFC2410C),
+    water = Color(0xFF1D6FD1),
     isDark = false,
 )
 
