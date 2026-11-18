@@ -161,6 +161,18 @@ class NutritionContentTest {
     }
 
     @Test
+    fun waterAndCalories_haveAnIconBeforeTheirTitle() {
+        show(state())
+        // The recommendation line starts at the card's edge; the title starts after its icon (like Home's cards).
+        val water = compose.onNodeWithText("Água").getBoundsInRoot()
+        val waterEdge = compose.onNodeWithText("Recomendado: 2,8 L").getBoundsInRoot()
+        assertTrue(water.left >= waterEdge.left + 16.dp)
+        val kcal = compose.onNodeWithText("Calorias").getBoundsInRoot()
+        val kcalEdge = compose.onNodeWithText("Recomendado: 2.300 kcal").getBoundsInRoot()
+        assertTrue(kcal.left >= kcalEdge.left + 16.dp)
+    }
+
+    @Test
     fun noWaterYet_hidesUndo() {
         show(state(waterMl = 0, waterEntries = 0))
         compose.onNodeWithContentDescription("Desfazer").assertDoesNotExist()

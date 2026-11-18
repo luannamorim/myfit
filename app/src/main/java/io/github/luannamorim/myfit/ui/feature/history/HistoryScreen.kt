@@ -70,6 +70,7 @@ fun HistoryContent(
                 marked = state.marked,
                 foodDays = state.foodOnTarget,
                 waterDays = state.waterOnTarget,
+                firstDayOfWeek = state.firstDayOfWeek,
                 selected = state.selected,
                 today = state.today,
                 onSelect = onSelect,

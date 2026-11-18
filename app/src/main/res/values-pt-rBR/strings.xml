@@ -480,6 +480,9 @@
     <string name="settings_theme_dark">Escuro</string>
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_system">Sistema</string>
+    <string name="settings_week_start">Início da semana</string>
+    <string name="settings_week_start_sunday">Domingo</string>
+    <string name="settings_week_start_monday">Segunda</string>
     <string name="settings_workout">Treino</string>
     <string name="settings_default_rest">Descanso padrão</string>
     <string name="settings_rest_sound">Som do fim do descanso</string>

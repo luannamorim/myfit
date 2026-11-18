@@ -67,6 +67,7 @@ import io.github.luannamorim.myfit.ui.components.TextAction
 import io.github.luannamorim.myfit.ui.feature.routines.REST_STEP_SECONDS
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Composable
@@ -211,6 +212,14 @@ fun SettingsContent(
                     ChipGroup {
                         listOf(ThemeMode.DARK to R.string.settings_theme_dark, ThemeMode.LIGHT to R.string.settings_theme_light, ThemeMode.SYSTEM to R.string.settings_theme_system)
                             .forEach { (mode, label) -> MyFitChip(stringResource(label), selected = s.themeMode == mode, onClick = { onUpdate { it.copy(themeMode = mode) } }) }
+                    }
+                    Spacer(Modifier.height(Spacing.l))
+                    // Home's week and History's calendar and week summary start on this day.
+                    Text(stringResource(R.string.settings_week_start), style = MyFitTheme.type.caption, color = c.textSecondary)
+                    Spacer(Modifier.height(Spacing.s))
+                    ChipGroup {
+                        listOf(DayOfWeek.SUNDAY to R.string.settings_week_start_sunday, DayOfWeek.MONDAY to R.string.settings_week_start_monday)
+                            .forEach { (day, label) -> MyFitChip(stringResource(label), selected = s.firstDayOfWeek == day, onClick = { onUpdate { it.copy(firstDayOfWeek = day) } }) }
                     }
                 }
 

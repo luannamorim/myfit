@@ -4,6 +4,7 @@ import io.github.luannamorim.myfit.domain.body.Sex
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import io.github.luannamorim.myfit.domain.nutrition.NutritionReminders
 import kotlinx.serialization.Serializable
+import java.time.DayOfWeek
 
 enum class ThemeMode { DARK, LIGHT, SYSTEM }
 
@@ -37,6 +38,8 @@ data class AppSettings(
     /** The user's own daily targets; null = the app's recommendation. */
     val customKcal: Int? = null,
     val customWaterMl: Int? = null,
+    /** First day of the week for Home's week and History's calendar and week summary (Sunday or Monday). */
+    val firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
 ) {
     companion object {
         const val MIN_REST_SECONDS = 15

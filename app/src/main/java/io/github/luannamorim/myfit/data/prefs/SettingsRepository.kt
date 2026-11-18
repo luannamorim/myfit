@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import java.time.DayOfWeek
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -44,6 +45,7 @@ class SettingsRepository @Inject constructor(
         val waterButtons = stringPreferencesKey("water_buttons_ml")
         val customKcal = intPreferencesKey("custom_kcal")
         val customWater = intPreferencesKey("custom_water_ml")
+        val firstDayOfWeek = stringPreferencesKey("first_day_of_week")
     }
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -73,6 +75,7 @@ class SettingsRepository @Inject constructor(
             prefs[Keys.waterButtons] = validWaterButtons(next.waterButtonsMl).joinToString(",")
             next.customKcal?.takeIf { it in AppSettings.CUSTOM_KCAL_RANGE }?.let { prefs[Keys.customKcal] = it } ?: prefs.remove(Keys.customKcal)
             next.customWaterMl?.takeIf { it in AppSettings.CUSTOM_WATER_RANGE_ML }?.let { prefs[Keys.customWater] = it } ?: prefs.remove(Keys.customWater)
+            prefs[Keys.firstDayOfWeek] = next.firstDayOfWeek.name
         }
     }
 
@@ -103,6 +106,7 @@ class SettingsRepository @Inject constructor(
             customKcal = this[Keys.customKcal],
             customWaterMl = this[Keys.customWater],
             waterButtonsMl = validWaterButtons(this[Keys.waterButtons]?.split(",")?.mapNotNull { it.trim().toIntOrNull() }),
+            firstDayOfWeek = this[Keys.firstDayOfWeek]?.let { enumValueOrNull<DayOfWeek>(it) } ?: defaults.firstDayOfWeek,
         )
     }
 }

@@ -25,6 +25,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import androidx.compose.ui.test.performScrollTo
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 /** Portuguese labels on a small phone (360 dp, common on Samsung): no Settings chip may break its text. */
@@ -42,7 +44,7 @@ class SettingsProfileLayoutTest {
             }
         }
         compose.onRoot().captureRoboImage("$SCREENSHOT_DIR/settings_profile_pt_360.png")
-        val chips = listOf("Não informado", "Masculino", "Feminino", "Perder gordura", "Manter peso", "Ganhar massa", "Escuro", "Claro", "Sistema", "Segue o modo do celular", "Toca sempre")
+        val chips = listOf("Não informado", "Masculino", "Feminino", "Perder gordura", "Manter peso", "Ganhar massa", "Escuro", "Claro", "Sistema", "Domingo", "Segunda", "Segue o modo do celular", "Toca sempre")
         val wrapped = chips.filter { label ->
             val results = mutableListOf<TextLayoutResult>()
             compose.onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
@@ -63,6 +65,16 @@ class SettingsProfileLayoutTest {
             }
         }
         return { settings }
+    }
+
+    @Test
+    fun weekStartChip_setsTheFirstDayOfTheWeek() {
+        val current = render(AppSettings())
+        compose.onNodeWithText("Início da semana").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Segunda").assertIsSelected()
+        compose.onNodeWithText("Domingo").performScrollTo().performClick()
+        assertEquals(DayOfWeek.SUNDAY, current().firstDayOfWeek)
+        compose.onNodeWithText("Domingo").assertIsSelected()
     }
 
     @Test

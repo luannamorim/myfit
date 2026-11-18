@@ -36,6 +36,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -146,15 +147,17 @@ class HomeViewModel @Inject constructor(
     /** Re-read on resume: Home can stay alive overnight, and "today" (week, nutrition) must follow. */
     private val todayFlow = MutableStateFlow(time.today())
 
-    val state: StateFlow<HomeUiState> = todayFlow.flatMapLatest { today -> observe(today) }
+    /** The week follows the first day chosen in Settings (Sunday or Monday). */
+    val state: StateFlow<HomeUiState> = combine(todayFlow, settings.settings.map { it.firstDayOfWeek }.distinctUntilChanged()) { today, first -> today to first }
+        .flatMapLatest { (today, first) -> observe(today, first) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     fun refreshToday() {
         todayFlow.value = time.today()
     }
 
-    private fun observe(today: LocalDate): Flow<HomeUiState> {
-        val week = HistoryCalculator.weekOf(today)
+    private fun observe(today: LocalDate, firstDay: DayOfWeek): Flow<HomeUiState> {
+        val week = HistoryCalculator.weekOf(today, firstDay)
         return combine(
             combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged()) { r, rem -> r to rem },
             combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },

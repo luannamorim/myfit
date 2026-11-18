@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.domain.history
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -57,6 +58,20 @@ class HistoryCalculatorTest {
     fun weekOf_sunday_returnsPreviousMonday() {
         val sunday = LocalDate.of(2026, 11, 15)
         assertEquals(monday..sunday, HistoryCalculator.weekOf(sunday))
+    }
+
+    @Test
+    fun weekOf_startsOnTheChosenDay() {
+        val sunday = LocalDate.of(2026, 11, 15)
+        assertEquals(sunday..sunday.plusDays(6), HistoryCalculator.weekOf(sunday, DayOfWeek.SUNDAY))
+        assertEquals(sunday.minusDays(7)..sunday.minusDays(1), HistoryCalculator.weekOf(sunday.minusDays(1), DayOfWeek.SUNDAY)) // a Saturday
+    }
+
+    @Test
+    fun calendarGrid_startsOnTheChosenDay() {
+        val grid = HistoryCalculator.calendarGrid(YearMonth.of(2026, 11), DayOfWeek.SUNDAY)
+        assertEquals(LocalDate.of(2026, 11, 1), grid.start) // a Sunday: no October days before it
+        assertEquals(LocalDate.of(2026, 12, 5), grid.endInclusive) // a Saturday
     }
 
     @Test

@@ -449,6 +449,9 @@
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_system">System</string>
+    <string name="settings_week_start">Week starts on</string>
+    <string name="settings_week_start_sunday">Sunday</string>
+    <string name="settings_week_start_monday">Monday</string>
     <string name="settings_workout">Workout</string>
     <string name="settings_default_rest">Default rest</string>
     <string name="settings_rest_sound">Rest end sound</string>

@@ -50,6 +50,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.TemporalAdjusters
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
@@ -270,6 +271,20 @@ class HomeViewModelTest {
         assertEquals(320, n.day.kcal)
         assertEquals(2120, n.targets.kcal) // 80 kg, 178 cm, 30 years, no workouts
         assertEquals(2800, n.targets.waterMl)
+    }
+
+    @Test
+    fun week_startsOnTheDayChosenInSettings() = runBlocking {
+        val today = env.time.today()
+        val settings = testSettings().apply { update { it.copy(firstDayOfWeek = DayOfWeek.SUNDAY) } }
+        val vm = homeViewModel(settings)
+        val sunday = vm.state.awaitUntil { !it.loading && it.week.days.firstOrNull()?.date?.dayOfWeek == DayOfWeek.SUNDAY }
+        assertEquals(today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)), sunday.week.days.first().date)
+        assertEquals(DayOfWeek.SATURDAY, sunday.week.days.last().date.dayOfWeek)
+
+        settings.update { it.copy(firstDayOfWeek = DayOfWeek.MONDAY) }
+        val monday = vm.state.awaitUntil { it.week.days.firstOrNull()?.date?.dayOfWeek == DayOfWeek.MONDAY }
+        assertEquals(today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)), monday.week.days.first().date)
     }
 
     @Test

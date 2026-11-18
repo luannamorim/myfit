@@ -64,6 +64,7 @@ fun MonthCalendar(
     modifier: Modifier = Modifier,
     foodDays: Set<LocalDate> = emptySet(),
     waterDays: Set<LocalDate> = emptySet(),
+    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
 ) {
     val c = MyFitTheme.colors
     var drag by remember { mutableFloatStateOf(0f) }
@@ -88,7 +89,7 @@ fun MonthCalendar(
             }
         }
         Row(Modifier.fillMaxWidth().padding(vertical = Spacing.s)) {
-            DayOfWeek.entries.forEach { dow ->
+            (0L..6L).map { firstDayOfWeek.plus(it) }.forEach { dow ->
                 Text(
                     Dates.weekdayShort(dow).uppercase(),
                     style = MyFitTheme.type.overline,
@@ -98,7 +99,7 @@ fun MonthCalendar(
                 )
             }
         }
-        val grid = HistoryCalculator.calendarGrid(month)
+        val grid = HistoryCalculator.calendarGrid(month, firstDayOfWeek)
         var day = grid.start
         while (day <= grid.endInclusive) {
             Row(Modifier.fillMaxWidth()) {

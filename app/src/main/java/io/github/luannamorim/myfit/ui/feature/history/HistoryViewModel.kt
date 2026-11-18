@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
 import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
 import io.github.luannamorim.myfit.data.repository.NutritionTracker
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
@@ -53,6 +55,8 @@ data class HistoryUiState(
     /** Summary tiles "Food/Water on target"; null = nothing logged in the period (tiles hidden). */
     val periodFood: DaysOnTarget? = null,
     val periodWater: DaysOnTarget? = null,
+    /** First day of the calendar's weeks and of the week summary (Settings). */
+    val firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -61,6 +65,7 @@ class HistoryViewModel @Inject constructor(
     private val history: HistoryRepository,
     activities: ActivityRepository,
     tracker: NutritionTracker,
+    settings: SettingsRepository,
     time: TimeSource,
 ) : ViewModel() {
     private val today = time.today()
@@ -68,10 +73,17 @@ class HistoryViewModel @Inject constructor(
     private val selected = MutableStateFlow(today)
     private val period = MutableStateFlow(SummaryPeriod.WEEK)
 
+    /** What is on screen: the month, the selected day, the summary period and the weeks' first day. */
+    private data class View(val month: YearMonth, val selected: LocalDate, val period: SummaryPeriod, val firstDay: DayOfWeek)
+
+    private val view = combine(month, selected, period, settings.settings.map { it.firstDayOfWeek }.distinctUntilChanged()) { m, d, p, f ->
+        View(m, d, p, f)
+    }
+
     /** Query covers the visible grid plus the selected week (which may spill into another month). */
-    private val queryRange = combine(month, selected) { m, d ->
-        val grid = HistoryCalculator.calendarGrid(m)
-        val week = HistoryCalculator.weekOf(d)
+    private val queryRange = view.map { v ->
+        val grid = HistoryCalculator.calendarGrid(v.month, v.firstDay)
+        val week = HistoryCalculator.weekOf(v.selected, v.firstDay)
         minOf(grid.start, week.start)..maxOf(grid.endInclusive, week.endInclusive)
     }.distinctUntilChanged()
 
@@ -83,8 +95,9 @@ class HistoryViewModel @Inject constructor(
         .distinctUntilChanged()
         .flatMapLatest { (d, range) -> combine(tracker.observe(d), tracker.observeRange(range)) { day, days -> day to days } }
 
-    val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions, nutrition) { m, d, p, (items, logged), (dayNutrition, gridNutrition) ->
-        val range = rangeOf(p, d, m)
+    val state: StateFlow<HistoryUiState> = combine(view, sessions, nutrition) { v, (items, logged), (dayNutrition, gridNutrition) ->
+        val (m, d, p) = v
+        val range = rangeOf(p, d, m, v.firstDay)
         // Days of the period so far: a week in progress isn't counted against days still to come.
         val elapsed = if (range.start.isAfter(today)) 0 else (range.start.toEpochDay()..minOf(range.endInclusive, today).toEpochDay()).count()
         val periodDays = gridNutrition.filter { it.day.date in range && !it.day.date.isAfter(today) }
@@ -108,6 +121,7 @@ class HistoryViewModel @Inject constructor(
             waterOnTarget = gridNutrition.filter { NutritionGoals.waterHit(it.day, it.targets) == true }.map { it.day.date }.toSet(),
             periodFood = if (periodLogged) DaysOnTarget(periodDays.count { NutritionGoals.kcalHit(it.day, it.targets, it.goal) == true }, elapsed) else null,
             periodWater = if (periodLogged) DaysOnTarget(periodDays.count { NutritionGoals.waterHit(it.day, it.targets) == true }, elapsed) else null,
+            firstDayOfWeek = v.firstDay,
         )
     }.stateIn(
         viewModelScope,
@@ -115,8 +129,8 @@ class HistoryViewModel @Inject constructor(
         HistoryUiState(month = YearMonth.from(today), today = today, selected = today, summaryRange = HistoryCalculator.weekOf(today)),
     )
 
-    private fun rangeOf(p: SummaryPeriod, d: LocalDate, m: YearMonth) = when (p) {
-        SummaryPeriod.WEEK -> HistoryCalculator.weekOf(d)
+    private fun rangeOf(p: SummaryPeriod, d: LocalDate, m: YearMonth, firstDay: DayOfWeek) = when (p) {
+        SummaryPeriod.WEEK -> HistoryCalculator.weekOf(d, firstDay)
         SummaryPeriod.MONTH -> HistoryCalculator.monthOf(m)
     }
 

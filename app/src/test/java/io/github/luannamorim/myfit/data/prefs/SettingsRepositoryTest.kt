@@ -100,6 +100,20 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun firstDayOfWeek_mondayByDefault_persists_andTravelsInExports() = runTest {
+        val r = repo()
+        assertEquals(DayOfWeek.MONDAY, r.current().firstDayOfWeek)
+        r.update { it.copy(firstDayOfWeek = DayOfWeek.SUNDAY) }
+        assertEquals(DayOfWeek.SUNDAY, r.current().firstDayOfWeek)
+        val copy = repo(File(tmp.root, "week.preferences_pb"))
+        copy.importJson(r.exportJson())
+        assertEquals(DayOfWeek.SUNDAY, copy.current().firstDayOfWeek)
+        // A backup from before the setting existed keeps Monday.
+        copy.importJson("""{"themeMode":"LIGHT"}""")
+        assertEquals(DayOfWeek.MONDAY, copy.current().firstDayOfWeek)
+    }
+
+    @Test
     fun waterButtons_default250And500_persist_andTravelInExports() = runTest {
         val r = repo()
         assertEquals(listOf(250, 500), r.current().waterButtonsMl)

@@ -24,6 +24,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import androidx.compose.ui.test.getBoundsInRoot
+import org.junit.Assert.assertTrue
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -57,6 +60,28 @@ class HistoryContentTest {
         compose.onNodeWithText("Remada curvada").assertDoesNotExist()
         compose.onNodeWithText("+ Atividade").assertDoesNotExist()
         compose.onNodeWithText("Esportes").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun calendar_startsOnTheChosenDay() {
+        val today = LocalDate.of(2026, 11, 17)
+        compose.setContent {
+            MyFitTheme(ThemeMode.DARK) {
+                HistoryContent(
+                    state = HistoryUiState(
+                        month = YearMonth.of(2026, 11), today = today, selected = today,
+                        summaryRange = HistoryCalculator.weekOf(today, DayOfWeek.SUNDAY), isLoading = false,
+                        firstDayOfWeek = DayOfWeek.SUNDAY,
+                    ),
+                    onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
+                )
+            }
+        }
+        fun left(text: String) = compose.onNodeWithText(text).getBoundsInRoot().left
+        assertTrue(left("DOM") < left("SEG"))
+        assertTrue(left("SEX") < left("SÁB"))
+        // Nov 1, 2026 is a Sunday: the grid starts on it, so October's 26th isn't shown (only November's).
+        compose.onAllNodesWithText("26", useUnmergedTree = true).assertCountEquals(1)
     }
 
     private val day = LocalDate.of(2026, 11, 17) // a Tuesday

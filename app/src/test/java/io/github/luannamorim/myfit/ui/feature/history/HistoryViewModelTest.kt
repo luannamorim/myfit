@@ -28,7 +28,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.time.DayOfWeek
 import java.time.YearMonth
+import java.time.temporal.TemporalAdjusters
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
@@ -44,7 +46,7 @@ class HistoryViewModelTest {
     @After fun tearDown() = env.close()
 
     private fun viewModel(settings: SettingsRepository = env.settings) =
-        HistoryViewModel(history, activities, NutritionTracker(nutrition, body, history, activities, settings), env.time)
+        HistoryViewModel(history, activities, NutritionTracker(nutrition, body, history, activities, settings), settings, env.time)
 
     /** Finishes a 1-set workout of [minutes] on the current fake day. */
     private suspend fun workout(minutes: Long) {
@@ -52,6 +54,20 @@ class HistoryViewModelTest {
         val s = SessionEngine.completeSet(env.repo.getActive()!!, 12, 40.0, env.time.now())
         env.time.advance(minutes * 60_000)
         env.repo.finish(s, env.time.now(), updateRoutineLoads = false)
+    }
+
+    @Test
+    fun weekStartsOnTheDayChosenInSettings_andFollowsAChange() = runBlocking {
+        val today = env.time.today()
+        env.settings.update { it.copy(firstDayOfWeek = DayOfWeek.SUNDAY) }
+        val vm = viewModel()
+        val sunday = vm.state.awaitUntil { !it.isLoading && it.firstDayOfWeek == DayOfWeek.SUNDAY }
+        assertEquals(today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)), sunday.summaryRange.start)
+        assertEquals(DayOfWeek.SATURDAY, sunday.summaryRange.endInclusive.dayOfWeek)
+
+        env.settings.update { it.copy(firstDayOfWeek = DayOfWeek.MONDAY) }
+        val monday = vm.state.awaitUntil { it.firstDayOfWeek == DayOfWeek.MONDAY }
+        assertEquals(today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)), monday.summaryRange.start)
     }
 
     @Test

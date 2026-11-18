@@ -95,18 +95,18 @@ object HistoryCalculator {
     fun activeDays(items: List<SessionSummary>, activities: List<Activity>): Set<LocalDate> =
         daysWithSessions(items) + activities.map { it.date }
 
-    /** Monday–Sunday week containing [date]. */
-    fun weekOf(date: LocalDate): ClosedRange<LocalDate> {
-        val start = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    /** The 7-day week containing [date], starting on [firstDay] (Monday unless the user chose Sunday). */
+    fun weekOf(date: LocalDate, firstDay: DayOfWeek = DayOfWeek.MONDAY): ClosedRange<LocalDate> {
+        val start = date.with(TemporalAdjusters.previousOrSame(firstDay))
         return start..start.plusDays(6)
     }
 
     fun monthOf(month: YearMonth): ClosedRange<LocalDate> = month.atDay(1)..month.atEndOfMonth()
 
-    /** Full Monday–Sunday weeks covering the month, as displayed by the calendar grid. */
-    fun calendarGrid(month: YearMonth): ClosedRange<LocalDate> {
-        val start = month.atDay(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-        val end = month.atEndOfMonth().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+    /** Full weeks starting on [firstDay] that cover the month, as displayed by the calendar grid. */
+    fun calendarGrid(month: YearMonth, firstDay: DayOfWeek = DayOfWeek.MONDAY): ClosedRange<LocalDate> {
+        val start = month.atDay(1).with(TemporalAdjusters.previousOrSame(firstDay))
+        val end = month.atEndOfMonth().with(TemporalAdjusters.nextOrSame(firstDay.minus(1)))
         return start..end
     }
 }

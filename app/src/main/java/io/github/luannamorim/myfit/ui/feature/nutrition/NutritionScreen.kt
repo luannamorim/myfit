@@ -2,6 +2,7 @@ package io.github.luannamorim.myfit.ui.feature.nutrition
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,8 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material3.Icon
@@ -28,6 +31,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,15 +42,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.luannamorim.myfit.R
-import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.Dates
+import io.github.luannamorim.myfit.core.format.DecimalInput
 import io.github.luannamorim.myfit.core.format.formatThousands
 import io.github.luannamorim.myfit.domain.model.AppSettings
-import kotlin.math.roundToInt
 import io.github.luannamorim.myfit.domain.nutrition.Meal
 import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
 import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
 import io.github.luannamorim.myfit.domain.nutrition.TargetMissing
+import io.github.luannamorim.myfit.ui.components.LabelWithDot
 import io.github.luannamorim.myfit.ui.components.MyFitCard
 import io.github.luannamorim.myfit.ui.components.MyFitChip
 import io.github.luannamorim.myfit.ui.components.MyFitTextField
@@ -59,6 +63,7 @@ import io.github.luannamorim.myfit.ui.theme.MyFitTheme
 import io.github.luannamorim.myfit.ui.theme.Spacing
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.math.roundToInt
 
 /** Everything the Nutrition tab can ask its host to do. */
 data class NutritionActions(
@@ -188,7 +193,7 @@ private fun WaterCard(state: NutritionUiState, actions: NutritionActions) {
     var editingButtons by rememberSaveable { mutableStateOf(false) }
     MyFitCard(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.nutrition_water), style = MyFitTheme.type.caption, color = c.textSecondary, modifier = Modifier.weight(1f))
+            Box(Modifier.weight(1f)) { LabelWithDot(stringResource(R.string.nutrition_water), dotColor = null, dotDescription = null, icon = Icons.Outlined.WaterDrop) }
             Text(
                 if (target != null) stringResource(R.string.nutrition_liters_of, liters(drunk), liters(target)) else stringResource(R.string.nutrition_liters, liters(drunk)),
                 style = MyFitTheme.type.bodyStrong,
@@ -320,6 +325,7 @@ private fun CaloriesCard(state: NutritionUiState, actions: NutritionActions) {
     MyFitCard(Modifier.fillMaxWidth()) {
         TotalRow(
             label = stringResource(R.string.nutrition_calories),
+            icon = Icons.Outlined.LocalFireDepartment,
             value = if (target != null) {
                 stringResource(R.string.nutrition_kcal_of, formatThousands(eaten.toDouble()), formatThousands(target.toDouble()))
             } else {
@@ -370,10 +376,11 @@ private fun goalLabel(goal: NutritionGoal): String = stringResource(
 )
 
 @Composable
-private fun TotalRow(label: String, value: String, onEdit: (() -> Unit)? = null, editDescription: String? = null) {
+private fun TotalRow(label: String, value: String, icon: ImageVector? = null, onEdit: (() -> Unit)? = null, editDescription: String? = null) {
     val c = MyFitTheme.colors
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = MyFitTheme.type.caption, color = c.textSecondary, modifier = Modifier.weight(1f))
+        // Same title as Home's cards: decorative icon, then the label.
+        Box(Modifier.weight(1f)) { LabelWithDot(label, dotColor = null, dotDescription = null, icon = icon) }
         Text(value, style = MyFitTheme.type.bodyStrong, color = c.textPrimary)
         if (onEdit != null) {
             IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
