@@ -16,6 +16,12 @@ interface NutritionDao {
     @Query("SELECT * FROM meal WHERE dateEpochDay = :day ORDER BY minuteOfDay, id")
     fun observeMeals(day: Long): Flow<List<MealEntity>>
 
+    @Query("SELECT * FROM water_entry WHERE dateEpochDay BETWEEN :from AND :to ORDER BY id")
+    fun observeWaterRange(from: Long, to: Long): Flow<List<WaterEntryEntity>>
+
+    @Query("SELECT * FROM meal WHERE dateEpochDay BETWEEN :from AND :to ORDER BY dateEpochDay, minuteOfDay, id")
+    fun observeMealsRange(from: Long, to: Long): Flow<List<MealEntity>>
+
     @Insert suspend fun insertWater(entry: WaterEntryEntity): Long
 
     /** Removes the most recent entry of [day]; returns how many rows went (0 or 1). */

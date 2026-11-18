@@ -69,11 +69,13 @@ fun HistoryContent(
         }
 
         SectionHeader(Dates.long(state.selected))
-        if (state.daySessions.isEmpty() && state.dayActivities.isEmpty()) {
+        val dayNutrition = state.dayNutrition?.takeIf { it.logged }
+        if (state.daySessions.isEmpty() && state.dayActivities.isEmpty() && dayNutrition == null) {
             Text(stringResource(R.string.history_no_sessions_day), style = MyFitTheme.type.body, color = c.textSecondary)
         } else {
             state.daySessions.forEach { SessionRow(it, onClick = { onOpenSession(it.id) }) }
             state.dayActivities.forEach { ActivityRow(it, onClick = { onOpenActivity(it.id) }) }
+            dayNutrition?.let { DayNutritionCard(it) }
         }
 
         Row(Modifier.fillMaxWidth().padding(top = Spacing.m), verticalAlignment = Alignment.CenterVertically) {
@@ -101,6 +103,8 @@ fun HistoryContent(
                 Modifier.weight(1f),
             )
         }
+        PeriodNutritionCard(state.periodNutrition, week = state.period == SummaryPeriod.WEEK)
+
         if (s.sports.isNotEmpty()) {
             MyFitCard {
                 Text(stringResource(R.string.history_sports), style = MyFitTheme.type.caption, color = c.textSecondary)

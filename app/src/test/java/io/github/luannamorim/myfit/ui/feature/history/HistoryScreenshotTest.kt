@@ -20,6 +20,11 @@ import io.github.luannamorim.myfit.domain.session.SessionSet
 import io.github.luannamorim.myfit.testutil.PHONE_TALL
 import io.github.luannamorim.myfit.testutil.snapBothThemes
 import io.github.luannamorim.myfit.ui.theme.MyFitTheme
+import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
+import io.github.luannamorim.myfit.domain.nutrition.Meal
+import io.github.luannamorim.myfit.domain.nutrition.NutritionDay
+import io.github.luannamorim.myfit.domain.nutrition.NutritionGoal
+import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,10 +67,26 @@ class HistoryScreenshotTest {
                 ),
                 summaryRange = HistoryCalculator.weekOf(today),
                 isLoading = false,
+                dayNutrition = nutrition(today, 2900, 2410),
+                periodNutrition = HistoryCalculator.weekOf(today).let { w ->
+                    (0L..6L).map { w.start.plusDays(it) }.map { d ->
+                        when {
+                            d.isAfter(today) -> nutrition(d, 0, null)
+                            d.dayOfMonth % 3 == 0 -> nutrition(d, 1200, 1700)
+                            else -> nutrition(d, 2900, 2300)
+                        }
+                    }
+                },
             ),
             onSelect = {}, onMonthChange = {}, onPeriod = {}, onOpenSession = {},
         )
     }
+
+    private fun nutrition(d: LocalDate, waterMl: Int, kcal: Int?) = NutritionStatus(
+        NutritionDay(d, kcal?.let { listOf(Meal(1, d, 600, null, it)) }.orEmpty(), waterMl, if (waterMl > 0) 1 else 0),
+        DailyTargets(2300, 2800, emptySet()),
+        NutritionGoal.MAINTAIN,
+    )
 
     @Test
     fun session_detail() = compose.snapBothThemes("session_detail") {

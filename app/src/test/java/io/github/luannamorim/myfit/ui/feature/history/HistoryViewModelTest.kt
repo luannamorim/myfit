@@ -5,6 +5,12 @@ import io.github.luannamorim.myfit.core.time.today
 import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
+import io.github.luannamorim.myfit.domain.body.Measure
+import io.github.luannamorim.myfit.domain.body.BodyAssessment
+import io.github.luannamorim.myfit.data.prefs.SettingsRepository
+import io.github.luannamorim.myfit.data.repository.BodyRepository
+import io.github.luannamorim.myfit.data.repository.NutritionTracker
+import io.github.luannamorim.myfit.data.repository.NutritionRepository
 import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
@@ -31,7 +37,13 @@ class HistoryViewModelTest {
     private val history = HistoryRepository(env.db, env.time, BackupTrigger { })
     private val activities = ActivityRepository(env.db, env.time, BackupTrigger { })
 
+    private val nutrition = NutritionRepository(env.db, env.time, BackupTrigger { })
+    private val body = BodyRepository(env.db.bodyDao(), env.time, BackupTrigger { })
+
     @After fun tearDown() = env.close()
+
+    private fun viewModel(settings: SettingsRepository = env.settings) =
+        HistoryViewModel(history, activities, NutritionTracker(nutrition, body, history, activities, settings), env.time)
 
     /** Finishes a 1-set workout of [minutes] on the current fake day. */
     private suspend fun workout(minutes: Long) {
@@ -49,7 +61,7 @@ class HistoryViewModelTest {
         val day3 = env.time.today()
         workout(40)
 
-        val vm = HistoryViewModel(history, activities, env.time)
+        val vm = viewModel()
         vm.select(day1)
         val state = vm.state.awaitUntil { !it.isLoading && it.selected == day1 && it.daySessions.isNotEmpty() }
         assertEquals(1, state.daySessions.size)
@@ -62,7 +74,7 @@ class HistoryViewModelTest {
     @Test
     fun toggleMonth_switchesSummaryRange() = runBlocking {
         workout(30)
-        val vm = HistoryViewModel(history, activities, env.time)
+        val vm = viewModel()
         val week = vm.state.awaitUntil { !it.isLoading && it.summary.sessions == 1 }
         assertEquals(HistoryCalculator.weekOf(week.selected), week.summaryRange)
         vm.setPeriod(SummaryPeriod.MONTH)
@@ -79,7 +91,7 @@ class HistoryViewModelTest {
         activities.save(Activity(sport = Sport.SWIMMING, date = today, durationMinutes = 45, distanceKm = 1.5, intensity = Intensity.HIGH))
         activities.save(Activity(sport = Sport.OTHER, name = "Remo no lago", date = today.minusDays(1), durationMinutes = 20))
 
-        val vm = HistoryViewModel(history, activities, env.time)
+        val vm = viewModel()
         val state = vm.state.awaitUntil { !it.isLoading && it.dayActivities.isNotEmpty() }
         assertEquals(listOf(Sport.SWIMMING), state.dayActivities.map { it.sport })
         assertEquals(1, state.daySessions.size)
@@ -95,11 +107,31 @@ class HistoryViewModelTest {
 
     @Test
     fun showMonth_movesSelectionIntoMonth() = runBlocking {
-        val vm = HistoryViewModel(history, activities, env.time)
+        val vm = viewModel()
         val start = vm.state.awaitUntil { !it.isLoading }
         val next = start.month.plusMonths(1)
         vm.showMonth(next)
         val state = vm.state.awaitUntil { it.month == next }
         assertEquals(next.atDay(1), state.selected)
+    }
+
+    @Test
+    fun nutrition_ofTheSelectedDay_andOfEachDayInThePeriod() = runBlocking {
+        val today = env.time.today()
+        body.save(BodyAssessment(date = today.minusDays(10), values = mapOf(Measure.WEIGHT to 80.0)))
+        nutrition.addWater(today, 3000) // 2.8 L target: hit
+        nutrition.addWater(today.minusDays(1), 1000) // missed
+
+        val vm = viewModel()
+        val state = vm.state.awaitUntil { !it.isLoading && it.dayNutrition?.day?.waterMl == 3000 && it.periodNutrition.isNotEmpty() }
+        assertEquals(2800, state.dayNutrition!!.targets.waterMl)
+        assertEquals(HistoryCalculator.weekOf(today).let { (it.start.toEpochDay()..it.endInclusive.toEpochDay()).count() }, state.periodNutrition.size)
+        val byDate = state.periodNutrition.associateBy { it.day.date }
+        assertEquals(3000, byDate[today]!!.day.waterMl)
+        if (today.minusDays(1) in HistoryCalculator.weekOf(today)) assertEquals(1000, byDate[today.minusDays(1)]!!.day.waterMl)
+
+        vm.setPeriod(SummaryPeriod.MONTH)
+        val month = vm.state.awaitUntil { it.period == SummaryPeriod.MONTH && it.periodNutrition.size >= 28 }
+        assertEquals(HistoryCalculator.monthOf(java.time.YearMonth.from(today)).start, month.periodNutrition.first().day.date)
     }
 }

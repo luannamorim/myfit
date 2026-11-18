@@ -27,6 +27,20 @@ class NutritionRepository @Inject constructor(
         }
     }
 
+    /** One [NutritionDay] per date in [range] (empty days included), oldest first. */
+    fun observeRange(range: ClosedRange<LocalDate>): Flow<List<NutritionDay>> {
+        val from = range.start.toEpochDay()
+        val to = range.endInclusive.toEpochDay()
+        return combine(dao.observeMealsRange(from, to), dao.observeWaterRange(from, to)) { meals, water ->
+            val mealsByDay = meals.groupBy { it.dateEpochDay }
+            val waterByDay = water.groupBy { it.dateEpochDay }
+            (from..to).map { d ->
+                val w = waterByDay[d].orEmpty()
+                NutritionDay(LocalDate.ofEpochDay(d), mealsByDay[d].orEmpty().map { it.toDomain() }, w.sumOf { it.ml }, w.size)
+            }
+        }
+    }
+
     /** Adds [ml] of water to [date]; amounts outside 1..[NutritionDay.MAX_WATER_ML] are ignored. */
     suspend fun addWater(date: LocalDate, ml: Int) {
         if (ml !in 1..NutritionDay.MAX_WATER_ML) return

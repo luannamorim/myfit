@@ -598,4 +598,8 @@
     <string name="nutrition_use_recommended_kcal">Use recommended (%1$s kcal)</string>
     <string name="nutrition_kcal_edit">Edit calorie target</string>
     <string name="nutrition_reminders_meal_name_hint">e.g. Lunch</string>
+    <string name="history_nutrition_legend">● target hit   ○ missed   · nothing logged</string>
+    <string name="history_nutrition_hits">%1$d/%2$d</string>
+    <string name="history_nutrition_days">%1$d of %2$d days</string>
+    <string name="history_nutrition_hit">Target hit</string>
 </resources>

@@ -632,4 +632,8 @@
     <string name="nutrition_use_recommended_kcal">Usar recomendado (%1$s kcal)</string>
     <string name="nutrition_kcal_edit">Editar meta de calorias</string>
     <string name="nutrition_reminders_meal_name_hint">ex.: Almoço</string>
+    <string name="history_nutrition_legend">● meta batida   ○ não bateu   · sem registro</string>
+    <string name="history_nutrition_hits">%1$d/%2$d</string>
+    <string name="history_nutrition_days">%1$d de %2$d dias</string>
+    <string name="history_nutrition_hit">Meta batida</string>
 </resources>

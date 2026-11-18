@@ -7,7 +7,9 @@ import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.core.time.today
 import io.github.luannamorim.myfit.data.repository.ActivityRepository
 import io.github.luannamorim.myfit.data.repository.HistoryRepository
+import io.github.luannamorim.myfit.data.repository.NutritionTracker
 import io.github.luannamorim.myfit.domain.activity.Activity
+import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.history.PeriodSummary
 import io.github.luannamorim.myfit.domain.history.SessionSummary
@@ -39,6 +41,10 @@ data class HistoryUiState(
     val summary: PeriodSummary = PeriodSummary(0, 0, 0.0, emptyList()),
     val summaryRange: ClosedRange<LocalDate>,
     val isLoading: Boolean = true,
+    /** The selected day's nutrition log against its targets. */
+    val dayNutrition: NutritionStatus? = null,
+    /** Every day of [summaryRange], for "days on target". */
+    val periodNutrition: List<NutritionStatus> = emptyList(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,6 +52,7 @@ data class HistoryUiState(
 class HistoryViewModel @Inject constructor(
     private val history: HistoryRepository,
     activities: ActivityRepository,
+    tracker: NutritionTracker,
     time: TimeSource,
 ) : ViewModel() {
     private val today = time.today()
@@ -64,11 +71,12 @@ class HistoryViewModel @Inject constructor(
         combine(history.observeSummaries(range), activities.observe(range)) { s, a -> s to a }
     }
 
-    val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions) { m, d, p, (items, logged) ->
-        val range = when (p) {
-            SummaryPeriod.WEEK -> HistoryCalculator.weekOf(d)
-            SummaryPeriod.MONTH -> HistoryCalculator.monthOf(m)
-        }
+    private val nutrition = combine(month, selected, period) { m, d, p -> d to rangeOf(p, d, m) }
+        .distinctUntilChanged()
+        .flatMapLatest { (d, range) -> combine(tracker.observe(d), tracker.observeRange(range)) { day, days -> day to days } }
+
+    val state: StateFlow<HistoryUiState> = combine(month, selected, period, sessions, nutrition) { m, d, p, (items, logged), (dayNutrition, periodNutrition) ->
+        val range = rangeOf(p, d, m)
         val monthRange = HistoryCalculator.monthOf(m)
         HistoryUiState(
             month = m,
@@ -83,12 +91,19 @@ class HistoryViewModel @Inject constructor(
             summary = HistoryCalculator.summarize(items, range, logged),
             summaryRange = range,
             isLoading = false,
+            dayNutrition = dayNutrition,
+            periodNutrition = periodNutrition,
         )
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
         HistoryUiState(month = YearMonth.from(today), today = today, selected = today, summaryRange = HistoryCalculator.weekOf(today)),
     )
+
+    private fun rangeOf(p: SummaryPeriod, d: LocalDate, m: YearMonth) = when (p) {
+        SummaryPeriod.WEEK -> HistoryCalculator.weekOf(d)
+        SummaryPeriod.MONTH -> HistoryCalculator.monthOf(m)
+    }
 
     fun select(date: LocalDate) {
         selected.value = date

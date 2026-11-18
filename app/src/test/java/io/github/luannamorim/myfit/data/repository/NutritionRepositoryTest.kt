@@ -89,4 +89,16 @@ class NutritionRepositoryTest {
         assertEquals(Meal.MAX_KCAL, meal.kcal)
         assertEquals(1439, meal.minuteOfDay)
     }
+
+    @Test
+    fun observeRange_givesEveryDay_withItsOwnLog() = runTest {
+        repo.addWater(day, 500)
+        repo.addWater(day.plusDays(2), 250)
+        repo.saveMeal(Meal(date = day.plusDays(2), minuteOfDay = 600, description = null, kcal = 700))
+        repo.saveMeal(Meal(date = day.plusDays(5), minuteOfDay = 600, description = null, kcal = 900)) // outside
+        val days = repo.observeRange(day..day.plusDays(3)).first()
+        assertEquals((0L..3L).map { day.plusDays(it) }, days.map { it.date })
+        assertEquals(listOf(500, 0, 250, 0), days.map { it.waterMl })
+        assertEquals(listOf(0, 0, 700, 0), days.map { it.kcal })
+    }
 }

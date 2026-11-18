@@ -19,6 +19,23 @@ class NutritionTracker @Inject constructor(
     private val activities: ActivityRepository,
     private val settings: SettingsRepository,
 ) {
+    /** Each day of [range] with its targets as they were on that day (History). */
+    fun observeRange(range: ClosedRange<LocalDate>): Flow<List<NutritionStatus>> {
+        val activityRange = NutritionTargets.activityWindow(range.start).start..range.endInclusive
+        return combine(
+            nutrition.observeRange(range),
+            body.observeAssessments(),
+            combine(history.observeSummaries(activityRange), activities.observe(activityRange)) { s, a -> HistoryCalculator.activeDays(s, a) },
+            settings.settings,
+        ) { days, assessments, activeDays, s ->
+            val birth = s.birthEpochDay?.let(LocalDate::ofEpochDay)
+            days.map { day ->
+                val targets = NutritionTargets.forDay(day.date, assessments, activeDays, s.sex, birth, s.nutritionGoal, s.customKcal, s.customWaterMl)
+                NutritionStatus(day, targets, s.nutritionGoal)
+            }
+        }
+    }
+
     fun observe(date: LocalDate): Flow<NutritionStatus> {
         val window = NutritionTargets.activityWindow(date)
         return combine(
