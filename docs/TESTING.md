@@ -41,6 +41,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Start: the first time, the app asks for notification permission. Accept it.
 - [ ] The set screen shows the exercise drawing (or the body map); the play button opens the video search.
 - [ ] Complete set → the rest starts on its own. Use +15 s and −15 s.
+- [ ] Lower the reps with − (e.g. 12 → 8) and tap *Complete set*: while the rest fades in, the set still shows 8, never the planned 12 or the next set's number.
 - [ ] A workout with a plank (or side plank): the set shows a time (e.g. 30 s) with ±. *Start* → the ring counts down, beeps in the last 3 seconds and plays the sound at the target; hold a few seconds more and tap *Done*: History shows the time actually held (e.g. 34 s). Cardio exercises show minutes.
 - [ ] Updating from 1.5: planks and cardio in your workouts now show a time; check the targets.
 - [ ] At the end of the rest: vibration, sound and a green pulse; "REST COMPLETE" appears.
@@ -89,7 +90,9 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 ### 6a. Reminders
 - [ ] Workouts tab: the bell next to + (outline, gray) opens Reminders. Home's header has only the settings gear.
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.
-- [ ] A one-off reminder with "Other activity" (tap "Swimming" to fill the name) on a date: it fires once and then shows as off.
+- [ ] A one-off reminder with "Other activity" on a date: saving asks for a sport until one is picked; "Free" shows a name field. It fires once and then shows as off.
+- [ ] Home's "Next workout" with an activity reminder (e.g. Swimming today, 2 h ahead): the card shows the sport's icon and name, "Done … ago" (or "Not done yet") and *Start*, which opens the new activity screen on Swimming. Log the swim: the card moves to the next reminder. While the swim timer runs, the card skips it too.
+- [ ] Updating from 1.17: an old reminder whose text is a sport ("Natação", "Corrida") shows on Home as that sport without editing it; other texts open in the editor as "Free" with their name.
 - [ ] Restart the phone: a weekly reminder still fires at its next time.
 - [ ] Turning a reminder's switch off stops it.
 
