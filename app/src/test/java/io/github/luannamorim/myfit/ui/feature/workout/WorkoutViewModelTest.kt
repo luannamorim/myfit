@@ -9,6 +9,9 @@ import io.github.luannamorim.myfit.testutil.SessionEnv
 import io.github.luannamorim.myfit.testutil.awaitUntil
 import io.github.luannamorim.myfit.testutil.insertExercise
 import io.github.luannamorim.myfit.testutil.insertRoutine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -18,6 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.util.Collections
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [36])
@@ -89,6 +93,44 @@ class WorkoutViewModelTest {
         // Load carried forward to the next set, reps reset to plan.
         assertEquals(12, next.reps)
         assertEquals(42.5, next.loadKg!!, 0.0)
+    }
+
+    /** Every state the screen gets while [action] runs, until [until] holds. */
+    private suspend fun statesDuring(vm: WorkoutViewModel, action: () -> Unit, until: (WorkoutUiState) -> Boolean): List<WorkoutUiState> =
+        coroutineScope {
+            val seen = Collections.synchronizedList(mutableListOf<WorkoutUiState>())
+            val watcher = launch(Dispatchers.Unconfined) { vm.state.collect { seen += it } }
+            action()
+            vm.state.awaitUntil(predicate = until)
+            watcher.cancel()
+            seen.toList()
+        }
+
+    @Test
+    fun completingAnEditedSet_keepsTheEditedRepsUntilTheRestShows() = runBlocking {
+        env.startWorkout(2)
+        val vm = vm()
+        vm.state.awaitUntil { it.hasSession }
+        vm.changeReps(-2)
+        vm.state.awaitUntil { it.reps == 10 }
+        val seen = statesDuring(vm, vm::completeSet) { it.rest != null }
+        // It used to flash the planned 12 between Done and the rest screen.
+        assertEquals(listOf(10), seen.filter { it.rest == null && it.setNumber == 1 }.map { it.reps }.distinct())
+    }
+
+    @Test
+    fun finishingAHold_keepsTheEditedTargetUntilTheNextSetShows() = runBlocking {
+        val plank = env.db.insertExercise("Prancha", MuscleGroup.ABS, measure = ExerciseMeasure.TIME)
+        env.controller.start(env.db.insertRoutine("Core", listOf(plank))) // 3 × 12 s
+        val vm = vm()
+        vm.state.awaitUntil { it.hasSession }
+        vm.changeReps(1)
+        vm.state.awaitUntil { it.reps == 15 }
+        vm.startHold()
+        vm.state.awaitUntil { it.hold != null }
+        env.time.advance(16_000)
+        val seen = statesDuring(vm, vm::finishHold) { it.setNumber == 2 }
+        assertEquals(listOf(15), seen.filter { it.setNumber == 1 }.map { it.reps }.distinct())
     }
 
     @Test

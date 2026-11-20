@@ -141,7 +141,8 @@ class WorkoutViewModel @Inject constructor(
         val seconds = (h.startedAt.millisUntil(time.now()) / 1000).toInt().coerceAtLeast(1)
         stopHold()
         controller.completeSet(seconds, state.value.loadKg)
-        draft.value = null
+        // The draft stays: clearing it before Room emits the done set flashed the planned value.
+        // It is keyed by set id, so it stops applying once that set is done.
     }
 
     fun cancelHold() {
@@ -177,8 +178,7 @@ class WorkoutViewModel @Inject constructor(
 
     fun completeSet() = act {
         val s = state.value
-        controller.completeSet(s.reps, s.loadKg)
-        draft.value = null
+        controller.completeSet(s.reps, s.loadKg) // draft kept, see finishHold
     }
 
     fun skipSet() = act { stopHold(); controller.skipSet(); draft.value = null }
