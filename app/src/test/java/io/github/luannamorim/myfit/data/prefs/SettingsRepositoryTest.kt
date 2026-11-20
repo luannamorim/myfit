@@ -57,6 +57,15 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun reminders_exportedBeforeTheSportField_restoreWithoutSport() = runTest {
+        val old = repo(File(tmp.root, "old-reminders.preferences_pb"))
+        old.importJson("""{"reminders":[{"id":1,"label":"Natação","minuteOfDay":420,"days":["MONDAY"]}]}""")
+        val reminder = old.current().reminders.single()
+        assertEquals("Natação", reminder.label)
+        assertNull(reminder.sport)
+    }
+
+    @Test
     fun sex_setAndCleared_andTravelsInExports() = runTest {
         val r = repo()
         r.update { it.copy(sex = Sex.FEMALE) }

@@ -30,6 +30,9 @@ class ReminderRepository @Inject constructor(private val settings: SettingsRepos
         return id
     }
 
+    /** Rewrites the whole list in one atomic update (ids kept as [transform] returns them). */
+    suspend fun updateAll(transform: (List<Reminder>) -> List<Reminder>) = settings.update { it.copy(reminders = transform(it.reminders)) }
+
     suspend fun delete(id: Long) = settings.update { s -> s.copy(reminders = s.reminders.filterNot { it.id == id }) }
 
     suspend fun setEnabled(id: Long, enabled: Boolean) = settings.update { s ->

@@ -12,6 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.core.time.FakeTimeSource
 import io.github.luannamorim.myfit.core.time.Mark
 import io.github.luannamorim.myfit.data.prefs.ReminderRepository
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.testutil.testSettings
 import kotlinx.coroutines.CoroutineScope
@@ -198,7 +199,7 @@ class ReminderPlatformTest {
     @Test
     fun sync_armsAtStart_followsEdits_andBackupRestore() = runBlocking {
         repo.save(weekly)
-        val sync = ReminderSync(repo, scheduler, notifications, scope)
+        val sync = ReminderSync(repo, scheduler, notifications, SportNames(context), scope)
         sync.start()
         awaitAlarms { it.size == 1 }
         assertNotNull(notificationManager.getNotificationChannel(ReminderNotifications.CHANNEL_REMINDERS))
@@ -213,6 +214,20 @@ class ReminderPlatformTest {
         other.update { it.copy(reminders = listOf(weekly.copy(id = 7, minuteOfDay = 20 * 60))) }
         settings.importJson(other.exportJson())
         awaitAlarms { it.size == 1 && alarmFor(7)?.triggerAtMs == ms("2026-11-12T20:00") }
+    }
+
+    @Test
+    fun sync_linksFreeTextReminders_toTheirSport() = runBlocking {
+        repo.save(Reminder(id = 1, label = "Swimming", minuteOfDay = 7 * 60, days = setOf(THURSDAY)))
+        repo.save(Reminder(id = 2, label = "Escalada", minuteOfDay = 8 * 60, days = setOf(THURSDAY)))
+        repo.save(weekly.copy(id = 3))
+        ReminderSync(repo, scheduler, notifications, SportNames(context), scope).start()
+
+        withTimeout(5_000) { while (repo.get(1)?.sport == null) delay(10) }
+        assertEquals(Sport.SWIMMING, repo.get(1)?.sport)
+        assertEquals(Reminder(id = 2, label = "Escalada", minuteOfDay = 8 * 60, days = setOf(THURSDAY), sport = Sport.OTHER), repo.get(2))
+        assertEquals(weekly.copy(id = 3), repo.get(3))
+        awaitAlarms { it.size == 3 }
     }
 
     @Test
