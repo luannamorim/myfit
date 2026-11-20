@@ -1,13 +1,17 @@
 package io.github.luannamorim.myfit.domain.nutrition
 
+import io.github.luannamorim.myfit.domain.activity.Activity
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.Sex
+import io.github.luannamorim.myfit.domain.history.SessionSummary
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
+import java.time.LocalTime
 
 class NutritionTargetsTest {
     private val day = LocalDate.of(2026, 11, 17)
@@ -76,6 +80,21 @@ class NutritionTargetsTest {
         // 1767.5 × 1.55 = 2739.6 → 2740
         assertEquals(2740, targets(activeDays = window + outside).kcal)
         assertEquals(NutritionTargets.activityWindow(day), day.minusDays(28)..day.minusDays(1))
+    }
+
+    @Test
+    fun exerciseDays_leaveStretchingOut() {
+        val workout = SessionSummary(1, "Treino", day.minusDays(1), LocalTime.of(18, 0), 3_600_000, 9, emptyList())
+        fun activity(sport: Sport, daysAgo: Long) = Activity(sport = sport, date = day.minusDays(daysAgo), durationMinutes = 30)
+        val activities = listOf(
+            activity(Sport.STRETCHING, 2), // stretching only: not exercise
+            activity(Sport.STRETCHING, 3), activity(Sport.INDOOR_CYCLING, 3), // the bike still counts
+            activity(Sport.YOGA, 4),
+        )
+        assertEquals(
+            setOf(day.minusDays(1), day.minusDays(3), day.minusDays(4)),
+            NutritionTargets.exerciseDays(listOf(workout), activities),
+        )
     }
 
     @Test

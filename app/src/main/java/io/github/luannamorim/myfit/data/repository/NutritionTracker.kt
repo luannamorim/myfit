@@ -1,7 +1,6 @@
 package io.github.luannamorim.myfit.data.repository
 
 import io.github.luannamorim.myfit.data.prefs.SettingsRepository
-import io.github.luannamorim.myfit.domain.history.HistoryCalculator
 import io.github.luannamorim.myfit.domain.nutrition.NutritionStatus
 import io.github.luannamorim.myfit.domain.nutrition.NutritionTargets
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +24,7 @@ class NutritionTracker @Inject constructor(
         return combine(
             nutrition.observeRange(range),
             body.observeAssessments(),
-            combine(history.observeSummaries(activityRange), activities.observe(activityRange)) { s, a -> HistoryCalculator.activeDays(s, a) },
+            combine(history.observeSummaries(activityRange), activities.observe(activityRange)) { s, a -> NutritionTargets.exerciseDays(s, a) },
             settings.settings,
         ) { days, assessments, activeDays, s ->
             val birth = s.birthEpochDay?.let(LocalDate::ofEpochDay)
@@ -41,7 +40,7 @@ class NutritionTracker @Inject constructor(
         return combine(
             nutrition.observeDay(date),
             body.observeAssessments(),
-            combine(history.observeSummaries(window), activities.observe(window)) { s, a -> HistoryCalculator.activeDays(s, a) },
+            combine(history.observeSummaries(window), activities.observe(window)) { s, a -> NutritionTargets.exerciseDays(s, a) },
             settings.settings,
         ) { day, assessments, activeDays, s ->
             val birth = s.birthEpochDay?.let(LocalDate::ofEpochDay)

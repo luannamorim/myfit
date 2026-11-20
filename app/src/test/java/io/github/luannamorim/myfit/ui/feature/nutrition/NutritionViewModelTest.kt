@@ -87,6 +87,14 @@ class NutritionViewModelTest {
     }
 
     @Test
+    fun stretchingBeforeTheDay_doesNotRaiseTheTarget() = runBlocking {
+        val settings = profile()
+        (1L..12L).forEach { activities.save(Activity(sport = Sport.STRETCHING, date = today.minusDays(it), durationMinutes = 30)) }
+        val state = viewModel(settings).state.awaitUntil { !it.loading && it.targets.kcal != null }
+        assertEquals(2120, state.targets.kcal) // still sedentary → 1.2
+    }
+
+    @Test
     fun missingProfile_isReported() = runBlocking {
         val state = viewModel(testSettings()).state.awaitUntil { !it.loading }
         assertNull(state.targets.kcal)

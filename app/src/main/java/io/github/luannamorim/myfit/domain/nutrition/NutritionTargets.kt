@@ -1,10 +1,14 @@
 package io.github.luannamorim.myfit.domain.nutrition
 
+import io.github.luannamorim.myfit.domain.activity.Activity
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.body.BodyAssessment
 import io.github.luannamorim.myfit.domain.body.BodyComparison
 import io.github.luannamorim.myfit.domain.body.BodyMetrics
 import io.github.luannamorim.myfit.domain.body.Measure
 import io.github.luannamorim.myfit.domain.body.Sex
+import io.github.luannamorim.myfit.domain.history.HistoryCalculator
+import io.github.luannamorim.myfit.domain.history.SessionSummary
 import java.time.LocalDate
 import java.time.Period
 import kotlin.math.max
@@ -13,7 +17,8 @@ import kotlin.math.roundToInt
 /**
  * Daily calorie and water targets. Estimates from well-known formulas, not advice:
  * - calories: Mifflin-St Jeor basal rate × an activity factor from the days with a workout or an
- *   activity in the 4 weeks before the day, shifted by the goal and never below the basal rate;
+ *   activity (stretching left out) in the 4 weeks before the day, shifted by the goal and never below
+ *   the basal rate;
  * - water: 35 ml per kg.
  * Everything is taken as it was on the shown day, so a later weigh-in doesn't rewrite past days.
  */
@@ -35,6 +40,13 @@ object NutritionTargets {
             else -> 1.725
         }
     }
+
+    /** Sports too light to count as exercise for the activity factor (they still show everywhere else). */
+    val NOT_EXERCISE = setOf(Sport.STRETCHING)
+
+    /** Days with a workout or an activity that counts as exercise ([NOT_EXERCISE] left out). */
+    fun exerciseDays(sessions: List<SessionSummary>, activities: List<Activity>): Set<LocalDate> =
+        HistoryCalculator.activeDays(sessions, activities.filter { it.sport !in NOT_EXERCISE })
 
     /** The 4 weeks that end the day before [date]. */
     fun activityWindow(date: LocalDate): ClosedRange<LocalDate> = date.minusDays(ACTIVITY_WINDOW_DAYS)..date.minusDays(1)
