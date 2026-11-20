@@ -5,6 +5,7 @@ import io.github.luannamorim.myfit.data.db.MyFitDatabase
 import io.github.luannamorim.myfit.data.db.entity.ActivityEntity
 import io.github.luannamorim.myfit.domain.activity.Activity
 import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.activity.SportLastDay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -22,6 +23,10 @@ class ActivityRepository @Inject constructor(
     /** Activities whose date is in [range], newest first. */
     fun observe(range: ClosedRange<LocalDate>): Flow<List<Activity>> =
         dao.observeRange(range.start.toEpochDay(), range.endInclusive.toEpochDay()).map { list -> list.map { it.toDomain() } }
+
+    /** Latest logged day per sport (and name, for [Sport.OTHER]). */
+    fun observeLastDays(): Flow<List<SportLastDay>> =
+        dao.observeLastDays().map { rows -> rows.map { SportLastDay(it.sport, it.name, it.epochDay) } }
 
     suspend fun get(id: Long): Activity? = dao.get(id)?.toDomain()
 

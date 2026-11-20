@@ -1,5 +1,6 @@
 package io.github.luannamorim.myfit.domain.model
 
+import io.github.luannamorim.myfit.domain.activity.Sport
 import kotlinx.serialization.Serializable
 import java.time.DayOfWeek
 
@@ -12,7 +13,7 @@ data class Reminder(
     val id: Long,
     /** Routine the reminder points to; null for a free-text activity. */
     val routineId: Long? = null,
-    /** Routine name when the reminder was saved, or the free text. */
+    /** Routine name when the reminder was saved, or the activity's name (the sport's, or the typed one for [Sport.OTHER]). */
     val label: String,
     /** Local time of day in minutes, 0..1439. */
     val minuteOfDay: Int,
@@ -21,6 +22,8 @@ data class Reminder(
     /** Weekdays it repeats on; empty means one-off. */
     val days: Set<DayOfWeek> = emptySet(),
     val enabled: Boolean = true,
+    /** Sport of an activity reminder ([routineId] null); [Sport.OTHER] uses [label] as its name. Null before 1.18.0. */
+    val sport: Sport? = null,
 ) {
     val isRepeating: Boolean get() = days.isNotEmpty()
 }

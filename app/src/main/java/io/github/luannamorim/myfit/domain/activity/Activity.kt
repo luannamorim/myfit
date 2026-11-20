@@ -55,3 +55,14 @@ data class Activity(
 ) {
     val durationMs: Long get() = durationMinutes * 60_000L
 }
+
+/** Latest day an activity of [sport] (and [name], for [Sport.OTHER]) was logged. */
+data class SportLastDay(val sport: Sport, val name: String?, val epochDay: Long)
+
+/** Latest day [sport] was logged; for [Sport.OTHER] only activities with the same [name] (case and spaces ignored). */
+fun List<SportLastDay>.lastDay(sport: Sport, name: String?): Long? =
+    filter { it.sport == sport && (sport != Sport.OTHER || sameActivityName(it.name, name)) }.maxOfOrNull { it.epochDay }
+
+/** Two names of a [Sport.OTHER] activity mean the same one. */
+fun sameActivityName(a: String?, b: String?): Boolean =
+    a != null && b != null && a.trim().equals(b.trim(), ignoreCase = true)
