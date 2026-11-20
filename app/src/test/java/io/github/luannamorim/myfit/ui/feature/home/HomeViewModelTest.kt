@@ -48,6 +48,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import java.io.File
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -205,7 +206,7 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun scheduled_missedWorkoutStaysUntilMidnight_orUntilAnotherRemindersTimeComes() {
+    fun scheduled_missedWorkoutStaysSixHours_orUntilAnotherRemindersTimeComes() {
         val routines = listOf(routine(1), routine(2), routine(9))
         val tomorrow = weekly(9, 9, 18 * 60, DayOfWeek.THURSDAY)
         // 07:00 missed 3 h ago: still on the card.
@@ -213,11 +214,15 @@ class HomeViewModelTest {
             LocalDateTime.of(2026, 11, 18, 7, 0),
             scheduledNext(routines, listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), tomorrow), wed)?.at,
         )
-        // 06:00 missed 4 h ago: still on the card, and still at 23:59.
+        // 06:00 missed 4 h ago: still on the card; 6 h after it (12:00) it's gone (the user, 1.18.2: was midnight).
         val early = listOf(weekly(1, 1, 6 * 60, DayOfWeek.WEDNESDAY), tomorrow)
         assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledNext(routines, early, wed)?.at)
-        val lateNight = ZonedDateTime.of(2026, 11, 18, 23, 59, 0, 0, wed.zone)
-        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledNext(routines, early, lateNight)?.at)
+        val sixHoursLater = ZonedDateTime.of(2026, 11, 18, 11, 59, 0, 0, wed.zone)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledNext(routines, early, sixHoursLater)?.at)
+        val past = ZonedDateTime.of(2026, 11, 18, 12, 0, 0, 0, wed.zone)
+        assertEquals(LocalDateTime.of(2026, 11, 19, 18, 0), scheduledNext(routines, early, past)?.at)
+        // Alone: its next week's slot.
+        assertEquals(LocalDateTime.of(2026, 11, 25, 6, 0), scheduledNext(routines, early.take(1), past)?.at)
         // 07:00 missed, but another reminder's time (09:00) came: that one.
         val both = listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), weekly(2, 2, 9 * 60, DayOfWeek.WEDNESDAY), tomorrow)
         assertEquals(LocalDateTime.of(2026, 11, 18, 9, 0), scheduledNext(routines, both, wed)?.at)
@@ -231,11 +236,17 @@ class HomeViewModelTest {
             tomorrow,
         )
         assertEquals(1L, scheduledNext(routines, others, wed)?.routine?.id)
-        // Past midnight it's gone: at 00:30, last night's 22:00 gives way to tomorrow's; alone, its next week's slot.
-        val night = ZonedDateTime.of(2026, 11, 18, 0, 30, 0, 0, wed.zone)
+        // Midnight no longer ends it: at 00:30, last night's 22:00 is still there; at 04:00 it gives way.
         val lastNight = weekly(1, 1, 22 * 60, DayOfWeek.TUESDAY)
-        assertEquals(9L, scheduledNext(routines, listOf(lastNight, tomorrow), night)?.routine?.id)
-        assertEquals(LocalDateTime.of(2026, 11, 24, 22, 0), scheduledNext(routines, listOf(lastNight), night)?.at)
+        val night = ZonedDateTime.of(2026, 11, 18, 0, 30, 0, 0, wed.zone)
+        assertEquals(LocalDateTime.of(2026, 11, 17, 22, 0), scheduledNext(routines, listOf(lastNight, tomorrow), night)?.at)
+        val dawn = ZonedDateTime.of(2026, 11, 18, 4, 0, 0, 0, wed.zone)
+        assertEquals(9L, scheduledNext(routines, listOf(lastNight, tomorrow), dawn)?.routine?.id)
+        assertEquals(LocalDateTime.of(2026, 11, 24, 22, 0), scheduledNext(routines, listOf(lastNight), dawn)?.at)
+        // A missed activity the same: last night's ride logged after midnight still counts for it.
+        val ride = activity(1, Sport.CYCLING, 22 * 60, DayOfWeek.TUESDAY)
+        assertEquals(LocalDateTime.of(2026, 11, 17, 22, 0), scheduledNext(emptyList(), listOf(ride), night)?.at)
+        assertEquals(LocalDateTime.of(2026, 11, 24, 22, 0), scheduledNext(emptyList(), listOf(ride), night, listOf(swimDay(todayDay, Sport.CYCLING)))?.at)
     }
 
     @Test
@@ -272,10 +283,10 @@ class HomeViewModelTest {
             LocalDateTime.of(2026, 11, 20, 9, 0),
             scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60)), wed)?.at,
         )
-        // Yesterday's one-off is gone; earlier today counts until midnight.
+        // A one-off missed less than 6 h ago counts (07:00 at 10:00); longer ago it's gone (yesterday 23:00, today 00:00).
         assertNull(scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 17), 23 * 60)), wed))
         assertEquals(1L, scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 7 * 60)), wed)?.routine?.id)
-        assertEquals(1L, scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 0)), wed)?.routine?.id)
+        assertNull(scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 0)), wed))
         // Friday's one-off done ahead today is gone; done before today it still counts.
         val friday = listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60))
         assertNull(scheduledNext(listOf(routine(1, last = todayDay)), friday, wed))
@@ -305,10 +316,11 @@ class HomeViewModelTest {
         // No reminder: the never-done suggestion (first in order).
         assertEquals(first, homeViewModel(settings).state.awaitUntil { !it.loading }.suggested?.id)
 
-        settings.update { it.copy(reminders = listOf(Reminder(1, second, "B", 23 * 60 + 59, days = DayOfWeek.entries.toSet()))) }
+        // The fake clock is at 05:26: a daily 12:00 (yesterday's missed over 6 h ago) is next today.
+        settings.update { it.copy(reminders = listOf(Reminder(1, second, "B", 12 * 60, days = DayOfWeek.entries.toSet()))) }
         val state = homeViewModel(settings).state.awaitUntil { !it.loading && it.suggestedAt != null }
         assertEquals(second, state.suggested?.id)
-        assertEquals(LocalDateTime.of(env.time.today(), LocalTime.of(23, 59)), state.suggestedAt)
+        assertEquals(LocalDateTime.of(env.time.today(), LocalTime.of(12, 0)), state.suggestedAt)
     }
 
     @Test
@@ -324,6 +336,22 @@ class HomeViewModelTest {
         assertEquals(ActivityTarget(Sport.SWIMMING, null, yesterday.toEpochDay()), state.suggestedActivity)
         assertNull(state.suggested)
         assertEquals(LocalDateTime.of(env.time.today(), LocalTime.of(23, 59)), state.suggestedAt)
+    }
+
+    @Test
+    fun state_comingBack_dropsAReminderMissedMoreThanSixHoursAgo() = runBlocking {
+        val exercise = env.db.insertExercise("Remada")
+        val routine = env.db.insertRoutine("A", listOf(exercise), position = 0)
+        val zone = env.time.zone()
+        val missed = Instant.ofEpochMilli(env.time.now().wallMs).atZone(zone).minusHours(5).withSecond(0).withNano(0)
+        val settings = testSettings()
+        settings.update { it.copy(reminders = listOf(Reminder(1, routine, "A", missed.hour * 60 + missed.minute, days = setOf(missed.dayOfWeek)))) }
+        val vm = homeViewModel(settings)
+        assertEquals(missed.toLocalDateTime(), vm.state.awaitUntil { !it.loading && it.suggestedAt != null }.suggestedAt)
+
+        env.time.advance(2 * 60 * 60 * 1000L)
+        vm.refreshToday() // back to the app
+        assertEquals(missed.plusWeeks(1).toLocalDateTime(), vm.state.awaitUntil { it.suggestedAt != missed.toLocalDateTime() }.suggestedAt)
     }
 
     private fun homeViewModel(settings: SettingsRepository = testSettings()): HomeViewModel {

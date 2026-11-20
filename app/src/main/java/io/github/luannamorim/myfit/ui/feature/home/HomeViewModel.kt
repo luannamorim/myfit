@@ -106,14 +106,18 @@ class HomeViewModel @Inject constructor(
         .flatMapLatest { (today, first) -> observe(today, first) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
+    /** Bumped on resume: the next-workout card depends on the clock (a missed reminder leaves after 6 h). */
+    private val resumed = MutableStateFlow(0L)
+
     fun refreshToday() {
         todayFlow.value = time.today()
+        resumed.value++
     }
 
     private fun observe(today: LocalDate, firstDay: DayOfWeek): Flow<HomeUiState> {
         val week = HistoryCalculator.weekOf(today, firstDay)
         return combine(
-            combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged(), activities.observeLastDays()) { r, rem, days ->
+            combine(routines.observeOverviews(), settings.settings.map { it.reminders }.distinctUntilChanged(), activities.observeLastDays(), resumed) { r, rem, days, _ ->
                 Triple(r, rem, days)
             },
             combine(history.observeSummaries(week), activities.observe(week)) { s, a -> s to a },

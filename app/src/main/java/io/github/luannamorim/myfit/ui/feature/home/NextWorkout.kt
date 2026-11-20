@@ -33,10 +33,12 @@ data class ScheduledNext(val target: NextTarget, val at: LocalDateTime)
 
 val ScheduledNext.routine: RoutineOverview? get() = (target as? RoutineTarget)?.routine
 
+/** How long a missed reminder stays on the card (the user, 1.18.2; it was until midnight since 1.8.0, 4 h before). */
+const val MISSED_WORKOUT_HOURS = 6L
+
 /**
- * The target of the next workout reminder: a routine, or a sport (1.18.0). A missed one stays until midnight
- * of its day (the user asked, 1.8.0; it was 4 hours), or until another reminder's time comes; then its slot
- * after that counts. A routine slot is done once that routine was done after the reminder's previous day
+ * The target of the next workout reminder: a routine, or a sport (1.18.0). A missed one stays
+ * [MISSED_WORKOUT_HOURS] after its time, or until another reminder's time comes; then its slot after that counts. A routine slot is done once that routine was done after the reminder's previous day
  * (a one-off: since today or its day), ahead of time included. A sport slot is done only by that sport logged
  * on the slot's own day (the user, 1.18.1: Wednesday's ride doesn't do Saturday's); a timer of that sport
  * running now counts as logged today, and any routine workout counts for [Sport.GYM]. Disabled reminders,
@@ -75,8 +77,8 @@ fun scheduledNext(
     }
     return targets
         .mapNotNull { (reminder, target) ->
-            // Slots from the start of today on: a missed one stays until midnight.
-            val slot = pendingSlot(reminder, target, today.atStartOfDay(now.zone).minusSeconds(1), today) ?: return@mapNotNull null
+            // Slots from MISSED_WORKOUT_HOURS ago on: a missed one stays that long.
+            val slot = pendingSlot(reminder, target, now.minusHours(MISSED_WORKOUT_HOURS), today) ?: return@mapNotNull null
             val at = if (!slot.isAfter(now) && overtaken(reminder, slot)) pendingSlot(reminder, target, slot, today) else slot
             at?.let { ScheduledNext(target.target, it.toLocalDateTime()) to it.toInstant() }
         }
