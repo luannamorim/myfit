@@ -38,7 +38,7 @@ val ScheduledNext.routine: RoutineOverview? get() = (target as? RoutineTarget)?.
  * of its day (the user asked, 1.8.0; it was 4 hours), or until another reminder's time comes; then its slot
  * after that counts. A slot is done once its routine or sport was done after the reminder's previous day
  * (a one-off: since today or its day), ahead of time included; a timer of that sport running now counts as
- * done today. Disabled reminders, free-text ones not linked to a sport, and routines that are gone or have no
+ * done today, and any routine workout counts for [Sport.GYM]. Disabled reminders, free-text ones not linked to a sport, and routines that are gone or have no
  * exercises are skipped.
  */
 fun scheduledNext(
@@ -57,7 +57,9 @@ fun scheduledNext(
             routineId != null -> byId[routineId]?.let { r to Slotted(RoutineTarget(it), it.lastDoneEpochDay) }
             sport != null -> {
                 val name = r.label.takeIf { sport == Sport.OTHER }
-                val last = sportDays.lastDay(sport, name)
+                // Any routine workout counts for a gym reminder too.
+                val gym = if (sport == Sport.GYM) routines.mapNotNull { it.lastDoneEpochDay }.maxOrNull() else null
+                val last = listOfNotNull(sportDays.lastDay(sport, name), gym).maxOrNull()
                 val timing = live != null && live.sport == sport && (sport != Sport.OTHER || sameActivityName(live.name, name))
                 val done = if (timing) maxOf(last ?: Long.MIN_VALUE, today.toEpochDay()) else last
                 r to Slotted(ActivityTarget(sport, name, last), done)

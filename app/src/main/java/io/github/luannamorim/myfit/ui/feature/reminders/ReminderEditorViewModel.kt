@@ -11,6 +11,7 @@ import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.reminder.ReminderSchedule
+import io.github.luannamorim.myfit.platform.reminder.SportNames
 import io.github.luannamorim.myfit.ui.navigation.ReminderEditorRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,6 +55,7 @@ class ReminderEditorViewModel @Inject constructor(
     private val reminders: ReminderRepository,
     routines: RoutineRepository,
     private val time: TimeSource,
+    private val sportNames: SportNames,
 ) : ViewModel() {
     private val id: Long? = savedStateHandle.toRoute<ReminderEditorRoute>().reminderId
     private val _state = MutableStateFlow(initialState())
@@ -128,7 +130,8 @@ class ReminderEditorViewModel @Inject constructor(
             id = id ?: 0L,
             routineId = s.routineId,
             label = label,
-            sport = if (s.routineId == null) s.sport else null,
+            // A free name that is a sport ("Corrida") becomes that sport, so the runs logged count for it.
+            sport = if (s.routineId == null) s.sport?.takeIf { it != Sport.OTHER } ?: sportNames.match(label) ?: Sport.OTHER else null,
             minuteOfDay = s.minuteOfDay,
             dateEpochDay = if (s.days.isEmpty()) s.date.toEpochDay() else null,
             days = s.days,

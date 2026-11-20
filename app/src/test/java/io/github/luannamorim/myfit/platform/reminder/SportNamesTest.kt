@@ -20,6 +20,8 @@ class SportNamesTest {
         assertEquals(Sport.SWIMMING, names.match("  swimming "))
         assertEquals(Sport.RUNNING, names.match("corrida"))
         assertEquals(Sport.RUNNING, names.match("Running"))
+        // The 1.17 editor hint suggested "Ioga"; the sport is called "Yoga".
+        assertEquals(Sport.YOGA, names.match("ioga"))
     }
 
     @Test

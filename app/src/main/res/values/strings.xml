@@ -512,7 +512,7 @@
     <string name="reminder_what">What</string>
     <string name="reminder_other">Other activity</string>
     <string name="reminder_activity">Activity</string>
-    <string name="reminder_activity_hint">E.g. Run, Yoga</string>
+    <string name="reminder_activity_hint">E.g. Climbing, Surf</string>
     <string name="reminder_activity_required">Enter the activity</string>
     <string name="reminder_sport_required">Pick the activity</string>
     <string name="reminder_time">Time</string>

@@ -1,5 +1,6 @@
 package io.github.luannamorim.myfit.platform.reminder
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,13 +11,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Sport names in both app languages, to recognize the sport in an old free-text reminder. */
+// Shipped as a universal APK: the Portuguese and English resources are always there.
+@SuppressLint("AppBundleLocaleChanges")
 @Singleton
 class SportNames @Inject constructor(@ApplicationContext context: Context) {
     private val byName: Map<String, Sport> by lazy {
         LOCALES.flatMap { locale ->
             val localized = context.createConfigurationContext(Configuration(context.resources.configuration).apply { setLocale(locale) })
             Sport.entries.filter { it != Sport.OTHER }.map { key(localized.getString(it.labelRes)) to it }
-        }.toMap()
+        }.toMap() + ALIASES
     }
 
     /** The sport named [text] (Portuguese or English, case and spaces ignored); null for [Sport.OTHER]'s own name or any other text. */
@@ -26,5 +29,8 @@ class SportNames @Inject constructor(@ApplicationContext context: Context) {
 
     private companion object {
         val LOCALES = listOf(Locale.forLanguageTag("pt-BR"), Locale.ENGLISH)
+
+        /** Names the 1.17 editor suggested that aren't a sport's label ("Ex.: Corrida, Ioga"; the sport is "Yoga"). */
+        val ALIASES = mapOf("ioga" to Sport.YOGA)
     }
 }

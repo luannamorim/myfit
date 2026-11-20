@@ -59,7 +59,7 @@ MyFit is a single-user app: fast during the workout, 100% local, with encrypted 
 1. MUST show a greeting and the current date.
 2. MUST show, with top priority, an in-progress workout with a "Resume" action.
 3. MUST show the workout done today, if any.
-4. MUST offer a shortcut to start a workout: the routine of the next workout reminder (with its day and time), otherwise the one done longest ago.
+4. MUST offer a shortcut to start a workout: the routine or activity of the next workout reminder (with its day and time), otherwise the routine done longest ago.
 5. MUST list the available workouts, a summary of the latest activity, the most recent body metrics (with change) and the week summary.
 
 ### Workouts and exercises
@@ -178,4 +178,4 @@ Platform components: a foreground service for the workout session, an exact alar
 1. **Installing outside the Play Store in Brazil:** the verified developer requirement was scheduled for September 30, 2026. Before the release, confirm whether it is in effect and document the path (advanced flow, ADB or limited distribution account).
 2. **Document providers:** sync apps expose folders with different behaviors (renaming, listing). The fallback is to write directly to the final name; validate on the user's device.
 3. **Updating workout loads when finishing:** checked by default (option visible on the summary screen). Revisit after a few weeks of use.
-4. **Next workout suggestion:** follows the workout reminders (a missed one stays until midnight of its day, or until another workout reminder's time comes; a slot counts as done once that routine was done after the reminder's previous day, ahead of time included); without one, "the one done longest ago".
+4. **Next workout suggestion:** follows the workout reminders, routines and activities alike (a missed one stays until midnight of its day, or until another workout reminder's time comes; a slot counts as done once that routine, or that sport, was logged after the reminder's previous day, ahead of time included; a running timer of that sport and, for Gym, any routine workout count too); an activity reminder has a sport (a free one also its name) and its card starts a new activity on it; without a reminder, "the one done longest ago".

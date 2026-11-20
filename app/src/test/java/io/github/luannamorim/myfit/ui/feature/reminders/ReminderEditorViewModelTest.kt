@@ -10,6 +10,8 @@ import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Reminder
+import io.github.luannamorim.myfit.platform.reminder.SportNames
+import androidx.test.core.app.ApplicationProvider
 import io.github.luannamorim.myfit.testutil.MainDispatcherRule
 import io.github.luannamorim.myfit.testutil.awaitUntil
 import io.github.luannamorim.myfit.testutil.inMemoryDb
@@ -50,7 +52,7 @@ class ReminderEditorViewModelTest {
     private suspend fun routine(name: String): Long = db.insertRoutine(name, listOf(db.insertExercise("Remada $name")))
 
     private suspend fun editor(id: Long? = null): ReminderEditorViewModel {
-        val vm = ReminderEditorViewModel(SavedStateHandle(ReminderEditorRoute(id)), reminders, routines, time)
+        val vm = ReminderEditorViewModel(SavedStateHandle(ReminderEditorRoute(id)), reminders, routines, time, SportNames(ApplicationProvider.getApplicationContext()))
         vm.state.awaitUntil { !it.loading }
         return vm
     }
@@ -107,6 +109,27 @@ class ReminderEditorViewModelTest {
         val saved = reminders.all().single()
         assertEquals("Beach vôlei", saved.label)
         assertEquals(Sport.OTHER, saved.sport)
+    }
+
+    @Test
+    fun aFreeNameThatIsASport_savesThatSport() = runBlocking {
+        val vm = editor()
+        vm.selectSport(Sport.OTHER, "Livre")
+        vm.setActivity("corrida ")
+        vm.save()
+        vm.state.awaitUntil { it.done }
+        val saved = reminders.all().single()
+        assertEquals(Sport.RUNNING, saved.sport)
+        assertEquals("corrida", saved.label)
+    }
+
+    @Test
+    fun anOldFreeTextReminder_savedFromTheEditor_getsItsSport() = runBlocking {
+        val id = reminders.save(Reminder(id = 0, label = "Natação", minuteOfDay = 7 * 60, days = setOf(DayOfWeek.MONDAY)))
+        val vm = editor(id)
+        vm.save()
+        vm.state.awaitUntil { it.done }
+        assertEquals(Sport.SWIMMING, reminders.get(id)?.sport)
     }
 
     @Test

@@ -141,6 +141,16 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun scheduled_aGymReminder_isDoneByAnyRoutineWorkout() {
+        val gym = listOf(activity(1, Sport.GYM, 7 * 60, DayOfWeek.WEDNESDAY))
+        val next = scheduledNext(listOf(routine(1, last = todayDay - 9), routine(2, last = todayDay)), gym, wed)!!
+        assertEquals(ActivityTarget(Sport.GYM, null, todayDay), next.target)
+        assertEquals(LocalDateTime.of(2026, 11, 25, 7, 0), next.at)
+        // No workout since last Wednesday: today's slot.
+        assertEquals(LocalDateTime.of(2026, 11, 18, 7, 0), scheduledNext(listOf(routine(1, last = todayDay - 9)), gym, wed)?.at)
+    }
+
+    @Test
     fun scheduled_routinesAndActivitiesShareTheRules() {
         val routines = listOf(routine(1))
         // The earliest wins, whichever kind.
