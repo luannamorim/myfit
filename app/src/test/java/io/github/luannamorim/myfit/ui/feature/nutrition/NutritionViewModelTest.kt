@@ -145,7 +145,9 @@ class NutritionViewModelTest {
         vm.state.awaitUntil { !it.loading }
         env.time.advance(dayMs) // still on screen when midnight passes
         vm.addWater(250)
-        assertEquals(250, nutrition.observeDay(today.plusDays(1)).first().waterMl)
+        // The write runs in the VM's scope: wait for it (CI read 0 once) — it must land on the new day, not today.
+        nutrition.observeDay(today.plusDays(1)).awaitUntil { it.waterMl == 250 }
+        assertEquals(0, nutrition.observeDay(today).first().waterMl)
         assertEquals(today.plusDays(1), vm.state.awaitUntil { it.day.waterMl == 250 }.date)
     }
 
