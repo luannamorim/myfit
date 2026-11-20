@@ -121,6 +121,19 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun scheduled_anActivityCountsOnlyWhenLoggedOnItsDay() {
+        // User's case: a bike on Wednesday doesn't do Saturday's bike (routines still count ahead of time).
+        val saturday = listOf(activity(1, Sport.CYCLING, 8 * 60, DayOfWeek.SATURDAY), weekly(2, 1, 9 * 60, DayOfWeek.SUNDAY))
+        val next = scheduledNext(listOf(routine(1)), saturday, wed, listOf(swimDay(todayDay, Sport.CYCLING)))!!
+        assertEquals(ActivityTarget(Sport.CYCLING, null, todayDay), next.target)
+        assertEquals(LocalDateTime.of(2026, 11, 21, 8, 0), next.at)
+        // A one-off on Friday isn't done by today's ride or a timer running today either.
+        val friday = listOf(Reminder(1, null, "Bike", 8 * 60, dateEpochDay = todayDay + 2, sport = Sport.CYCLING))
+        assertEquals(LocalDateTime.of(2026, 11, 20, 8, 0), scheduledNext(emptyList(), friday, wed, listOf(swimDay(todayDay, Sport.CYCLING)))?.at)
+        assertEquals(LocalDateTime.of(2026, 11, 20, 8, 0), scheduledNext(emptyList(), friday, wed, live = live(Sport.CYCLING))?.at)
+    }
+
+    @Test
     fun scheduled_otherActivity_matchesItsNameIgnoringCase() {
         val volley = listOf(activity(1, Sport.OTHER, 7 * 60, DayOfWeek.WEDNESDAY, label = "Beach vôlei"))
         val logged = listOf(swimDay(todayDay, Sport.OTHER, "beach Vôlei "))

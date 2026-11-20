@@ -91,7 +91,7 @@ UI labels are quoted in English; on a phone set to Portuguese, the same labels a
 - [ ] Workouts tab: the bell next to + (outline, gray) opens Reminders. Home's header has only the settings gear.
 - [ ] *Settings → Reminders → +*: pick a workout, a time 2 minutes ahead and today's weekday. At that time a "Time to work out" notification arrives, even with the screen locked; tapping it opens the app.
 - [ ] A one-off reminder with "Other activity" on a date: saving asks for a sport until one is picked; "Free" shows a name field. It fires once and then shows as off.
-- [ ] Home's "Next workout" with an activity reminder (e.g. Swimming today, 2 h ahead): the card shows the sport's icon and name, "Done … ago" (or "Not done yet") and *Start*, which opens the new activity screen on Swimming. Log the swim: the card moves to the next reminder. While the swim timer runs, the card skips it too.
+- [ ] Home's "Next workout" with an activity reminder (e.g. Swimming today, 2 h ahead): the card shows the sport's icon and name, "Done … ago" (or "Not done yet") and *Start*, which opens the new activity screen on Swimming. Log the swim: the card moves to the next reminder. While the swim timer runs, the card skips it too. A swim logged on another day (e.g. Wednesday for a Saturday reminder) does not hide Saturday's.
 - [ ] Updating from 1.17: an old reminder whose text is a sport ("Natação", "Corrida") shows on Home as that sport without editing it; other texts open in the editor as "Free" with their name.
 - [ ] Restart the phone: a weekly reminder still fires at its next time.
 - [ ] Turning a reminder's switch off stops it.
