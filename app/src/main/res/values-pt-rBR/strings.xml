@@ -285,6 +285,7 @@
     <string name="home_next">Próximo treino</string>
     <string name="home_next_at">%1$s às %2$s</string>
     <string name="home_start">Iniciar treino</string>
+    <string name="home_start_activity">Iniciar</string>
     <string name="home_your_routines">Seus treinos</string>
     <string name="home_see_all">Ver todos</string>
     <string name="home_body">Corpo</string>

@@ -52,7 +52,10 @@ import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.annotation.StringRes
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.ui.common.activityTitle
+import io.github.luannamorim.myfit.ui.common.icon
+import io.github.luannamorim.myfit.ui.common.labelRes
 import java.time.LocalTime
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.clickable
@@ -94,6 +97,8 @@ data class HomeActions(
     val onOpenSettings: () -> Unit = {},
     val onOpenNutrition: () -> Unit = {},
     val onOpenActivity: (Long) -> Unit = {},
+    /** Next-workout card of an activity reminder: a new activity on that sport ([name] for the free one). */
+    val onStartActivity: (sport: Sport, name: String?) -> Unit = { _, _ -> },
 )
 
 @Composable
@@ -144,6 +149,8 @@ fun HomeContent(state: HomeUiState, actions: HomeActions, modifier: Modifier = M
             state.todaySessions.isNotEmpty() || state.todayActivities.isNotEmpty() -> TodayDone(state, actions)
         }
 
+        // An activity reminder shows even without routines; then [HomeUiState.suggested] is null.
+        state.suggestedActivity?.takeIf { active == null }?.let { NextActivity(it, state.suggestedAt, state.today, actions) }
         if (state.routines.isEmpty()) {
             EmptyState(
                 title = stringResource(R.string.home_empty_title),
@@ -235,20 +242,7 @@ private fun NextWorkout(routine: RoutineOverview, at: LocalDateTime?, today: Loc
     val c = MyFitTheme.colors
     val todayEpochDay = today.toEpochDay()
     MyFitCard(Modifier.fillMaxWidth(), contentPadding = Spacing.l) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.home_next).uppercase(), style = MyFitTheme.type.overline, color = c.textSecondary, modifier = Modifier.weight(1f))
-            // From a reminder: when it is due ("Today at 18:00", "Thu at 07:00").
-            if (at != null) {
-                Icon(Icons.Rounded.NotificationsNone, contentDescription = null, tint = c.textSecondary, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    stringResource(R.string.home_next_at, reminderDayText(at.toLocalDate(), today), timeText(at.hour * 60 + at.minute, DateFormat.is24HourFormat(LocalContext.current))),
-                    style = MyFitTheme.type.caption,
-                    color = c.textSecondary,
-                    maxLines = 1,
-                )
-            }
-        }
+        NextHeader(at, today)
         Spacer(Modifier.height(Spacing.s))
         Text(routine.name, style = MyFitTheme.type.headline, color = c.textPrimary)
         Text(
@@ -258,6 +252,48 @@ private fun NextWorkout(routine: RoutineOverview, at: LocalDateTime?, today: Loc
         )
         Spacer(Modifier.height(Spacing.l))
         PrimaryButton(stringResource(R.string.home_start), onClick = { actions.onStart(routine.id) }, icon = Icons.Rounded.PlayArrow, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+/** An activity reminder is next: its sport, when it was last logged, and a start on that sport. */
+@Composable
+private fun NextActivity(target: ActivityTarget, at: LocalDateTime?, today: LocalDate, actions: HomeActions) {
+    val c = MyFitTheme.colors
+    MyFitCard(Modifier.fillMaxWidth(), contentPadding = Spacing.l) {
+        NextHeader(at, today)
+        Spacer(Modifier.height(Spacing.s))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(target.sport.icon, contentDescription = null, tint = c.textPrimary, modifier = Modifier.size(28.dp))
+            Spacer(Modifier.width(Spacing.s))
+            Text(target.name ?: stringResource(target.sport.labelRes), style = MyFitTheme.type.headline, color = c.textPrimary)
+        }
+        Text(lastDoneText(target.lastDoneEpochDay, today.toEpochDay()), style = MyFitTheme.type.caption, color = c.textSecondary)
+        Spacer(Modifier.height(Spacing.l))
+        PrimaryButton(
+            stringResource(R.string.home_start_activity),
+            onClick = { actions.onStartActivity(target.sport, target.name) },
+            icon = Icons.Rounded.PlayArrow,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/** "Next workout" overline and, from a reminder, when it is due ("Today at 18:00", "Thu at 07:00"). */
+@Composable
+private fun NextHeader(at: LocalDateTime?, today: LocalDate) {
+    val c = MyFitTheme.colors
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.home_next).uppercase(), style = MyFitTheme.type.overline, color = c.textSecondary, modifier = Modifier.weight(1f))
+        if (at != null) {
+            Icon(Icons.Rounded.NotificationsNone, contentDescription = null, tint = c.textSecondary, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(
+                stringResource(R.string.home_next_at, reminderDayText(at.toLocalDate(), today), timeText(at.hour * 60 + at.minute, DateFormat.is24HourFormat(LocalContext.current))),
+                style = MyFitTheme.type.caption,
+                color = c.textSecondary,
+                maxLines = 1,
+            )
+        }
     }
 }
 

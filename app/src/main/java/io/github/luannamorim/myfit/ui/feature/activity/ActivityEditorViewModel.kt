@@ -73,7 +73,11 @@ class ActivityEditorViewModel @Inject constructor(
             date = route.dateEpochDay?.let(LocalDate::ofEpochDay)?.coerceAtMost(today) ?: today,
             today = today,
             review = route.review,
-        ),
+        ).let { s ->
+            // From a reminder on Home: the sport (and a free activity's name) already picked.
+            val sport = route.sport?.let { name -> Sport.entries.firstOrNull { it.name == name } }
+            if (sport == null) s else s.copy(sport = sport, name = route.name.takeIf { sport == Sport.OTHER }.orEmpty())
+        },
     )
     val state: StateFlow<ActivityEditorUiState> = _state.asStateFlow()
 

@@ -261,6 +261,7 @@
     <string name="home_next">Next workout</string>
     <string name="home_next_at">%1$s at %2$s</string>
     <string name="home_start">Start workout</string>
+    <string name="home_start_activity">Start</string>
     <string name="home_your_routines">Your workouts</string>
     <string name="home_see_all">See all</string>
     <string name="home_body">Body</string>

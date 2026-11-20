@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.luannamorim.myfit.domain.history.HistoryCalculator
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.model.ThemeMode
 import io.github.luannamorim.myfit.domain.nutrition.DailyTargets
@@ -52,6 +53,23 @@ class HomeScreenshotTest {
     @Test
     fun home_empty() = compose.snapBothThemes("home_empty") {
         HomeContent(HomeUiState(loading = false, greeting = Greeting.MORNING, today = today, week = week(emptySet(), 0, 0)), HomeActions(), body = { BodyEmptyCard {} })
+    }
+
+    @Test
+    fun home_next_activity() = compose.snapBothThemes("home_next_activity") {
+        HomeContent(
+            HomeUiState(
+                loading = false,
+                greeting = Greeting.MORNING,
+                today = today,
+                routines = listOf(RoutineOverview(1, "Back day", null, 6, today.toEpochDay() - 3)),
+                suggestedActivity = ActivityTarget(Sport.SWIMMING, null, today.toEpochDay() - 3),
+                suggestedAt = today.atTime(18, 30),
+                week = week(emptySet(), 0, 0),
+            ),
+            HomeActions(),
+            body = { BodyEmptyCard {} },
+        )
     }
 
     @Test

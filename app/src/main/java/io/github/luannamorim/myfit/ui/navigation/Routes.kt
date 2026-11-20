@@ -30,5 +30,12 @@ import kotlinx.serialization.Serializable
  * [activityId] 0 creates a new one; [dateEpochDay] pre-fills its date (History's selected day);
  * [review] is the "activity done" step right after a timed activity (intensity, notes, photo).
  */
-@Serializable data class ActivityEditorRoute(val activityId: Long = 0, val dateEpochDay: Long? = null, val review: Boolean = false)
+/** [sport] (a [io.github.luannamorim.myfit.domain.activity.Sport] name) and [name] preselect a new activity (Home's next-workout card). */
+@Serializable data class ActivityEditorRoute(
+    val activityId: Long = 0,
+    val dateEpochDay: Long? = null,
+    val review: Boolean = false,
+    val sport: String? = null,
+    val name: String? = null,
+)
 @Serializable data object LiveActivityRoute

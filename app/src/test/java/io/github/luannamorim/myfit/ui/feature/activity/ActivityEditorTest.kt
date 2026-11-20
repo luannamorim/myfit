@@ -110,6 +110,19 @@ class ActivityEditorTest {
     }
 
     @Test
+    fun fromAReminder_theSportIsAlreadyPicked() = runBlocking {
+        val swim = editor(ActivityEditorRoute(sport = Sport.SWIMMING.name))
+        assertEquals(Sport.SWIMMING, swim.state.awaitUntil { !it.loading }.sport)
+
+        val free = editor(ActivityEditorRoute(sport = Sport.OTHER.name, name = "Beach vôlei")).state.awaitUntil { !it.loading }
+        assertEquals(Sport.OTHER, free.sport)
+        assertEquals("Beach vôlei", free.name)
+
+        // An unknown name (a sport removed later) keeps the default.
+        assertEquals(Sport.entries.first(), editor(ActivityEditorRoute(sport = "CURLING")).state.awaitUntil { !it.loading }.sport)
+    }
+
+    @Test
     fun newActivity_validates_thenSavesSwimmingDistanceInMeters() = runBlocking {
         val vm = editor(ActivityEditorRoute(dateEpochDay = time.today().minusDays(3).toEpochDay()))
         vm.state.awaitUntil { !it.loading }
