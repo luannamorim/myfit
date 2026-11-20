@@ -204,21 +204,20 @@ fun WorkoutContent(
                 Modifier.weight(1f).widthIn(max = ContentMaxWidth).fillMaxWidth().padding(horizontal = Spacing.screen),
                 contentAlignment = Alignment.Center,
             ) {
+                // Each panel draws the state it was shown with: Done moves the cursor and starts the rest in
+                // one write, and the leaving set panel used to fade out showing the next set's planned values.
                 AnimatedContent(
-                    targetState = when {
-                        state.allDone -> Phase.DONE
-                        state.rest != null -> Phase.REST
-                        else -> Phase.SET
-                    },
+                    targetState = state,
+                    contentKey = { it.phase },
                     transitionSpec = { fadeIn(tween(200)) togetherWith fadeOut(tween(150)) },
                     label = "phase",
-                ) { phase ->
-                    when (phase) {
-                        Phase.REST -> RestPanel(state, onAdjustRest, onSkipRest)
-                        Phase.SET -> if (state.timed) {
-                            TimedSetPanel(state, onChangeReps, onChangeLoad, onCompleteSet, onSkipSet, onStartHold, onFinishHold, onCancelHold, onRestOver)
+                ) { shown ->
+                    when (shown.phase) {
+                        Phase.REST -> RestPanel(shown, onAdjustRest, onSkipRest)
+                        Phase.SET -> if (shown.timed) {
+                            TimedSetPanel(shown, onChangeReps, onChangeLoad, onCompleteSet, onSkipSet, onStartHold, onFinishHold, onCancelHold, onRestOver)
                         } else {
-                            SetPanel(state, onChangeReps, onChangeLoad, onCompleteSet, onSkipSet)
+                            SetPanel(shown, onChangeReps, onChangeLoad, onCompleteSet, onSkipSet)
                         }
                         Phase.DONE -> DonePanel(onFinish)
                     }
@@ -254,6 +253,13 @@ fun WorkoutContent(
 }
 
 private enum class Phase { SET, REST, DONE }
+
+private val WorkoutUiState.phase: Phase
+    get() = when {
+        allDone -> Phase.DONE
+        rest != null -> Phase.REST
+        else -> Phase.SET
+    }
 
 @Composable
 private fun TopRow(
