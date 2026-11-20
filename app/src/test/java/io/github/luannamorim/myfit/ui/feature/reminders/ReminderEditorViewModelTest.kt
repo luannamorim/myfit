@@ -8,6 +8,7 @@ import io.github.luannamorim.myfit.core.time.Mark
 import io.github.luannamorim.myfit.data.prefs.ReminderRepository
 import io.github.luannamorim.myfit.data.repository.BackupTrigger
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.testutil.MainDispatcherRule
 import io.github.luannamorim.myfit.testutil.awaitUntil
@@ -76,25 +77,66 @@ class ReminderEditorViewModelTest {
     }
 
     @Test
-    fun otherActivity_requiresText_andSavesTrimmed() = runBlocking {
+    fun otherActivity_requiresASport_andSavesIt() = runBlocking {
         val vm = editor()
         assertNull(vm.state.value.routineId) // no routines: other activity
         assertFalse(vm.validate())
-        assertTrue(vm.state.value.activityError)
+        assertTrue(vm.state.value.sportError)
 
-        vm.setActivity("  Corrida ")
-        assertFalse(vm.state.value.activityError)
+        vm.selectSport(Sport.SWIMMING, "Natação")
+        assertFalse(vm.state.value.sportError)
         vm.save()
         vm.state.awaitUntil { it.done }
         val saved = reminders.all().single()
-        assertEquals("Corrida", saved.label)
+        assertEquals("Natação", saved.label)
+        assertEquals(Sport.SWIMMING, saved.sport)
         assertNull(saved.routineId)
+    }
+
+    @Test
+    fun freeSport_requiresAName_andSavesItTrimmed() = runBlocking {
+        val vm = editor()
+        vm.selectSport(Sport.OTHER, "Livre")
+        assertEquals("", vm.state.value.activity)
+        assertFalse(vm.validate())
+        assertTrue(vm.state.value.activityError)
+
+        vm.setActivity("  Beach vôlei ")
+        vm.save()
+        vm.state.awaitUntil { it.done }
+        val saved = reminders.all().single()
+        assertEquals("Beach vôlei", saved.label)
+        assertEquals(Sport.OTHER, saved.sport)
+    }
+
+    @Test
+    fun aRoutineReminder_savesNoSport() = runBlocking {
+        val costas = routine("Costas")
+        val vm = editor()
+        vm.selectRoutine(null)
+        vm.selectSport(Sport.RUNNING, "Corrida")
+        vm.selectRoutine(costas)
+        vm.save()
+        vm.state.awaitUntil { it.done }
+        val saved = reminders.all().single()
+        assertEquals(costas, saved.routineId)
+        assertEquals("Costas", saved.label)
+        assertNull(saved.sport)
+    }
+
+    @Test
+    fun edit_loadsTheSport() = runBlocking {
+        val id = reminders.save(Reminder(id = 0, label = "Natação", minuteOfDay = 7 * 60, days = setOf(DayOfWeek.MONDAY), sport = Sport.SWIMMING))
+        val s = editor(id).state.value
+        assertNull(s.routineId)
+        assertEquals(Sport.SWIMMING, s.sport)
+        assertEquals("Natação", s.activity)
     }
 
     @Test
     fun once_inThePast_isRejected_weekly_isNot() = runBlocking {
         val vm = editor()
-        vm.setActivity("Ioga")
+        vm.selectSport(Sport.YOGA, "Ioga")
         vm.setTime(10 * 60) // 10:00 today, already gone
         assertFalse(vm.validate())
         assertTrue(vm.state.value.pastError)
@@ -111,7 +153,7 @@ class ReminderEditorViewModelTest {
     @Test
     fun once_tomorrowEarlier_isAccepted() = runBlocking {
         val vm = editor()
-        vm.setActivity("Ioga")
+        vm.selectSport(Sport.YOGA, "Ioga")
         vm.setTime(6 * 60)
         vm.setDate(today.plusDays(1))
         assertTrue(vm.validate())
@@ -146,6 +188,7 @@ class ReminderEditorViewModelTest {
         val id = reminders.save(Reminder(id = 0, routineId = 404, label = "Treino antigo", minuteOfDay = 8 * 60, dateEpochDay = today.plusDays(3).toEpochDay()))
         val s = editor(id).state.value
         assertNull(s.routineId)
+        assertEquals(Sport.OTHER, s.sport)
         assertEquals("Treino antigo", s.activity)
         assertEquals(today.plusDays(3), s.date)
     }

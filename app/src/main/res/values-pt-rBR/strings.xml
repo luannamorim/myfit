@@ -546,6 +546,7 @@
     <string name="reminder_activity">Atividade</string>
     <string name="reminder_activity_hint">Ex.: Corrida, Ioga</string>
     <string name="reminder_activity_required">Informe a atividade</string>
+    <string name="reminder_sport_required">Escolha a atividade</string>
     <string name="reminder_time">Horário</string>
     <string name="reminder_repeat">Repetir</string>
     <string name="reminder_once">Nenhum dia marcado: avisa uma vez, na data abaixo.</string>

@@ -7,12 +7,12 @@ import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.Icon
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -53,6 +54,7 @@ import io.github.luannamorim.myfit.R
 import io.github.luannamorim.myfit.core.format.Dates
 import io.github.luannamorim.myfit.core.format.appLocale
 import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.ui.common.icon
 import io.github.luannamorim.myfit.ui.common.labelRes
 import io.github.luannamorim.myfit.ui.components.ConfirmDialog
 import io.github.luannamorim.myfit.ui.components.ContentMaxWidth
@@ -84,6 +86,7 @@ fun ReminderEditorScreen(onClose: () -> Unit, viewModel: ReminderEditorViewModel
         state = state,
         actions = ReminderEditorActions(
             onSelectRoutine = viewModel::selectRoutine,
+            onSelectSport = viewModel::selectSport,
             onActivity = viewModel::setActivity,
             onTime = viewModel::setTime,
             onToggleDay = viewModel::toggleDay,
@@ -107,6 +110,7 @@ fun ReminderEditorScreen(onClose: () -> Unit, viewModel: ReminderEditorViewModel
 
 class ReminderEditorActions(
     val onSelectRoutine: (Long?) -> Unit = {},
+    val onSelectSport: (Sport, String) -> Unit = { _, _ -> },
     val onActivity: (String) -> Unit = {},
     val onTime: (Int) -> Unit = {},
     val onToggleDay: (DayOfWeek) -> Unit = {},
@@ -154,20 +158,31 @@ fun ReminderEditorContent(
                     MyFitChip(stringResource(R.string.reminder_other), selected = state.routineId == null, onClick = { actions.onSelectRoutine(null) })
                 }
                 if (state.routineId == null) {
-                    MyFitTextField(
-                        value = state.activity,
-                        onValueChange = actions.onActivity,
-                        label = stringResource(R.string.reminder_activity),
-                        placeholder = stringResource(R.string.reminder_activity_hint),
-                        isError = state.activityError,
-                        supportingText = if (state.activityError) stringResource(R.string.reminder_activity_required) else null,
-                    )
-                    // Quick pick: the sports that can be logged (swimming, bike...) fill in the name.
-                    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                        Sport.entries.filter { it != Sport.OTHER }.forEach { sport ->
+                    // The sport links the reminder to what gets logged: Home knows when it's done (1.18.0).
+                    Text(stringResource(R.string.activity_sport), style = MyFitTheme.type.caption, color = if (state.sportError) c.danger else c.textSecondary)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                        Sport.entries.forEach { sport ->
                             val name = stringResource(sport.labelRes)
-                            MyFitChip(name, selected = state.activity == name, onClick = { actions.onActivity(name) })
+                            MyFitChip(
+                                name,
+                                selected = state.sport == sport,
+                                onClick = { actions.onSelectSport(sport, name) },
+                                leading = { Icon(sport.icon, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                            )
                         }
+                    }
+                    if (state.sportError) {
+                        Text(stringResource(R.string.reminder_sport_required), style = MyFitTheme.type.caption, color = c.danger)
+                    }
+                    if (state.sport == Sport.OTHER) {
+                        MyFitTextField(
+                            value = state.activity,
+                            onValueChange = actions.onActivity,
+                            label = stringResource(R.string.reminder_activity),
+                            placeholder = stringResource(R.string.reminder_activity_hint),
+                            isError = state.activityError,
+                            supportingText = if (state.activityError) stringResource(R.string.reminder_activity_required) else null,
+                        )
                     }
                 }
 

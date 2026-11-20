@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.luannamorim.myfit.core.time.TimeSource
 import io.github.luannamorim.myfit.data.prefs.ReminderRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
+import io.github.luannamorim.myfit.domain.activity.Sport
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.reminder.ReminderSchedule
 import io.github.luannamorim.myfit.ui.navigation.ReminderEditorRoute
@@ -30,14 +31,18 @@ data class ReminderEditorUiState(
     val loading: Boolean = true,
     val isNew: Boolean = true,
     val routines: List<RoutineChoice> = emptyList(),
-    /** Selected routine; null means "other activity" ([activity] is the label). */
+    /** Selected routine; null means "other activity" ([sport], with [activity] as the label). */
     val routineId: Long? = null,
+    /** The other activity's sport (required there). */
+    val sport: Sport? = null,
+    /** The other activity's name: the sport's, or the one typed for [Sport.OTHER]. */
     val activity: String = "",
     val minuteOfDay: Int = 0,
     /** Repeat days; empty means one-off on [date]. */
     val days: Set<DayOfWeek> = emptySet(),
     val date: LocalDate = LocalDate.MIN,
     val today: LocalDate = LocalDate.MIN,
+    val sportError: Boolean = false,
     val activityError: Boolean = false,
     val pastError: Boolean = false,
     val done: Boolean = false,
@@ -69,6 +74,7 @@ class ReminderEditorViewModel @Inject constructor(
                         loading = false,
                         routines = choices,
                         routineId = routineId,
+                        sport = if (routineId == null) existing.sport ?: Sport.OTHER else null,
                         activity = if (routineId == null) existing.label else "",
                         minuteOfDay = existing.minuteOfDay,
                         days = existing.days,
@@ -79,7 +85,17 @@ class ReminderEditorViewModel @Inject constructor(
         }
     }
 
-    fun selectRoutine(routineId: Long?) = _state.update { it.copy(routineId = routineId, activityError = false) }
+    fun selectRoutine(routineId: Long?) = _state.update { it.copy(routineId = routineId, sportError = false, activityError = false) }
+
+    /** Picks the other activity's sport; [label] is its name in the current language (the free sport keeps a typed name). */
+    fun selectSport(sport: Sport, label: String) = _state.update { s ->
+        val activity = when {
+            sport != Sport.OTHER -> label
+            s.sport == Sport.OTHER -> s.activity
+            else -> ""
+        }
+        s.copy(sport = sport, activity = activity, sportError = false, activityError = false)
+    }
 
     fun setActivity(text: String) = _state.update { it.copy(activity = text, activityError = false) }
 
@@ -91,14 +107,15 @@ class ReminderEditorViewModel @Inject constructor(
 
     fun setDate(date: LocalDate) = _state.update { it.copy(date = date, pastError = false) }
 
-    /** Flags a missing activity name or a one-off moment that is not in the future. */
+    /** Flags a missing sport, a free activity without a name, or a one-off moment that is not in the future. */
     fun validate(): Boolean {
         val s = _state.value
         if (s.loading) return false
-        val activityError = s.routineId == null && s.activity.isBlank()
+        val sportError = s.routineId == null && s.sport == null
+        val activityError = s.routineId == null && s.sport == Sport.OTHER && s.activity.isBlank()
         val pastError = s.days.isEmpty() && !ZonedDateTime.of(s.date, ReminderSchedule.localTime(s.minuteOfDay), time.zone()).isAfter(now())
-        _state.update { it.copy(activityError = activityError, pastError = pastError) }
-        return !activityError && !pastError
+        _state.update { it.copy(sportError = sportError, activityError = activityError, pastError = pastError) }
+        return !sportError && !activityError && !pastError
     }
 
     /** Saves (and turns on) the reminder when valid. */
@@ -111,6 +128,7 @@ class ReminderEditorViewModel @Inject constructor(
             id = id ?: 0L,
             routineId = s.routineId,
             label = label,
+            sport = if (s.routineId == null) s.sport else null,
             minuteOfDay = s.minuteOfDay,
             dateEpochDay = if (s.days.isEmpty()) s.date.toEpochDay() else null,
             days = s.days,

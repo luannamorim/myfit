@@ -3,6 +3,7 @@ package io.github.luannamorim.myfit.ui.feature.reminders
 import android.Manifest
 import android.app.Application
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -13,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -22,6 +22,7 @@ import dagger.hilt.android.testing.HiltTestApplication
 import io.github.luannamorim.myfit.MainActivity
 import io.github.luannamorim.myfit.data.prefs.ReminderRepository
 import kotlinx.coroutines.runBlocking
+import io.github.luannamorim.myfit.domain.activity.Sport
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -66,7 +67,9 @@ class RemindersFlowTest {
         compose.onAllNodesWithText("Novo lembrete").onFirst().performClick()
         waitFor("Outra atividade")
         compose.onNodeWithText("Outra atividade").performClick()
-        compose.onNode(hasSetTextAction()).performTextInput("Corrida")
+        // The sport chips pick the sport; the name field is only for the free one.
+        compose.onAllNodes(hasSetTextAction()).assertCountEquals(0)
+        compose.onNodeWithText("Corrida").performScrollTo().performClick()
         // Save is enabled once the routines are loaded.
         compose.waitUntil(5_000) { compose.onAllNodes(hasText("Salvar") and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Salvar").performClick()
@@ -77,6 +80,7 @@ class RemindersFlowTest {
         val saved = runBlocking { reminders.all() }.single()
         assertEquals("Corrida", saved.label)
         assertEquals(null, saved.routineId)
+        assertEquals(Sport.RUNNING, saved.sport)
         assertEquals(true, saved.enabled)
     }
 }

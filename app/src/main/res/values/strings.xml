@@ -513,6 +513,7 @@
     <string name="reminder_activity">Activity</string>
     <string name="reminder_activity_hint">E.g. Run, Yoga</string>
     <string name="reminder_activity_required">Enter the activity</string>
+    <string name="reminder_sport_required">Pick the activity</string>
     <string name="reminder_time">Time</string>
     <string name="reminder_repeat">Repeat</string>
     <string name="reminder_once">No day selected: reminds you once, on the date below.</string>
