@@ -1,0 +1,94 @@
+package io.github.luannamorim.myfit.ui.feature.home
+
+import io.github.luannamorim.myfit.domain.activity.LiveActivity
+import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.activity.SportLastDay
+import io.github.luannamorim.myfit.domain.activity.lastDay
+import io.github.luannamorim.myfit.domain.activity.sameActivityName
+import io.github.luannamorim.myfit.domain.model.Reminder
+import io.github.luannamorim.myfit.domain.model.RoutineOverview
+import io.github.luannamorim.myfit.domain.reminder.ReminderSchedule
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
+
+/** Suggests the routine with exercises never done yet (first in order), else the one done longest ago. */
+fun suggestRoutine(routines: List<RoutineOverview>): RoutineOverview? =
+    routines.withIndex()
+        .filter { it.value.exerciseCount > 0 }
+        .minWithOrNull(compareBy<IndexedValue<RoutineOverview>>({ it.value.lastDoneEpochDay != null }, { it.value.lastDoneEpochDay ?: 0 }, { it.index }))
+        ?.value
+
+/** What a workout reminder points to on Home's "Next workout". */
+sealed interface NextTarget
+
+data class RoutineTarget(val routine: RoutineOverview) : NextTarget
+
+/** A sport ([name] only for [Sport.OTHER]) and the last day it was logged. */
+data class ActivityTarget(val sport: Sport, val name: String?, val lastDoneEpochDay: Long?) : NextTarget
+
+/** The target of the next workout reminder, and the reminder's moment. */
+data class ScheduledNext(val target: NextTarget, val at: LocalDateTime)
+
+val ScheduledNext.routine: RoutineOverview? get() = (target as? RoutineTarget)?.routine
+
+/**
+ * The target of the next workout reminder: a routine, or a sport (1.18.0). A missed one stays until midnight
+ * of its day (the user asked, 1.8.0; it was 4 hours), or until another reminder's time comes; then its slot
+ * after that counts. A slot is done once its routine or sport was done after the reminder's previous day
+ * (a one-off: since today or its day), ahead of time included; a timer of that sport running now counts as
+ * done today. Disabled reminders, free-text ones not linked to a sport, and routines that are gone or have no
+ * exercises are skipped.
+ */
+fun scheduledNext(
+    routines: List<RoutineOverview>,
+    reminders: List<Reminder>,
+    now: ZonedDateTime,
+    sportDays: List<SportLastDay> = emptyList(),
+    live: LiveActivity? = null,
+): ScheduledNext? {
+    val today = now.toLocalDate()
+    val byId = routines.filter { it.exerciseCount > 0 }.associateBy { it.id }
+    val targets = reminders.filter { it.enabled }.mapNotNull { r ->
+        val routineId = r.routineId
+        val sport = r.sport
+        when {
+            routineId != null -> byId[routineId]?.let { r to Slotted(RoutineTarget(it), it.lastDoneEpochDay) }
+            sport != null -> {
+                val name = r.label.takeIf { sport == Sport.OTHER }
+                val last = sportDays.lastDay(sport, name)
+                val timing = live != null && live.sport == sport && (sport != Sport.OTHER || sameActivityName(live.name, name))
+                val done = if (timing) maxOf(last ?: Long.MIN_VALUE, today.toEpochDay()) else last
+                r to Slotted(ActivityTarget(sport, name, last), done)
+            }
+            else -> null
+        }
+    }
+
+    // Another reminder's time came after [slot], up to now.
+    fun overtaken(reminder: Reminder, slot: ZonedDateTime) = targets.any { (other, _) ->
+        other.id != reminder.id && ReminderSchedule.nextTrigger(other, slot)?.isAfter(now) == false
+    }
+    return targets
+        .mapNotNull { (reminder, target) ->
+            // Slots from the start of today on: a missed one stays until midnight.
+            val slot = pendingSlot(reminder, target.doneEpochDay, today.atStartOfDay(now.zone).minusSeconds(1), today) ?: return@mapNotNull null
+            val at = if (!slot.isAfter(now) && overtaken(reminder, slot)) pendingSlot(reminder, target.doneEpochDay, slot, today) else slot
+            at?.let { ScheduledNext(target.target, it.toLocalDateTime()) to it.toInstant() }
+        }
+        .minByOrNull { it.second }
+        ?.first
+}
+
+/** A target and the last day that counts as done for it. */
+private data class Slotted(val target: NextTarget, val doneEpochDay: Long?)
+
+/** First slot of [reminder] after [after] not done yet (see [scheduledNext]). */
+private fun pendingSlot(reminder: Reminder, doneEpochDay: Long?, after: ZonedDateTime, today: LocalDate): ZonedDateTime? {
+    val slot = ReminderSchedule.nextTrigger(reminder, after) ?: return null
+    val day = slot.toLocalDate()
+    val since = ReminderSchedule.previousDay(reminder, day) ?: minOf(day, today).minusDays(1)
+    val done = (doneEpochDay ?: Long.MIN_VALUE) > since.toEpochDay()
+    return if (done) ReminderSchedule.nextTrigger(reminder, day.atTime(LocalTime.MAX).atZone(after.zone)) else slot
+}

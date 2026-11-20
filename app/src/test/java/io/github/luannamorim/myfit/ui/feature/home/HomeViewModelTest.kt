@@ -17,7 +17,10 @@ import io.github.luannamorim.myfit.data.repository.NutritionTracker
 import io.github.luannamorim.myfit.data.repository.NutritionRepository
 import io.github.luannamorim.myfit.data.repository.RoutineRepository
 import io.github.luannamorim.myfit.domain.activity.Activity
+import io.github.luannamorim.myfit.domain.activity.LiveActivity
 import io.github.luannamorim.myfit.domain.activity.Sport
+import io.github.luannamorim.myfit.domain.activity.SportLastDay
+import io.github.luannamorim.myfit.core.time.Mark
 import io.github.luannamorim.myfit.domain.model.Reminder
 import io.github.luannamorim.myfit.domain.model.RoutineOverview
 import io.github.luannamorim.myfit.domain.session.SessionEngine
@@ -91,6 +94,65 @@ class HomeViewModelTest {
     private fun weekly(id: Long, routineId: Long?, minute: Int, vararg days: DayOfWeek, enabled: Boolean = true) =
         Reminder(id, routineId, "R$routineId", minute, days = days.toSet(), enabled = enabled)
 
+    private fun activity(id: Long, sport: Sport, minute: Int, vararg days: DayOfWeek, label: String = sport.name) =
+        Reminder(id, null, label, minute, days = days.toSet(), sport = sport)
+    private fun swimDay(day: Long, sport: Sport = Sport.SWIMMING, name: String? = null) = SportLastDay(sport, name, day)
+    private fun live(sport: Sport, name: String? = null) = LiveActivity(sport, name, startedAt = Mark(wed.toInstant().toEpochMilli(), 0, 0))
+
+    @Test
+    fun scheduled_anActivityReminderIsNext() {
+        val reminders = listOf(weekly(1, 1, 18 * 60, DayOfWeek.FRIDAY), activity(2, Sport.SWIMMING, 7 * 60, DayOfWeek.THURSDAY))
+        // Last swim before last Thursday: this Thursday's slot is pending.
+        val next = scheduledNext(listOf(routine(1)), reminders, wed, listOf(swimDay(todayDay - 7)))!!
+        assertEquals(ActivityTarget(Sport.SWIMMING, null, todayDay - 7), next.target)
+        assertNull(next.routine)
+        assertEquals(LocalDateTime.of(2026, 11, 19, 7, 0), next.at)
+    }
+
+    @Test
+    fun scheduled_anActivityIsDoneOnceThatSportIsLogged() {
+        val swim = listOf(activity(1, Sport.SWIMMING, 7 * 60, DayOfWeek.WEDNESDAY))
+        // Logged today: next week's slot.
+        assertEquals(LocalDateTime.of(2026, 11, 25, 7, 0), scheduledNext(emptyList(), swim, wed, listOf(swimDay(todayDay)))?.at)
+        // Another sport logged today doesn't count.
+        assertEquals(LocalDateTime.of(2026, 11, 18, 7, 0), scheduledNext(emptyList(), swim, wed, listOf(swimDay(todayDay, Sport.RUNNING)))?.at)
+        // Logged before the reminder's previous day (last Wednesday): today's slot is pending.
+        assertEquals(LocalDateTime.of(2026, 11, 18, 7, 0), scheduledNext(emptyList(), swim, wed, listOf(swimDay(todayDay - 7)))?.at)
+    }
+
+    @Test
+    fun scheduled_otherActivity_matchesItsNameIgnoringCase() {
+        val volley = listOf(activity(1, Sport.OTHER, 7 * 60, DayOfWeek.WEDNESDAY, label = "Beach vôlei"))
+        val logged = listOf(swimDay(todayDay, Sport.OTHER, "beach Vôlei "))
+        val next = scheduledNext(emptyList(), volley, wed, logged)!!
+        assertEquals(ActivityTarget(Sport.OTHER, "Beach vôlei", todayDay), next.target)
+        assertEquals(LocalDateTime.of(2026, 11, 25, 7, 0), next.at)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 7, 0), scheduledNext(emptyList(), volley, wed, listOf(swimDay(todayDay, Sport.OTHER, "Surf")))?.at)
+    }
+
+    @Test
+    fun scheduled_aRunningTimerOfThatSportCountsAsDone() {
+        val swim = listOf(activity(1, Sport.SWIMMING, 7 * 60, DayOfWeek.WEDNESDAY))
+        assertEquals(LocalDateTime.of(2026, 11, 25, 7, 0), scheduledNext(emptyList(), swim, wed, live = live(Sport.SWIMMING))?.at)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 7, 0), scheduledNext(emptyList(), swim, wed, live = live(Sport.RUNNING))?.at)
+        val volley = listOf(activity(1, Sport.OTHER, 7 * 60, DayOfWeek.WEDNESDAY, label = "Beach vôlei"))
+        assertEquals(LocalDateTime.of(2026, 11, 25, 7, 0), scheduledNext(emptyList(), volley, wed, live = live(Sport.OTHER, "BEACH VÔLEI"))?.at)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 7, 0), scheduledNext(emptyList(), volley, wed, live = live(Sport.OTHER, "Surf"))?.at)
+    }
+
+    @Test
+    fun scheduled_routinesAndActivitiesShareTheRules() {
+        val routines = listOf(routine(1))
+        // The earliest wins, whichever kind.
+        val both = listOf(weekly(1, 1, 18 * 60, DayOfWeek.WEDNESDAY), activity(2, Sport.RUNNING, 12 * 60, DayOfWeek.WEDNESDAY))
+        assertEquals(Sport.RUNNING, (scheduledNext(routines, both, wed)?.target as ActivityTarget).sport)
+        // A missed run (07:00) gives way once the routine reminder's time (09:00) has come.
+        val missed = listOf(activity(1, Sport.RUNNING, 7 * 60, DayOfWeek.WEDNESDAY), weekly(2, 1, 9 * 60, DayOfWeek.WEDNESDAY))
+        assertEquals(1L, scheduledNext(routines, missed, wed)?.routine?.id)
+        // Free-text reminders not linked to a sport yet are skipped.
+        assertNull(scheduledNext(routines, listOf(Reminder(1, null, "Natação", 12 * 60, days = setOf(DayOfWeek.WEDNESDAY))), wed))
+    }
+
     @Test
     fun scheduled_picksTheNextReminderRoutine() {
         val routines = listOf(routine(1), routine(2), routine(3))
@@ -99,8 +161,8 @@ class HomeViewModelTest {
             weekly(2, 2, 7 * 60, DayOfWeek.THURSDAY),
             weekly(3, 3, 18 * 60, DayOfWeek.SATURDAY),
         )
-        val next = scheduledRoutine(routines, reminders, wed)!!
-        assertEquals(2L, next.routine.id)
+        val next = scheduledNext(routines, reminders, wed)!!
+        assertEquals(2L, next.routine?.id)
         assertEquals(LocalDateTime.of(2026, 11, 19, 7, 0), next.at)
     }
 
@@ -108,14 +170,14 @@ class HomeViewModelTest {
     fun scheduled_todaysReminderStaysAfterItsTime_untilThatRoutineIsDone() {
         val reminders = listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), weekly(2, 2, 18 * 60, DayOfWeek.THURSDAY))
         // 07:00 passed, routine 1 not done today: still today's workout.
-        val pending = scheduledRoutine(listOf(routine(1, last = todayDay - 7), routine(2)), reminders, wed)!!
-        assertEquals(1L, pending.routine.id)
+        val pending = scheduledNext(listOf(routine(1, last = todayDay - 7), routine(2)), reminders, wed)!!
+        assertEquals(1L, pending.routine?.id)
         assertEquals(LocalDateTime.of(2026, 11, 18, 7, 0), pending.at)
         // Done today: tomorrow's reminder is next.
-        val done = scheduledRoutine(listOf(routine(1, last = todayDay), routine(2)), reminders, wed)!!
-        assertEquals(2L, done.routine.id)
+        val done = scheduledNext(listOf(routine(1, last = todayDay), routine(2)), reminders, wed)!!
+        assertEquals(2L, done.routine?.id)
         // Only reminder and done today: its next week's slot.
-        val alone = scheduledRoutine(listOf(routine(1, last = todayDay)), reminders.take(1), wed)!!
+        val alone = scheduledNext(listOf(routine(1, last = todayDay)), reminders.take(1), wed)!!
         assertEquals(LocalDateTime.of(2026, 11, 25, 7, 0), alone.at)
     }
 
@@ -126,18 +188,18 @@ class HomeViewModelTest {
         // 07:00 missed 3 h ago: still on the card.
         assertEquals(
             LocalDateTime.of(2026, 11, 18, 7, 0),
-            scheduledRoutine(routines, listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), tomorrow), wed)?.at,
+            scheduledNext(routines, listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), tomorrow), wed)?.at,
         )
         // 06:00 missed 4 h ago: still on the card, and still at 23:59.
         val early = listOf(weekly(1, 1, 6 * 60, DayOfWeek.WEDNESDAY), tomorrow)
-        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledRoutine(routines, early, wed)?.at)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledNext(routines, early, wed)?.at)
         val lateNight = ZonedDateTime.of(2026, 11, 18, 23, 59, 0, 0, wed.zone)
-        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledRoutine(routines, early, lateNight)?.at)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 6, 0), scheduledNext(routines, early, lateNight)?.at)
         // 07:00 missed, but another reminder's time (09:00) came: that one.
         val both = listOf(weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY), weekly(2, 2, 9 * 60, DayOfWeek.WEDNESDAY), tomorrow)
-        assertEquals(LocalDateTime.of(2026, 11, 18, 9, 0), scheduledRoutine(routines, both, wed)?.at)
+        assertEquals(LocalDateTime.of(2026, 11, 18, 9, 0), scheduledNext(routines, both, wed)?.at)
         // That one done (the 07:00 skipped for it): the next, not the 07:00 again.
-        assertEquals(9L, scheduledRoutine(listOf(routine(1), routine(2, last = todayDay), routine(9)), both, wed)?.routine?.id)
+        assertEquals(9L, scheduledNext(listOf(routine(1), routine(2, last = todayDay), routine(9)), both, wed)?.routine?.id)
         // Disabled and free-text reminders' times don't move it.
         val others = listOf(
             weekly(1, 1, 7 * 60, DayOfWeek.WEDNESDAY),
@@ -145,12 +207,12 @@ class HomeViewModelTest {
             weekly(3, null, 9 * 60, DayOfWeek.WEDNESDAY),
             tomorrow,
         )
-        assertEquals(1L, scheduledRoutine(routines, others, wed)?.routine?.id)
+        assertEquals(1L, scheduledNext(routines, others, wed)?.routine?.id)
         // Past midnight it's gone: at 00:30, last night's 22:00 gives way to tomorrow's; alone, its next week's slot.
         val night = ZonedDateTime.of(2026, 11, 18, 0, 30, 0, 0, wed.zone)
         val lastNight = weekly(1, 1, 22 * 60, DayOfWeek.TUESDAY)
-        assertEquals(9L, scheduledRoutine(routines, listOf(lastNight, tomorrow), night)?.routine?.id)
-        assertEquals(LocalDateTime.of(2026, 11, 24, 22, 0), scheduledRoutine(routines, listOf(lastNight), night)?.at)
+        assertEquals(9L, scheduledNext(routines, listOf(lastNight, tomorrow), night)?.routine?.id)
+        assertEquals(LocalDateTime.of(2026, 11, 24, 22, 0), scheduledNext(routines, listOf(lastNight), night)?.at)
     }
 
     @Test
@@ -158,24 +220,24 @@ class HomeViewModelTest {
         val reminders = listOf(weekly(1, 1, 18 * 60, DayOfWeek.THURSDAY), weekly(2, 2, 7 * 60, DayOfWeek.FRIDAY))
         // Tomorrow's routine done ahead (today, or Monday after last Thursday's slot): Friday's comes first.
         for (last in listOf(todayDay, todayDay - 2)) {
-            assertEquals(2L, scheduledRoutine(listOf(routine(1, last = last), routine(2)), reminders, wed)?.routine?.id)
+            assertEquals(2L, scheduledNext(listOf(routine(1, last = last), routine(2)), reminders, wed)?.routine?.id)
         }
         // Done on its previous slot (last Thursday): tomorrow's still to do.
-        assertEquals(1L, scheduledRoutine(listOf(routine(1, last = todayDay - 6), routine(2)), reminders, wed)?.routine?.id)
+        assertEquals(1L, scheduledNext(listOf(routine(1, last = todayDay - 6), routine(2)), reminders, wed)?.routine?.id)
         // Only reminder and done ahead: the slot after tomorrow's.
         assertEquals(
             LocalDateTime.of(2026, 11, 26, 18, 0),
-            scheduledRoutine(listOf(routine(1, last = todayDay)), reminders.take(1), wed)?.at,
+            scheduledNext(listOf(routine(1, last = todayDay)), reminders.take(1), wed)?.at,
         )
         // Several days: Monday/Thursday, done Tuesday counts for Thursday; done Monday was Monday's.
         val twice = listOf(weekly(1, 1, 18 * 60, DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
         assertEquals(
             LocalDateTime.of(2026, 11, 23, 18, 0),
-            scheduledRoutine(listOf(routine(1, last = todayDay - 1)), twice, wed)?.at,
+            scheduledNext(listOf(routine(1, last = todayDay - 1)), twice, wed)?.at,
         )
         assertEquals(
             LocalDateTime.of(2026, 11, 19, 18, 0),
-            scheduledRoutine(listOf(routine(1, last = todayDay - 2)), twice, wed)?.at,
+            scheduledNext(listOf(routine(1, last = todayDay - 2)), twice, wed)?.at,
         )
     }
 
@@ -185,16 +247,16 @@ class HomeViewModelTest {
         val routines = listOf(routine(1), routine(2))
         assertEquals(
             LocalDateTime.of(2026, 11, 20, 9, 0),
-            scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60)), wed)?.at,
+            scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60)), wed)?.at,
         )
         // Yesterday's one-off is gone; earlier today counts until midnight.
-        assertNull(scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 17), 23 * 60)), wed))
-        assertEquals(1L, scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 7 * 60)), wed)?.routine?.id)
-        assertEquals(1L, scheduledRoutine(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 0)), wed)?.routine?.id)
+        assertNull(scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 17), 23 * 60)), wed))
+        assertEquals(1L, scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 7 * 60)), wed)?.routine?.id)
+        assertEquals(1L, scheduledNext(routines, listOf(once(1, 1, LocalDate.of(2026, 11, 18), 0)), wed)?.routine?.id)
         // Friday's one-off done ahead today is gone; done before today it still counts.
         val friday = listOf(once(1, 1, LocalDate.of(2026, 11, 20), 9 * 60))
-        assertNull(scheduledRoutine(listOf(routine(1, last = todayDay)), friday, wed))
-        assertEquals(1L, scheduledRoutine(listOf(routine(1, last = todayDay - 1)), friday, wed)?.routine?.id)
+        assertNull(scheduledNext(listOf(routine(1, last = todayDay)), friday, wed))
+        assertEquals(1L, scheduledNext(listOf(routine(1, last = todayDay - 1)), friday, wed)?.routine?.id)
     }
 
     @Test
@@ -207,8 +269,8 @@ class HomeViewModelTest {
             weekly(4, 9, 18 * 60, DayOfWeek.THURSDAY),
             weekly(5, 5, 18 * 60, DayOfWeek.SUNDAY),
         )
-        assertEquals(5L, scheduledRoutine(routines, reminders, wed)?.routine?.id)
-        assertNull(scheduledRoutine(routines, reminders.take(4), wed))
+        assertEquals(5L, scheduledNext(routines, reminders, wed)?.routine?.id)
+        assertNull(scheduledNext(routines, reminders.take(4), wed))
     }
 
     @Test
@@ -223,6 +285,21 @@ class HomeViewModelTest {
         settings.update { it.copy(reminders = listOf(Reminder(1, second, "B", 23 * 60 + 59, days = DayOfWeek.entries.toSet()))) }
         val state = homeViewModel(settings).state.awaitUntil { !it.loading && it.suggestedAt != null }
         assertEquals(second, state.suggested?.id)
+        assertEquals(LocalDateTime.of(env.time.today(), LocalTime.of(23, 59)), state.suggestedAt)
+    }
+
+    @Test
+    fun state_nextActivityReminder_showsTheSportAndItsLastDay() = runBlocking {
+        val exercise = env.db.insertExercise("Remada")
+        env.db.insertRoutine("A", listOf(exercise), position = 0)
+        val yesterday = env.time.today().minusDays(1)
+        ActivityRepository(env.db, env.time, BackupTrigger { }).save(Activity(sport = Sport.SWIMMING, date = yesterday, durationMinutes = 40))
+        val settings = testSettings()
+        settings.update { it.copy(reminders = listOf(Reminder(1, null, "Natação", 23 * 60 + 59, days = DayOfWeek.entries.toSet(), sport = Sport.SWIMMING))) }
+
+        val state = homeViewModel(settings).state.awaitUntil { !it.loading && it.suggestedActivity?.lastDoneEpochDay != null }
+        assertEquals(ActivityTarget(Sport.SWIMMING, null, yesterday.toEpochDay()), state.suggestedActivity)
+        assertNull(state.suggested)
         assertEquals(LocalDateTime.of(env.time.today(), LocalTime.of(23, 59)), state.suggestedAt)
     }
 
